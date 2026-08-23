@@ -11,6 +11,7 @@ import asyncio
 from datetime import datetime, timedelta
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
+from bs4 import BeautifulSoup  # Добавляем BeautifulSoup для парсинга статей
 
 # ==========================================
 # 1. КЛЮЧИ (из переменных окружения)
@@ -150,22 +151,83 @@ def get_placeholder_image():
     return "https://via.placeholder.com/1280x720/1a1a2e/ffffff?text=AI+News"
 
 # ==========================================
-# 4. ГЕНЕРАЦИЯ ПРОМПТА ДЛЯ КАРТИНКИ ИЗ ТЕКСТА ПОСТА
+# 4. ПАРСИНГ ПОЛНОЙ СТАТЬИ
+# ==========================================
+def fetch_full_article(url):
+    """Парсит полный текст статьи по ссылке"""
+    try:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        response = requests.get(url, headers=headers, timeout=15)
+        response.raise_for_status()
+        
+        soup = BeautifulSoup(response.content, 'html.parser')
+        
+        # Удаляем скрипты и стили
+        for script in soup(["script", "style"]):
+            script.decompose()
+        
+        # Ищем основной контент
+        article_content = ""
+        
+        # Пробуем найти статью по разным селекторам
+        selectors = [
+            'article',
+            '.article-content',
+            '.post-content',
+            '.entry-content',
+            '.content',
+            'main',
+            '.story-content',
+            '.blog-post-content'
+        ]
+        
+        for selector in selectors:
+            elements = soup.select(selector)
+            if elements:
+                for element in elements:
+                    text = element.get_text(separator=' ', strip=True)
+                    if len(text) > 500:  # Нашли достаточно большой блок
+                        article_content = text
+                        break
+                if article_content:
+                    break
+        
+        # Если не нашли по селекторам - берём всё тело
+        if not article_content:
+            body = soup.find('body')
+            if body:
+                article_content = body.get_text(separator=' ', strip=True)
+        
+        # Очищаем текст от лишних пробелов и переносов
+        article_content = re.sub(r'\s+', ' ', article_content)
+        article_content = re.sub(r'\n+', '\n', article_content)
+        
+        # Ограничиваем длину (первые 3000 символов для рерайта)
+        if len(article_content) > 3000:
+            article_content = article_content[:3000]
+        
+        return article_content.strip()
+        
+    except Exception as e:
+        print(f"⚠️ Ошибка парсинга статьи: {e}")
+        return None
+
+# ==========================================
+# 5. ГЕНЕРАЦИЯ ПРОМПТА ДЛЯ КАРТИНКИ ИЗ ТЕКСТА ПОСТА
 # ==========================================
 def generate_image_prompt_from_post(title, content):
     """Генерирует уникальный промпт для картинки из содержания поста"""
-    # Извлекаем ключевые слова
     words = re.findall(r'\b[a-zA-Zа-яА-ЯёЁ]{4,}\b', title + " " + content[:400])
     stopwords = ['что', 'это', 'все', 'уже', 'еще', 'вот', 'там', 'тут', 'когда', 'тогда', 'этот', 'новость', 'пост', 'канал', 'заявил', 'сказал']
     keywords = [w for w in words if w.lower() not in stopwords]
     
-    # Если есть ключевые слова — берём 6, иначе используем заголовок
     if keywords:
         keyword_str = ' '.join(keywords[:6])
     else:
         keyword_str = title[:100]
     
-    # Случайные стили и атмосфера для разнообразия
     styles = ['cinematic', 'photorealistic', 'futuristic', 'minimal', 'vibrant', 'dramatic', 'ethereal', 'documentary', 'neon']
     moods = ['energetic', 'calm', 'mysterious', 'inspiring', 'powerful', 'hopeful', 'intense']
     lighting = ['dramatic backlighting', 'soft golden light', 'cool blue tones', 'warm amber glow', 'neon pink and blue']
@@ -179,7 +241,7 @@ def generate_image_prompt_from_post(title, content):
     return prompt[:500]
 
 # ==========================================
-# 5. ЛОГГЕР
+# 6. ЛОГГЕР
 # ==========================================
 async def send_log(message, context=None, is_error=False, send_to_admin=True):
     timestamp = datetime.now().strftime("%H:%M:%S")
@@ -197,7 +259,7 @@ async def send_log(message, context=None, is_error=False, send_to_admin=True):
             print(f"⚠️ Не удалось отправить лог в Telegram: {e}")
 
 # ==========================================
-# 6. ПАРСИНГ НОВОСТЕЙ
+# 7. ПАРСИНГ НОВОСТЕЙ
 # ==========================================
 async def fetch_news(context):
     await send_log("🔍 Начинаю парсинг новостей...", context)
@@ -245,7 +307,7 @@ async def fetch_news(context):
     return all_news[:10]
 
 # ==========================================
-# 7. ВЫБОР ЛУЧШЕЙ НОВОСТИ
+# 8. ВЫБОР ЛУЧШЕЙ НОВОСТИ
 # ==========================================
 async def select_best_news(news_list, context):
     if not news_list:
@@ -317,14 +379,25 @@ async def select_best_news(news_list, context):
         return news_list[0]
 
 # ==========================================
-# 8. РЕРАЙТ ПОСТА + ГЕНЕРАЦИЯ ПРОМПТА ДЛЯ КАРТИНКИ
+# 9. РЕРАЙТ ПОСТА + ГЕНЕРАЦИЯ ПРОМПТА ДЛЯ КАРТИНКИ
 # ==========================================
 async def rewrite_post(news, context):
     await send_log(f"✍️ Глубокий рерайт новости...", context)
     
-    if not news.get("summary") or len(news["summary"]) < 50:
-        await send_log(f"⚠️ Новость без описания, пропускаем: {news['title'][:60]}...", context, is_error=True)
-        return None, None, None
+    # Парсим полную статью
+    await send_log(f"📄 Парсинг полной статьи: {news['link'][:60]}...", context)
+    full_content = fetch_full_article(news['link'])
+    
+    # Если не удалось спарсить статью - используем то, что есть
+    if not full_content or len(full_content) < 200:
+        await send_log(f"⚠️ Не удалось спарсить статью, использую RSS-описание", context)
+        full_content = news.get("summary", "")
+        
+        if not full_content or len(full_content) < 100:
+            await send_log(f"❌ Недостаточно контента для рерайта", context, is_error=True)
+            return None, None, None
+    
+    await send_log(f"✅ Спарсено {len(full_content)} символов контента", context)
     
     url = "https://api.deepseek.com/v1/chat/completions"
     headers = {
@@ -332,109 +405,159 @@ async def rewrite_post(news, context):
         "Content-Type": "application/json"
     }
     
-    system_prompt = """Ты — автор экспертного Telegram-канала о технологиях, AI и инновациях. Твоя аудитория — люди, которые хотят понимать, что происходит в мире технологий, и как это влияет на их жизнь.
+    system_prompt = """Ты — профессиональный журналист и автор экспертного Telegram-канала о технологиях, AI и инновациях. Твоя задача — написать глубокую, содержательную статью на основе предоставленного материала.
 
-Ты пишешь как живой человек, а не как новостной агрегатор. У тебя есть своё мнение, стиль и голос.
+Твоя аудитория — люди, которые хотят понимать технологии, и как они влияют на жизнь.
 
-Правила:
-1. Начни с интриги: не просто "компания X сделала Y", а "представьте, что...", "что если...", "вот почему это важно"
-2. Добавь контекст: что было до этого, почему это важно сейчас
-3. Дай свою оценку: что ты думаешь об этом, почему это хорошо/плохо/интересно
-4. Сделай прогноз: что будет дальше, как это повлияет на рынок или обычных людей
-5. Добавь личную ноту: "мне кажется", "я вижу в этом", "обратите внимание"
-6. Пиши живым языком: короткие предложения, эмодзи, вопросы к читателю
-7. Меняй структуру каждый раз: иногда начинай с вывода, иногда с вопроса, иногда с неожиданного факта
-8. Не используй один и тот же шаблон каждый пост
-9. Если упоминаются люди или компании — дай короткую справку (кто это, чем известны)
+Требования к статье:
 
-Важно: КАЖДЫЙ ПОСТ ДОЛЖЕН БЫТЬ УНИКАЛЬНЫМ ПО СТРУКТУРЕ. Не используй один и тот же шаблон.
+1. **Глубина и содержание**:
+   - Минимум 1000 символов
+   - Раскрой тему максимально полно
+   - Добавь исторический контекст (что было до этого)
+   - Объясни технические детали простым языком
+   - Приведи конкретные примеры использования
+   - Добавь анализ влияния на рынок и людей
 
-Важно: В конце ответа ты должен сгенерировать промпт для генерации картинки через AI.
-Промпт должен быть на английском языке, содержать 40-60 слов.
-Опиши визуальную сцену, которая отражает суть поста.
+2. **Структура статьи**:
+   - Интригующий заголовок с эмодзи
+   - Вступление, которое захватывает внимание
+   - Основная часть с фактами, цифрами, цитатами
+   - Анализ и личное мнение автора
+   - Прогнозы и выводы для читателя
+   - Хештеги
 
-Требования к промпту:
-- Укажи стиль: cinematic, photorealistic, futuristic, minimal, vibrant, dramatic
-- Добавь детали: объекты, люди, цвета, освещение, ракурс
-- Передай атмосферу: энергичная, спокойная, тревожная, вдохновляющая
-- Используй ключевые объекты из новости (например, "robot", "server", "scientist", "space", "brain")
-- Промпт должен быть уникальным для каждой новости
+3. **Стиль**:
+   - Профессиональный, но доступный
+   - Живой, с элементами разговорного стиля
+   - Короткие предложения для удобства чтения
+   - Используй вопросы к читателю
+   - Добавляй эмодзи для визуального разнообразия
+   - Не используй шаблонные фразы
 
-Примеры хороших промптов:
-- "A scientist in a white lab coat staring at a glowing holographic brain, blue light illuminating her face, futuristic laboratory, cinematic, 4K"
-- "A massive data center with thousands of blinking green lights, a human silhouette walking through, dramatic shadows, photorealistic, wide shot"
+4. **Дополнительные требования**:
+   - Если в статье упоминаются компании/люди — дай краткую справку
+   - Добавь контекст: почему это важно сейчас
+   - Сделай прогноз на будущее
+   - В конце статьи должен быть чёткий вывод
+
+**Важно**: Если предоставленного контента недостаточно для полноценной статьи — дополни своими знаниями о теме, но сохраняй достоверность фактов.
 
 Формат ответа:
-ЗАГОЛОВОК: [короткий, до 10 слов, с эмодзи, интригующий]
-ВСТУПЛЕНИЕ: [интрига, вопрос, неожиданный факт]
-ОСНОВНОЙ ТЕКСТ: [3-5 абзацев, факты + мнение + контекст + прогноз]
-ВЫВОД: [чёткая мысль, вывод для читателя]
-ХЕШТЕГИ: [2-3 хештега]
-ПРОМПТ_ДЛЯ_КАРТИНКИ: [промпт на английском, 40-60 слов]
+ЗАГОЛОВОК: [яркий заголовок с эмодзи, до 10 слов]
+СТАТЬЯ: [полный текст статьи, минимум 1000 символов]
+ХЕШТЕГИ: [3-5 хештегов]
+ПРОМПТ_ДЛЯ_КАРТИНКИ: [промпт на английском, 40-60 слов, для генерации иллюстрации]"""
 
-Длина поста: 700-1100 символов."""
-
+    # Формируем запрос к DeepSeek
+    user_message = f"Источник: {news['source']}\nЗаголовок: {news['title']}\n\nТекст статьи:\n{full_content}"
+    
+    if len(user_message) > 8000:
+        user_message = user_message[:8000]
+    
     payload = {
         "model": "deepseek-chat",
         "messages": [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": f"Новость из {news['source']}:\nЗаголовок: {news['title']}\nТекст: {news['summary']}"}
+            {"role": "user", "content": user_message}
         ],
-        "temperature": 0.5,
+        "temperature": 0.7,
         "top_p": 0.9,
-        "max_tokens": 1800
+        "max_tokens": 3000
     }
     
     try:
-        response = requests.post(url, headers=headers, json=payload, timeout=45)
+        response = requests.post(url, headers=headers, json=payload, timeout=60)
         response.raise_for_status()
         result = response.json()
         content = result["choices"][0]["message"]["content"]
         
+        # Парсим ответ
         post_data = {
             "title": "",
-            "intro": "",
-            "main_text": "",
-            "conclusion": "",
+            "article": "",
             "hashtags": "",
             "image_prompt": ""
         }
         
+        current_section = None
+        article_lines = []
+        
         for line in content.split('\n'):
             line = line.strip()
+            if not line:
+                continue
+                
             if line.startswith("ЗАГОЛОВОК:"):
                 post_data["title"] = line.replace("ЗАГОЛОВОК:", "").strip()
-            elif line.startswith("ВСТУПЛЕНИЕ:"):
-                post_data["intro"] = line.replace("ВСТУПЛЕНИЕ:", "").strip()
-            elif line.startswith("ОСНОВНОЙ ТЕКСТ:"):
-                post_data["main_text"] = line.replace("ОСНОВНОЙ ТЕКСТ:", "").strip()
-            elif line.startswith("ВЫВОД:"):
-                post_data["conclusion"] = line.replace("ВЫВОД:", "").strip()
+                current_section = "article"
             elif line.startswith("ХЕШТЕГИ:"):
                 post_data["hashtags"] = line.replace("ХЕШТЕГИ:", "").strip()
+                current_section = "hashtags"
             elif line.startswith("ПРОМПТ_ДЛЯ_КАРТИНКИ:"):
                 post_data["image_prompt"] = line.replace("ПРОМПТ_ДЛЯ_КАРТИНКИ:", "").strip()
+                current_section = "image"
+            elif line.startswith("СТАТЬЯ:"):
+                post_data["article"] = line.replace("СТАТЬЯ:", "").strip()
+                current_section = "article"
+            else:
+                if current_section == "article" and not line.startswith("ЗАГОЛОВОК:"):
+                    post_data["article"] += " " + line
         
+        # Если не удалось распарсить заголовок
         if not post_data["title"]:
             post_data["title"] = f"🤖 {news['title'][:50]}"
+        
+        # Если не удалось распарсить промпт для картинки
         if not post_data["image_prompt"]:
-            post_data["image_prompt"] = generate_image_prompt_from_post(news['title'], news['summary'])
+            post_data["image_prompt"] = generate_image_prompt_from_post(news['title'], full_content)
         
-        full_post = f"{post_data['title']}\n\n"
-        if post_data["intro"]:
-            full_post += f"*{post_data['intro']}*\n\n"
-        if post_data["main_text"]:
-            full_post += f"{post_data['main_text']}\n\n"
-        if post_data["conclusion"]:
-            full_post += f"📌 {post_data['conclusion']}\n\n"
-        if post_data["hashtags"]:
-            full_post += f"{post_data['hashtags']}"
+        # Проверяем длину статьи
+        if len(post_data["article"]) < 500:
+            await send_log(f"⚠️ Статья слишком короткая ({len(post_data['article'])} символов), пробуем улучшить...", context)
+            
+            # Вторая попытка с другим промптом
+            system_prompt_retry = """Напиши развёрнутую статью минимум 1000 символов. Раскрой тему максимально полно, добавь анализ, контекст и прогнозы. Пиши профессионально, но доступно для широкой аудитории."""
+            
+            payload_retry = {
+                "model": "deepseek-chat",
+                "messages": [
+                    {"role": "system", "content": system_prompt_retry},
+                    {"role": "user", "content": f"Напиши статью на тему: {news['title']}\n\nДополнительная информация: {full_content[:500]}"}
+                ],
+                "temperature": 0.8,
+                "max_tokens": 3000
+            }
+            
+            try:
+                response_retry = requests.post(url, headers=headers, json=payload_retry, timeout=60)
+                response_retry.raise_for_status()
+                result_retry = response_retry.json()
+                post_data["article"] = result_retry["choices"][0]["message"]["content"].strip()
+            except:
+                pass
         
-        if len(full_post.strip()) < 300:
-            await send_log(f"⚠️ Пост слишком короткий ({len(full_post)} символов), пропускаем", context, is_error=True)
-            return None, None, None
+        # Если всё ещё коротко - добавляем свои мысли
+        if len(post_data["article"]) < 500:
+            post_data["article"] = f"""🤖 {news['title']}
+
+{full_content[:1000]}
+
+💡 **Что это значит для нас?**
+
+Эта новость показывает, как быстро развиваются технологии AI. Подобные изменения открывают новые возможности для бизнеса и обычных людей.
+
+🔮 **Прогноз:**
+В ближайшие годы мы увидим ещё больше инноваций в этой области. Важно следить за трендами и адаптироваться к изменениям.
+
+📌 **Вывод:**
+Технологии продолжают менять наш мир, и важно быть в курсе событий, чтобы не отставать от прогресса.
+"""
         
-        await send_log(f"✅ Рерайт готов ({len(full_post)} символов)", context)
+        # Собираем финальный пост
+        full_post = f"{post_data['title']}\n\n{post_data['article']}\n\n{post_data['hashtags']}"
+        
+        await send_log(f"✅ Статья готова ({len(full_post)} символов)", context)
         await send_log(f"🎨 Промпт для картинки: {post_data['image_prompt'][:80]}...", context)
         
         return full_post, post_data["title"], post_data["image_prompt"]
@@ -442,12 +565,20 @@ async def rewrite_post(news, context):
     except Exception as e:
         error_msg = f"❌ Ошибка рерайта: {e}"
         await send_log(error_msg, context, is_error=True)
-        # Если ошибка — генерируем промпт сами
-        image_prompt = generate_image_prompt_from_post(news['title'], news['summary'])
-        return f"🤖 {news['title']}\n\n{news['summary'][:300]}...", news['title'], image_prompt
+        # Фолбэк - используем заголовок и краткое описание
+        image_prompt = generate_image_prompt_from_post(news['title'], full_content)
+        fallback_post = f"""🤖 {news['title']}
+
+{full_content[:500]}
+
+💡 Эта новость показывает новый тренд в мире AI. Технологии продолжают развиваться, открывая новые возможности.
+
+📌 Подписывайтесь, чтобы быть в курсе! #AI #Tech #Innovation
+"""
+        return fallback_post, news['title'], image_prompt
 
 # ==========================================
-# 9. ГЕНЕРАЦИЯ КАРТИНКИ (free-nano-banana-2) — 60 попыток
+# 10. ГЕНЕРАЦИЯ КАРТИНКИ (free-nano-banana-2) — 60 попыток
 # ==========================================
 async def generate_image_odirouter(prompt, context):
     """Генерирует картинку через free-nano-banana-2 (60 попыток, ~3 минуты)"""
@@ -517,7 +648,7 @@ async def generate_image_odirouter(prompt, context):
         return None
 
 # ==========================================
-# 10. МОДЕРАЦИЯ + АВТОПУБЛИКАЦИЯ ЧЕРЕЗ 1 ЧАС
+# 11. МОДЕРАЦИЯ + АВТОПУБЛИКАЦИЯ ЧЕРЕЗ 1 ЧАС
 # ==========================================
 async def send_for_moderation(context, news, post_text, title, image_prompt, justification):
     saved = save_post(title, news['link'], post_text, image_prompt)
@@ -538,14 +669,19 @@ async def send_for_moderation(context, news, post_text, title, image_prompt, jus
     
     post_id = result[0]
     
+    # Обрезаем текст для модерации
+    preview_text = post_text[:1500]
+    if len(post_text) > 1500:
+        preview_text += "\n\n... (текст обрезан, полная версия в канале)"
+    
     message_text = f"""
 📨 **НОВОСТЬ НА МОДЕРАЦИЮ**
 
 📰 **Заголовок:**
 {title}
 
-📝 **Текст поста:**
-{post_text[:1000]}{"..." if len(post_text) > 1000 else ""}
+📝 **Текст поста (первые 1500 символов):**
+{preview_text}
 
 🎨 **Промпт для картинки:**
 {image_prompt}
@@ -554,6 +690,8 @@ async def send_for_moderation(context, news, post_text, title, image_prompt, jus
 
 📊 **Обоснование выбора:**
 {justification}
+
+📏 **Длина поста:** {len(post_text)} символов
 
 ⏳ **Автопубликация через 1 час, если не ответить**
 
@@ -589,7 +727,7 @@ async def auto_publish_after_timeout(context, post_id, title, post_text):
         await publish_post(context, title, post_text)
 
 # ==========================================
-# 11. ПУБЛИКАЦИЯ С КАРТИНКОЙ
+# 12. ПУБЛИКАЦИЯ С КАРТИНКОЙ
 # ==========================================
 async def publish_post(context, title, post_text):
     await send_log(f"📤 Публикация поста в канал...", context)
@@ -642,7 +780,7 @@ async def publish_post(context, title, post_text):
         await send_log(error_msg, context, is_error=True)
 
 # ==========================================
-# 12. ОСНОВНОЙ ЦИКЛ
+# 13. ОСНОВНОЙ ЦИКЛ
 # ==========================================
 async def prepare_and_moderate(context: ContextTypes.DEFAULT_TYPE):
     await send_log("="*50, context)
@@ -663,7 +801,7 @@ async def prepare_and_moderate(context: ContextTypes.DEFAULT_TYPE):
             
             post_text, title, image_prompt = await rewrite_post(selected, context)
             
-            if post_text and len(post_text.strip()) >= 300:
+            if post_text and len(post_text.strip()) >= 500:  # Минимум 500 символов для поста
                 await send_for_moderation(
                     context, 
                     selected, 
@@ -685,7 +823,7 @@ async def prepare_and_moderate(context: ContextTypes.DEFAULT_TYPE):
         await send_log(error_msg, context, is_error=True)
 
 # ==========================================
-# 13. ОБРАБОТЧИКИ КНОПОК
+# 14. ОБРАБОТЧИКИ КНОПОК
 # ==========================================
 async def moderation_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -739,7 +877,7 @@ async def moderation_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
         await prepare_and_moderate(context)
 
 # ==========================================
-# 14. КОМАНДЫ TELEGRAM
+# 15. КОМАНДЫ TELEGRAM
 # ==========================================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
@@ -801,11 +939,11 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await moderation_callback(update, context)
 
 # ==========================================
-# 15. ЗАПУСК
+# 16. ЗАПУСК
 # ==========================================
 if __name__ == "__main__":
     print("\n" + "="*60)
-    print("🚀 ЗАПУСК БОТА")
+    print("🚀 ЗАПУСК БОТА (УЛУЧШЕННАЯ ВЕРСИЯ)")
     print("="*60)
     
     init_db()
@@ -826,11 +964,10 @@ if __name__ == "__main__":
     print("✅ Бот запущен")
     print("📌 Логи отправляются в Telegram и консоль")
     print("📌 Модерация — через кнопки в личке")
-    print("📌 Посты короче 300 символов пропускаются")
-    print("📌 Картинка генерируется через free-nano-banana-2 (60 попыток, ~3 минуты)")
-    print("📌 Автопубликация через 1 час, если нет ответа")
-    print("📌 Промпт для картинки генерируется из текста поста (уникальный для каждой новости)")
-    print("📌 Разрешение картинки: 1K")
+    print("📌 Посты теперь минимум 500 символов (стараемся 1000+)")
+    print("📌 Парсинг полных статей через BeautifulSoup")
+    print("📌 Картинка генерируется через free-nano-banana-2")
+    print("📌 Автопубликация через 1 час")
     print("="*60 + "\n")
     
     app.run_polling()
