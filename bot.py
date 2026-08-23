@@ -447,13 +447,13 @@ async def rewrite_post(news, context):
         return f"🤖 {news['title']}\n\n{news['summary'][:300]}...", news['title'], image_prompt
 
 # ==========================================
-# 9. ГЕНЕРАЦИЯ КАРТИНКИ (nano-banana-2) — 60 попыток
+# 9. ГЕНЕРАЦИЯ КАРТИНКИ (free-nano-banana-2) — 60 попыток
 # ==========================================
 async def generate_image_odirouter(prompt, context):
-    """Генерирует картинку через nano-banana-2 (60 попыток, ~3 минуты)"""
+    """Генерирует картинку через free-nano-banana-2 (60 попыток, ~3 минуты)"""
     await send_log(f"🎨 Генерация картинки...", context)
     
-    url = "https://api.odirouter.ai/model/v1/queue/nano-banana-2"
+    url = "https://api.odirouter.ai/model/v1/queue/free-nano-banana-2"
     headers = {
         "Authorization": f"Bearer {ODIROUTER_API_KEY}",
         "Content-Type": "application/json"
@@ -465,7 +465,7 @@ async def generate_image_odirouter(prompt, context):
     payload = {
         "prompt": prompt,
         "aspect_ratio": "16:9",
-        "image_size": "1K"
+        "resolution": "1K"
     }
     
     try:
@@ -480,7 +480,7 @@ async def generate_image_odirouter(prompt, context):
         
         await send_log(f"  ✅ Задача создана: {request_id}", context)
         
-        status_url = f"https://api.odirouter.ai/model/v1/queue/nano-banana-2/requests/{request_id}/status"
+        status_url = f"https://api.odirouter.ai/model/v1/queue/free-nano-banana-2/requests/{request_id}/status"
         attempts = 0
         max_attempts = 60
         while attempts < max_attempts:
@@ -501,7 +501,7 @@ async def generate_image_odirouter(prompt, context):
             await send_log("  ⏰ Таймаут генерации (3 минуты)", context, is_error=True)
             return None
         
-        result_url = f"https://api.odirouter.ai/model/v1/queue/nano-banana-2/requests/{request_id}/response"
+        result_url = f"https://api.odirouter.ai/model/v1/queue/free-nano-banana-2/requests/{request_id}/response"
         result_response = requests.get(result_url, headers=headers)
         result_data = result_response.json()
         
@@ -827,9 +827,10 @@ if __name__ == "__main__":
     print("📌 Логи отправляются в Telegram и консоль")
     print("📌 Модерация — через кнопки в личке")
     print("📌 Посты короче 300 символов пропускаются")
-    print("📌 Картинка генерируется через nano-banana-2 (60 попыток, ~3 минуты)")
+    print("📌 Картинка генерируется через free-nano-banana-2 (60 попыток, ~3 минуты)")
     print("📌 Автопубликация через 1 час, если нет ответа")
     print("📌 Промпт для картинки генерируется из текста поста (уникальный для каждой новости)")
+    print("📌 Разрешение картинки: 1K")
     print("="*60 + "\n")
     
     app.run_polling()
