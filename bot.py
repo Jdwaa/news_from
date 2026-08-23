@@ -382,22 +382,21 @@ async def select_best_news(news_list, context):
 # 9. РЕРАЙТ ПОСТА + ГЕНЕРАЦИЯ ПРОМПТА ДЛЯ КАРТИНКИ
 # ==========================================
 async def rewrite_post(news, context):
-    await send_log(f"✍️ Глубокий рерайт новости...", context)
+    await send_log(f"✍️ Создание авторской колонки...", context)
     
     # Парсим полную статью
-    await send_log(f"📄 Парсинг полной статьи: {news['link'][:60]}...", context)
+    await send_log(f"📄 Парсинг материала: {news['link'][:60]}...", context)
     full_content = fetch_full_article(news['link'])
     
-    # Если не удалось спарсить статью - используем то, что есть
     if not full_content or len(full_content) < 200:
         await send_log(f"⚠️ Не удалось спарсить статью, использую RSS-описание", context)
         full_content = news.get("summary", "")
         
         if not full_content or len(full_content) < 100:
-            await send_log(f"❌ Недостаточно контента для рерайта", context, is_error=True)
+            await send_log(f"❌ Недостаточно контента для создания колонки", context, is_error=True)
             return None, None, None
     
-    await send_log(f"✅ Спарсено {len(full_content)} символов контента", context)
+    await send_log(f"✅ Собрано {len(full_content)} символов материала", context)
     
     url = "https://api.deepseek.com/v1/chat/completions"
     headers = {
@@ -405,65 +404,87 @@ async def rewrite_post(news, context):
         "Content-Type": "application/json"
     }
     
-    system_prompt = """Ты — профессиональный журналист и автор экспертного Telegram-канала о технологиях, AI и инновациях. Твоя задача — написать глубокую, содержательную статью на основе предоставленного материала.
+    system_prompt = """Ты — независимый технологический журналист и аналитик. Ты пишешь авторские колонки для Telegram-канала о технологиях, AI и инновациях.
 
-Твоя аудитория — люди, которые хотят понимать технологии, и как они влияют на жизнь.
+ТВОЯ РОЛЬ:
+- Ты НЕ пересказываешь новости
+- Ты НЕ цитируешь источники
+- Ты НЕ упоминаешь, откуда взята информация
+- Ты создаёшь УНИКАЛЬНЫЙ авторский контент на основе прочитанного
 
-Требования к статье:
+ТВОЙ СТИЛЬ:
+- Живой, разговорный, но профессиональный
+- Субъективный: выражай своё мнение
+- Эмоциональный: используй эмодзи для усиления эмоций
+- Доступный: объясняй сложное простым языком
+- Увлекательный: читатель должен хотеть дочитать до конца
 
-1. **Глубина и содержание**:
-   - Минимум 1000 символов
-   - Раскрой тему максимально полно
-   - Добавь исторический контекст (что было до этого)
-   - Объясни технические детали простым языком
-   - Приведи конкретные примеры использования
-   - Добавь анализ влияния на рынок и людей
+СТРУКТУРА ПОСТА (1000-1200 символов):
 
-2. **Структура статьи**:
-   - Интригующий заголовок с эмодзи
-   - Вступление, которое захватывает внимание
-   - Основная часть с фактами, цифрами, цитатами
-   - Анализ и личное мнение автора
-   - Прогнозы и выводы для читателя
-   - Хештеги
+1. **ЗАГОЛОВОК** (до 8 слов, с эмодзи):
+   - Интригующий, цепляющий
+   - Отражает суть, но не повторяет новость
 
-3. **Стиль**:
-   - Профессиональный, но доступный
-   - Живой, с элементами разговорного стиля
-   - Короткие предложения для удобства чтения
-   - Используй вопросы к читателю
-   - Добавляй эмодзи для визуального разнообразия
-   - Не используй шаблонные фразы
+2. **ВСТУПЛЕНИЕ** (1-2 предложения):
+   - Захвати внимание вопросом или неожиданным фактом
+   - Создай интригу
 
-4. **Дополнительные требования**:
-   - Если в статье упоминаются компании/люди — дай краткую справку
-   - Добавь контекст: почему это важно сейчас
-   - Сделай прогноз на будущее
-   - В конце статьи должен быть чёткий вывод
+3. **ОСНОВНАЯ ЧАСТЬ** (3-4 абзаца):
+   - Объясни, что происходит
+   - Добавь свой анализ: почему это важно
+   - Приведи примеры из жизни (выдуманные, но реалистичные)
+   - Сделай неожиданный вывод или связь с другими событиями
 
-**Важно**: Если предоставленного контента недостаточно для полноценной статьи — дополни своими знаниями о теме, но сохраняй достоверность фактов.
+4. **ЛИЧНОЕ МНЕНИЕ** (1-2 абзаца):
+   - "Мне кажется...", "Я вижу в этом...", "Обратите внимание..."
+   - Поделись прогнозом: что будет дальше
+   - Сравни с похожими ситуациями в прошлом
 
-Формат ответа:
-ЗАГОЛОВОК: [яркий заголовок с эмодзи, до 10 слов]
-СТАТЬЯ: [полный текст статьи, минимум 1000 символов]
-ХЕШТЕГИ: [3-5 хештегов]
+5. **ВЫВОД** (1 предложение):
+   - Чёткая мысль, которую читатель запомнит
+   - Можно вопрос к читателю
+
+6. **ХЕШТЕГИ** (2-3 шт):
+   - #AI #Tech #Innovation (или другие релевантные)
+
+ВАЖНЫЕ ПРАВИЛА:
+- НЕ пиши "согласно источнику", "как сообщает", "по данным"
+- НЕ пересказывай новость дословно
+- НЕ используй шаблонные фразы
+- НЕ копируй структуру из предыдущих постов
+- НЕ упоминай названия СМИ, сайтов, блогов
+- НЕ указывай даты публикации новости
+- Ты — эксперт, который делится своим мнением
+- Каждый пост должен звучать как свежая колонка
+
+Пример хорошего начала:
+❌ "Компания OpenAI выпустила новую модель..."
+✅ "Что если ИИ уже умеет думать быстрее нас? Похоже, мы приближаемся к этому моменту..."
+
+Пример плохого окончания:
+❌ "Вот такая новость, подписывайтесь"
+✅ "Представьте мир, где каждый имеет личного ИИ-ассистента. Это не фантастика — это наше ближайшее будущее."
+
+ФОРМАТ ОТВЕТА:
+ЗАГОЛОВОК: [текст]
+ТЕКСТ_ПОСТА: [полный текст поста, 1000-1200 символов]
+ХЕШТЕГИ: [теги]
 ПРОМПТ_ДЛЯ_КАРТИНКИ: [промпт на английском, 40-60 слов, для генерации иллюстрации]"""
 
-    # Формируем запрос к DeepSeek
-    user_message = f"Источник: {news['source']}\nЗаголовок: {news['title']}\n\nТекст статьи:\n{full_content}"
+    user_message = f"{full_content}"
     
-    if len(user_message) > 8000:
-        user_message = user_message[:8000]
+    if len(user_message) > 6000:
+        user_message = user_message[:6000]
     
     payload = {
         "model": "deepseek-chat",
         "messages": [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_message}
+            {"role": "user", "content": f"На основе этого материала напиши авторскую колонку:\n\n{user_message}"}
         ],
-        "temperature": 0.7,
+        "temperature": 0.8,
         "top_p": 0.9,
-        "max_tokens": 3000
+        "max_tokens": 2500
     }
     
     try:
@@ -475,13 +496,12 @@ async def rewrite_post(news, context):
         # Парсим ответ
         post_data = {
             "title": "",
-            "article": "",
+            "text": "",
             "hashtags": "",
             "image_prompt": ""
         }
         
         current_section = None
-        article_lines = []
         
         for line in content.split('\n'):
             line = line.strip()
@@ -490,19 +510,22 @@ async def rewrite_post(news, context):
                 
             if line.startswith("ЗАГОЛОВОК:"):
                 post_data["title"] = line.replace("ЗАГОЛОВОК:", "").strip()
-                current_section = "article"
+                current_section = "text"
+            elif line.startswith("ТЕКСТ_ПОСТА:"):
+                post_data["text"] = line.replace("ТЕКСТ_ПОСТА:", "").strip()
+                current_section = "text"
             elif line.startswith("ХЕШТЕГИ:"):
                 post_data["hashtags"] = line.replace("ХЕШТЕГИ:", "").strip()
                 current_section = "hashtags"
             elif line.startswith("ПРОМПТ_ДЛЯ_КАРТИНКИ:"):
                 post_data["image_prompt"] = line.replace("ПРОМПТ_ДЛЯ_КАРТИНКИ:", "").strip()
                 current_section = "image"
-            elif line.startswith("СТАТЬЯ:"):
-                post_data["article"] = line.replace("СТАТЬЯ:", "").strip()
-                current_section = "article"
             else:
-                if current_section == "article" and not line.startswith("ЗАГОЛОВОК:"):
-                    post_data["article"] += " " + line
+                if current_section == "text" and not line.startswith("ЗАГОЛОВОК:"):
+                    if post_data["text"]:
+                        post_data["text"] += "\n" + line
+                    else:
+                        post_data["text"] = line
         
         # Если не удалось распарсить заголовок
         if not post_data["title"]:
@@ -512,140 +535,58 @@ async def rewrite_post(news, context):
         if not post_data["image_prompt"]:
             post_data["image_prompt"] = generate_image_prompt_from_post(news['title'], full_content)
         
-        # Проверяем длину статьи
-        if len(post_data["article"]) < 500:
-            await send_log(f"⚠️ Статья слишком короткая ({len(post_data['article'])} символов), пробуем улучшить...", context)
-            
-            # Вторая попытка с другим промптом
-            system_prompt_retry = """Напиши развёрнутую статью минимум 1000 символов. Раскрой тему максимально полно, добавь анализ, контекст и прогнозы. Пиши профессионально, но доступно для широкой аудитории."""
+        # Если текст пустой или слишком короткий
+        if not post_data["text"] or len(post_data["text"]) < 400:
+            # Вторая попытка с упрощённым промптом
+            system_prompt_retry = """Напиши авторскую колонку на тему технологий. Минимум 1000 символов. Без упоминания источников. Только твоё мнение и анализ. Пиши живо, с эмодзи, как для Telegram-канала."""
             
             payload_retry = {
                 "model": "deepseek-chat",
                 "messages": [
                     {"role": "system", "content": system_prompt_retry},
-                    {"role": "user", "content": f"Напиши статью на тему: {news['title']}\n\nДополнительная информация: {full_content[:500]}"}
+                    {"role": "user", "content": f"Тема: {news['title']}\n\nИнформация для размышления: {full_content[:500]}"}
                 ],
-                "temperature": 0.8,
-                "max_tokens": 3000
+                "temperature": 0.9,
+                "max_tokens": 2500
             }
             
             try:
                 response_retry = requests.post(url, headers=headers, json=payload_retry, timeout=60)
                 response_retry.raise_for_status()
                 result_retry = response_retry.json()
-                post_data["article"] = result_retry["choices"][0]["message"]["content"].strip()
+                post_data["text"] = result_retry["choices"][0]["message"]["content"].strip()
             except:
                 pass
         
-        # Если всё ещё коротко - добавляем свои мысли
-        if len(post_data["article"]) < 500:
-            post_data["article"] = f"""🤖 {news['title']}
-
-{full_content[:1000]}
-
-💡 **Что это значит для нас?**
-
-Эта новость показывает, как быстро развиваются технологии AI. Подобные изменения открывают новые возможности для бизнеса и обычных людей.
-
-🔮 **Прогноз:**
-В ближайшие годы мы увидим ещё больше инноваций в этой области. Важно следить за трендами и адаптироваться к изменениям.
-
-📌 **Вывод:**
-Технологии продолжают менять наш мир, и важно быть в курсе событий, чтобы не отставать от прогресса.
-"""
-        
         # Собираем финальный пост
-        full_post = f"{post_data['title']}\n\n{post_data['article']}\n\n{post_data['hashtags']}"
+        full_post = f"{post_data['title']}\n\n{post_data['text']}\n\n{post_data['hashtags']}"
         
-        await send_log(f"✅ Статья готова ({len(full_post)} символов)", context)
+        # Если нет хештегов - добавим стандартные
+        if not post_data["hashtags"]:
+            post_data["hashtags"] = "#AI #Tech #Innovation"
+            full_post = f"{post_data['title']}\n\n{post_data['text']}\n\n{post_data['hashtags']}"
+        
+        await send_log(f"✅ Колонка готова ({len(full_post)} символов)", context)
         await send_log(f"🎨 Промпт для картинки: {post_data['image_prompt'][:80]}...", context)
         
         return full_post, post_data["title"], post_data["image_prompt"]
         
     except Exception as e:
-        error_msg = f"❌ Ошибка рерайта: {e}"
+        error_msg = f"❌ Ошибка создания колонки: {e}"
         await send_log(error_msg, context, is_error=True)
-        # Фолбэк - используем заголовок и краткое описание
+        # Фолбэк
         image_prompt = generate_image_prompt_from_post(news['title'], full_content)
         fallback_post = f"""🤖 {news['title']}
 
 {full_content[:500]}
 
-💡 Эта новость показывает новый тренд в мире AI. Технологии продолжают развиваться, открывая новые возможности.
+💡 Эта тема заслуживает внимания. Технологии меняют наш мир, и важно осмысливать эти изменения.
 
-📌 Подписывайтесь, чтобы быть в курсе! #AI #Tech #Innovation
+А что ты думаешь по этому поводу? Делитесь мнением в комментариях!
+
+#AI #Tech #Innovation
 """
         return fallback_post, news['title'], image_prompt
-
-# ==========================================
-# 10. ГЕНЕРАЦИЯ КАРТИНКИ (free-nano-banana-2) — 60 попыток
-# ==========================================
-async def generate_image_odirouter(prompt, context):
-    """Генерирует картинку через free-nano-banana-2 (60 попыток, ~3 минуты)"""
-    await send_log(f"🎨 Генерация картинки...", context)
-    
-    url = "https://api.odirouter.ai/model/v1/queue/free-nano-banana-2"
-    headers = {
-        "Authorization": f"Bearer {ODIROUTER_API_KEY}",
-        "Content-Type": "application/json"
-    }
-    
-    if len(prompt) > 500:
-        prompt = prompt[:500]
-    
-    payload = {
-        "prompt": prompt,
-        "aspect_ratio": "16:9",
-        "resolution": "1K"
-    }
-    
-    try:
-        response = requests.post(url, headers=headers, json=payload, timeout=30)
-        response.raise_for_status()
-        task_data = response.json()
-        request_id = task_data.get("request_id")
-        
-        if not request_id:
-            await send_log("  ❌ Не удалось получить request_id", context, is_error=True)
-            return None
-        
-        await send_log(f"  ✅ Задача создана: {request_id}", context)
-        
-        status_url = f"https://api.odirouter.ai/model/v1/queue/free-nano-banana-2/requests/{request_id}/status"
-        attempts = 0
-        max_attempts = 60
-        while attempts < max_attempts:
-            status_response = requests.get(status_url, headers=headers)
-            status_data = status_response.json()
-            current_status = status_data.get("status")
-            attempts += 1
-            await send_log(f"  ⏳ Статус: {current_status} (попытка {attempts}/{max_attempts})", context)
-            
-            if current_status == "COMPLETED":
-                await send_log("  ✅ Картинка сгенерирована", context)
-                break
-            elif current_status in ["FAILED", "CANCELED"]:
-                await send_log(f"  ❌ Ошибка генерации", context, is_error=True)
-                return None
-            time.sleep(3)
-        else:
-            await send_log("  ⏰ Таймаут генерации (3 минуты)", context, is_error=True)
-            return None
-        
-        result_url = f"https://api.odirouter.ai/model/v1/queue/free-nano-banana-2/requests/{request_id}/response"
-        result_response = requests.get(result_url, headers=headers)
-        result_data = result_response.json()
-        
-        for item in result_data.get("output", []):
-            for content in item.get("content", []):
-                if content.get("type") == "image" and "url" in content:
-                    return content["url"]
-        return None
-        
-    except Exception as e:
-        error_msg = f"❌ Ошибка генерации картинки: {e}"
-        await send_log(error_msg, context, is_error=True)
-        return None
 
 # ==========================================
 # 11. МОДЕРАЦИЯ + АВТОПУБЛИКАЦИЯ ЧЕРЕЗ 1 ЧАС
