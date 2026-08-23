@@ -21,7 +21,6 @@ ADMIN_ID = int(os.getenv("ADMIN_ID", 0))
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 ODIROUTER_API_KEY = os.getenv("ODIROUTER_API_KEY")
 
-# Проверка обязательных переменных
 if not TELEGRAM_TOKEN:
     raise ValueError("❌ TELEGRAM_TOKEN не задан!")
 if not CHANNEL_ID:
@@ -151,7 +150,36 @@ def get_placeholder_image():
     return "https://via.placeholder.com/1280x720/1a1a2e/ffffff?text=AI+News"
 
 # ==========================================
-# 4. ЛОГГЕР
+# 4. ГЕНЕРАЦИЯ ПРОМПТА ДЛЯ КАРТИНКИ ИЗ ТЕКСТА ПОСТА
+# ==========================================
+def generate_image_prompt_from_post(title, content):
+    """Генерирует уникальный промпт для картинки из содержания поста"""
+    # Извлекаем ключевые слова
+    words = re.findall(r'\b[a-zA-Zа-яА-ЯёЁ]{4,}\b', title + " " + content[:400])
+    stopwords = ['что', 'это', 'все', 'уже', 'еще', 'вот', 'там', 'тут', 'когда', 'тогда', 'этот', 'новость', 'пост', 'канал', 'заявил', 'сказал']
+    keywords = [w for w in words if w.lower() not in stopwords]
+    
+    # Если есть ключевые слова — берём 6, иначе используем заголовок
+    if keywords:
+        keyword_str = ' '.join(keywords[:6])
+    else:
+        keyword_str = title[:100]
+    
+    # Случайные стили и атмосфера для разнообразия
+    styles = ['cinematic', 'photorealistic', 'futuristic', 'minimal', 'vibrant', 'dramatic', 'ethereal', 'documentary', 'neon']
+    moods = ['energetic', 'calm', 'mysterious', 'inspiring', 'powerful', 'hopeful', 'intense']
+    lighting = ['dramatic backlighting', 'soft golden light', 'cool blue tones', 'warm amber glow', 'neon pink and blue']
+    
+    style = random.choice(styles)
+    mood = random.choice(moods)
+    light = random.choice(lighting)
+    
+    prompt = f"{keyword_str}, {style}, {mood}, {light}, 4K, high detail, professional photography, wide shot"
+    
+    return prompt[:500]
+
+# ==========================================
+# 5. ЛОГГЕР
 # ==========================================
 async def send_log(message, context=None, is_error=False, send_to_admin=True):
     timestamp = datetime.now().strftime("%H:%M:%S")
@@ -169,7 +197,7 @@ async def send_log(message, context=None, is_error=False, send_to_admin=True):
             print(f"⚠️ Не удалось отправить лог в Telegram: {e}")
 
 # ==========================================
-# 5. ПАРСИНГ НОВОСТЕЙ
+# 6. ПАРСИНГ НОВОСТЕЙ
 # ==========================================
 async def fetch_news(context):
     await send_log("🔍 Начинаю парсинг новостей...", context)
@@ -217,7 +245,7 @@ async def fetch_news(context):
     return all_news[:10]
 
 # ==========================================
-# 6. ВЫБОР ЛУЧШЕЙ НОВОСТИ
+# 7. ВЫБОР ЛУЧШЕЙ НОВОСТИ
 # ==========================================
 async def select_best_news(news_list, context):
     if not news_list:
@@ -289,7 +317,7 @@ async def select_best_news(news_list, context):
         return news_list[0]
 
 # ==========================================
-# 7. РЕРАЙТ ПОСТА + ГЕНЕРАЦИЯ ПРОМПТА ДЛЯ КАРТИНКИ
+# 8. РЕРАЙТ ПОСТА + ГЕНЕРАЦИЯ ПРОМПТА ДЛЯ КАРТИНКИ
 # ==========================================
 async def rewrite_post(news, context):
     await send_log(f"✍️ Глубокий рерайт новости...", context)
@@ -309,37 +337,42 @@ async def rewrite_post(news, context):
 Ты пишешь как живой человек, а не как новостной агрегатор. У тебя есть своё мнение, стиль и голос.
 
 Правила:
-1. Начни с сути: сразу скажи, что произошло и почему это важно
-2. Добавь контекст: что было до этого, что изменилось сейчас
+1. Начни с интриги: не просто "компания X сделала Y", а "представьте, что...", "что если...", "вот почему это важно"
+2. Добавь контекст: что было до этого, почему это важно сейчас
 3. Дай свою оценку: что ты думаешь об этом, почему это хорошо/плохо/интересно
 4. Сделай прогноз: что будет дальше, как это повлияет на рынок или обычных людей
-5. Пиши живым языком: короткие предложения, эмодзи, вопросы к читателю
-6. Не используй кликбейт и пустые фразы
-7. Если упоминаются люди или компании — дай короткую справку (кто это, чем известны)
+5. Добавь личную ноту: "мне кажется", "я вижу в этом", "обратите внимание"
+6. Пиши живым языком: короткие предложения, эмодзи, вопросы к читателю
+7. Меняй структуру каждый раз: иногда начинай с вывода, иногда с вопроса, иногда с неожиданного факта
+8. Не используй один и тот же шаблон каждый пост
+9. Если упоминаются люди или компании — дай короткую справку (кто это, чем известны)
+
+Важно: КАЖДЫЙ ПОСТ ДОЛЖЕН БЫТЬ УНИКАЛЬНЫМ ПО СТРУКТУРЕ. Не используй один и тот же шаблон.
 
 Важно: В конце ответа ты должен сгенерировать промпт для генерации картинки через AI.
-Промпт должен быть на английском языке, содержать 30-50 слов.
+Промпт должен быть на английском языке, содержать 40-60 слов.
 Опиши визуальную сцену, которая отражает суть поста.
 
 Требования к промпту:
-- Укажи стиль: cinematic, photorealistic, futuristic, minimal, vibrant
+- Укажи стиль: cinematic, photorealistic, futuristic, minimal, vibrant, dramatic
 - Добавь детали: объекты, люди, цвета, освещение, ракурс
 - Передай атмосферу: энергичная, спокойная, тревожная, вдохновляющая
-- Не используй общие слова вроде "AI technology" или "digital art"
-- Промпт должен быть конкретным и визуальным
+- Используй ключевые объекты из новости (например, "robot", "server", "scientist", "space", "brain")
+- Промпт должен быть уникальным для каждой новости
 
-Пример хорошего промпта:
-"A futuristic server room with glowing blue data streams, a human silhouette standing in the center, dramatic backlighting, cool neon tones, cinematic wide shot, 4K, photorealistic"
+Примеры хороших промптов:
+- "A scientist in a white lab coat staring at a glowing holographic brain, blue light illuminating her face, futuristic laboratory, cinematic, 4K"
+- "A massive data center with thousands of blinking green lights, a human silhouette walking through, dramatic shadows, photorealistic, wide shot"
 
 Формат ответа:
 ЗАГОЛОВОК: [короткий, до 10 слов, с эмодзи, интригующий]
-ВСТУПЛЕНИЕ: [1–2 предложения, ввод в тему, суть]
-ОСНОВНОЙ ТЕКСТ: [3–5 абзацев, факты + мнение + контекст + прогноз]
-ВЫВОД: [1–2 предложения, чёткая мысль]
-ХЕШТЕГИ: [2–3 хештега]
-ПРОМПТ_ДЛЯ_КАРТИНКИ: [промпт на английском, 30-50 слов]
+ВСТУПЛЕНИЕ: [интрига, вопрос, неожиданный факт]
+ОСНОВНОЙ ТЕКСТ: [3-5 абзацев, факты + мнение + контекст + прогноз]
+ВЫВОД: [чёткая мысль, вывод для читателя]
+ХЕШТЕГИ: [2-3 хештега]
+ПРОМПТ_ДЛЯ_КАРТИНКИ: [промпт на английском, 40-60 слов]
 
-Длина поста: 600–1000 символов."""
+Длина поста: 700-1100 символов."""
 
     payload = {
         "model": "deepseek-chat",
@@ -347,9 +380,9 @@ async def rewrite_post(news, context):
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": f"Новость из {news['source']}:\nЗаголовок: {news['title']}\nТекст: {news['summary']}"}
         ],
-        "temperature": 0.4,
+        "temperature": 0.5,
         "top_p": 0.9,
-        "max_tokens": 1500
+        "max_tokens": 1800
     }
     
     try:
@@ -385,7 +418,7 @@ async def rewrite_post(news, context):
         if not post_data["title"]:
             post_data["title"] = f"🤖 {news['title'][:50]}"
         if not post_data["image_prompt"]:
-            post_data["image_prompt"] = f"Futuristic technology scene, digital innovation, cinematic lighting, 4K, high detail"
+            post_data["image_prompt"] = generate_image_prompt_from_post(news['title'], news['summary'])
         
         full_post = f"{post_data['title']}\n\n"
         if post_data["intro"]:
@@ -409,13 +442,15 @@ async def rewrite_post(news, context):
     except Exception as e:
         error_msg = f"❌ Ошибка рерайта: {e}"
         await send_log(error_msg, context, is_error=True)
-        return None, None, None
+        # Если ошибка — генерируем промпт сами
+        image_prompt = generate_image_prompt_from_post(news['title'], news['summary'])
+        return f"🤖 {news['title']}\n\n{news['summary'][:300]}...", news['title'], image_prompt
 
 # ==========================================
-# 8. ГЕНЕРАЦИЯ КАРТИНКИ (free-nano-banana-2) — 60 попыток
+# 9. ГЕНЕРАЦИЯ КАРТИНКИ (nano-banana-2) — 60 попыток
 # ==========================================
 async def generate_image_odirouter(prompt, context):
-    """Генерирует картинку через free-nano-banana-2 (бесплатно)"""
+    """Генерирует картинку через nano-banana-2 (60 попыток, ~3 минуты)"""
     await send_log(f"🎨 Генерация картинки...", context)
     
     url = "https://api.odirouter.ai/model/v1/queue/nano-banana-2"
@@ -482,7 +517,7 @@ async def generate_image_odirouter(prompt, context):
         return None
 
 # ==========================================
-# 9. МОДЕРАЦИЯ + АВТОПУБЛИКАЦИЯ ЧЕРЕЗ 1 ЧАС
+# 10. МОДЕРАЦИЯ + АВТОПУБЛИКАЦИЯ ЧЕРЕЗ 1 ЧАС
 # ==========================================
 async def send_for_moderation(context, news, post_text, title, image_prompt, justification):
     saved = save_post(title, news['link'], post_text, image_prompt)
@@ -491,7 +526,6 @@ async def send_for_moderation(context, news, post_text, title, image_prompt, jus
         await send_log(f"⚠️ Пост не сохранён (дубликат): {news['link']}", context, is_error=True)
         return
     
-    # Получаем ID сохранённого поста
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT id FROM posts WHERE link = ? ORDER BY id DESC LIMIT 1", (news['link'],))
@@ -540,25 +574,22 @@ async def send_for_moderation(context, news, post_text, title, image_prompt, jus
     
     await context.bot.send_message(chat_id=ADMIN_ID, text=message_text, reply_markup=reply_markup)
     
-    # Запускаем таймер автопубликации через 1 час
     asyncio.create_task(auto_publish_after_timeout(context, post_id, title, post_text))
 
 async def auto_publish_after_timeout(context, post_id, title, post_text):
-    """Автопубликация через 1 час, если пост всё ещё pending"""
-    await asyncio.sleep(3600)  # 1 час
+    await asyncio.sleep(3600)
     
-    # Проверяем статус поста
     post = get_post_by_id(post_id)
     if not post:
         return
     
-    if post[5] == 'pending':  # status = pending
+    if post[5] == 'pending':
         await send_log(f"⏰ Автопубликация поста #{post_id} (таймаут 1 час)", context)
         update_post_status(post_id, 'published')
         await publish_post(context, title, post_text)
 
 # ==========================================
-# 10. ПУБЛИКАЦИЯ С КАРТИНКОЙ
+# 11. ПУБЛИКАЦИЯ С КАРТИНКОЙ
 # ==========================================
 async def publish_post(context, title, post_text):
     await send_log(f"📤 Публикация поста в канал...", context)
@@ -573,12 +604,13 @@ async def publish_post(context, title, post_text):
     post_id, db_title, db_content, image_prompt, image_url = post
     
     if not image_url:
-        if image_prompt:
-            await send_log(f"🎨 Генерация картинки по промпту...", context)
-            image_url = await generate_image_odirouter(image_prompt, context)
-        else:
-            image_url = get_placeholder_image()
-            await send_log("🔄 Промпта нет, использую заглушку", context)
+        # Если промпт от DeepSeek пустой или слишком короткий — генерируем свой
+        if not image_prompt or len(image_prompt) < 20:
+            image_prompt = generate_image_prompt_from_post(title, db_content)
+            await send_log(f"🔄 Сгенерирован новый промпт для картинки", context)
+        
+        await send_log(f"🎨 Генерация картинки по промпту...", context)
+        image_url = await generate_image_odirouter(image_prompt, context)
         
         if image_url:
             update_post_image(post_id, image_url)
@@ -610,7 +642,7 @@ async def publish_post(context, title, post_text):
         await send_log(error_msg, context, is_error=True)
 
 # ==========================================
-# 11. ОСНОВНОЙ ЦИКЛ
+# 12. ОСНОВНОЙ ЦИКЛ
 # ==========================================
 async def prepare_and_moderate(context: ContextTypes.DEFAULT_TYPE):
     await send_log("="*50, context)
@@ -653,7 +685,7 @@ async def prepare_and_moderate(context: ContextTypes.DEFAULT_TYPE):
         await send_log(error_msg, context, is_error=True)
 
 # ==========================================
-# 12. ОБРАБОТЧИКИ КНОПОК
+# 13. ОБРАБОТЧИКИ КНОПОК
 # ==========================================
 async def moderation_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -663,7 +695,6 @@ async def moderation_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
     callback_type = data.split('_')[0]
     
     if callback_type == "publish":
-        # Извлекаем post_id
         try:
             post_id = int(data.split('_')[1])
         except:
@@ -708,7 +739,7 @@ async def moderation_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
         await prepare_and_moderate(context)
 
 # ==========================================
-# 13. КОМАНДЫ TELEGRAM
+# 14. КОМАНДЫ TELEGRAM
 # ==========================================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
@@ -770,7 +801,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await moderation_callback(update, context)
 
 # ==========================================
-# 14. ЗАПУСК
+# 15. ЗАПУСК
 # ==========================================
 if __name__ == "__main__":
     print("\n" + "="*60)
@@ -795,10 +826,10 @@ if __name__ == "__main__":
     print("✅ Бот запущен")
     print("📌 Логи отправляются в Telegram и консоль")
     print("📌 Модерация — через кнопки в личке")
-    print("📌 Настройки API: temperature=0.4, top_p=0.9")
     print("📌 Посты короче 300 символов пропускаются")
     print("📌 Картинка генерируется через nano-banana-2 (60 попыток, ~3 минуты)")
     print("📌 Автопубликация через 1 час, если нет ответа")
+    print("📌 Промпт для картинки генерируется из текста поста (уникальный для каждой новости)")
     print("="*60 + "\n")
     
     app.run_polling()
