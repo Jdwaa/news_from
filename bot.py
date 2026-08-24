@@ -141,19 +141,29 @@ def is_post_exists(link, title=None):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     
-    # Проверяем по ссылке
+    # Проверяем по ссылке (точное совпадение)
     c.execute("SELECT id FROM posts WHERE link = ?", (link,))
     result = c.fetchone()
     
     if not result and title:
-        # Проверяем по заголовку (упрощённо)
-        # Берём первые 5 слов заголовка
+        # Проверяем по заголовку (первые 5 слов)
         title_keywords = ' '.join(title.split()[:5])
         c.execute("SELECT id FROM posts WHERE title LIKE ?", (f'%{title_keywords}%',))
         result = c.fetchone()
     
     conn.close()
     return result is not None
+
+def clean_old_posts(days=7):
+    """Удаляет посты старше указанного количества дней"""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("DELETE FROM posts WHERE published_at < datetime('now', '-' || ? || ' days')", (days,))
+    deleted = c.rowcount
+    conn.commit()
+    conn.close()
+    print(f"🧹 Удалено старых постов: {deleted}")
+    return deleted
 
 def save_log_to_db(message, log_type="info"):
     conn = sqlite3.connect(DB_PATH)
@@ -281,8 +291,8 @@ def fetch_newsapi_news():
                     if not article.get('description') or len(article['description']) < 50:
                         continue
                     
-                    # Проверяем на дубликаты
-                    if is_post_exists(article.get('url', '')):
+                    # Проверяем на дубликаты (по ссылке и по заголовку)
+                    if is_post_exists(article.get('url', ''), article.get('title', '')):
                         continue
                     
                     news_list.append({
@@ -323,7 +333,9 @@ async def fetch_news(context):
             count = 0
             for entry in feed.entries[:5]:
                 link = entry.link
-                if is_post_exists(link):
+                
+                # Проверяем на дубликаты (по ссылке и по заголовку)
+                if is_post_exists(link, entry.title):
                     continue
                 
                 summary = ""
@@ -356,7 +368,7 @@ async def fetch_news(context):
     
     random.shuffle(all_news)
     await send_log(f"📊 Всего собрано уникальных новостей: {len(all_news)}", context)
-    return all_news[:15]  # Увеличил до 15, чтобы было больше выбора
+    return all_news[:15]
 
 # ==========================================
 # 8. ВЫБОР ЛУЧШЕЙ НОВОСТИ
@@ -434,7 +446,7 @@ async def select_best_news(news_list, context):
 # 9. РЕРАЙТ ПОСТА + ГЕНЕРАЦИЯ ПРОМПТА ДЛЯ КАРТИНКИ
 # ==========================================
 async def rewrite_post(news, context):
-    await send_log(f"✍️ Глубокий рерайт новости...", context)
+    await send_log(f"✍️ Создание авторского поста...", context)
     
     if not news.get("summary") or len(news["summary"]) < 50:
         await send_log(f"⚠️ Новость без описания, пропускаем: {news['title'][:60]}...", context, is_error=True)
@@ -443,7 +455,7 @@ async def rewrite_post(news, context):
     # ========== ПАРСИМ ПОЛНУЮ СТАТЬЮ ==========
     full_content = None
     if news.get("link"):
-        await send_log(f"📄 Парсинг полной статьи: {news['link'][:60]}...", context)
+        await send_log(f"📄 Парсинг полной статьи...", context)
         full_content = fetch_full_article(news['link'])
         if full_content:
             await send_log(f"  ✅ Спарсено {len(full_content)} символов", context)
@@ -457,44 +469,44 @@ async def rewrite_post(news, context):
         "Content-Type": "application/json"
     }
     
-    system_prompt = """Ты — автор экспертного Telegram-канала о технологиях, AI и инновациях. Твоя аудитория — люди, которые хотят понимать, что происходит в мире технологий, и как это влияет на их жизнь.
+    system_prompt = """Ты — автор экспертного Telegram-канала о технологиях, AI и инновациях.
 
-Ты пишешь как живой человек, а не как новостной агрегатор. У тебя есть своё мнение, стиль и голос.
+ТЫ ЖИВОЙ ЧЕЛОВЕК:
+- У тебя есть своё мнение, стиль и голос
+- Ты пишешь как друг, который разбирается в теме
+- Ты используешь эмодзи, вопросы к читателю, живые формулировки
+- Ты НЕ пишешь как новостной агрегатор
 
-Правила:
-1. Прочитай статью и перепиши в красивый пост длиной не меньше 600 символов
-2. Должен быть полный рерайт статьи без остатков от прошлого автора 
-3. Начни с сути: сразу скажи, что произошло и почему это важно
-4. Добавь контекст: что было до этого, что изменилось сейчас
-5. Дай свою оценку: что ты думаешь об этом, почему это хорошо/плохо/интересно
-6. Сделай прогноз: что будет дальше, как это повлияет на рынок или обычных людей
-7. Пиши живым языком: короткие предложения, эмодзи, вопросы к читателю
-8. Не используй кликбейт и пустые фразы
-9. Если упоминаются люди или компании — дай короткую справку (кто это, чем известны)
+ТВОЯ ЗАДАЧА:
+1. Прочитай статью и ПОЛНОСТЬЮ ПЕРЕРАБОТАЙ её в авторский пост
+2. НЕ ОСТАВЛЯЙ следов оригинала: переформулируй всё своими словами
+3. Добавь своё мнение: "мне кажется", "я вижу в этом", "обратите внимание"
+4. Сделай прогноз: "что будет дальше", "как это повлияет"
+5. Задавай вопросы читателю: "представьте", "а вы замечали"
 
-Важно: В конце ответа ты должен сгенерировать промпт для генерации картинки через AI.
-Промпт должен быть на английском языке, содержать 30-50 слов.
-Опиши визуальную сцену, которая отражает суть поста.
+ЖЁСТКИЕ ТРЕБОВАНИЯ К ДЛИНЕ:
+- Пост ДОЛЖЕН БЫТЬ минимум 600 символов (это обязательно!)
+- Если после написания пост короче 600 символов — ПЕРЕПИШИ ЕГО снова
+- Добавь больше анализа, контекста, примеров, прогнозов
+- Если не хватает информации — ДОПОЛНИ своими знаниями
 
-Требования к промпту:
-- Укажи стиль: cinematic, photorealistic, futuristic, minimal, vibrant
-- Добавь детали: объекты, люди, цвета, освещение, ракурс
-- Передай атмосферу: энергичная, спокойная, тревожная, вдохновляющая
-- Не используй общие слова вроде "AI technology" или "digital art"
-- Промпт должен быть конкретным и визуальным
-- Если пост получился меньше 600 символов,то перепиши и добавь своё мнение,для увеличения длины поста на 600 символов
+СТРУКТУРА ПОСТА (600-1000 символов):
+1. ЗАГОЛОВОК: яркий, интригующий, с эмодзи (до 10 слов)
+2. ВСТУПЛЕНИЕ: вопрос или неожиданный факт (1-2 предложения)
+3. ОСНОВНАЯ ЧАСТЬ: твой анализ, мнение, контекст, прогнозы (3-5 абзацев)
+4. ВЫВОД: чёткая мысль или призыв к действию (1-2 предложения)
+5. ХЕШТЕГИ: 2-3 шт
+6. ПРОМПТ_ДЛЯ_КАРТИНКИ: 30-50 слов на английском
 
-Пример хорошего промпта:
-"A futuristic server room with glowing blue data streams, a human silhouette standing in the center, dramatic backlighting, cool neon tones, cinematic wide shot, 4K, photorealistic"
+ВАЖНО! Если пост получился короче 600 символов — перепиши его СНОВА, добавив больше анализа и контента.
 
-Формат ответа:
-ЗАГОЛОВОК: [короткий, до 10 слов, с эмодзи, интригующий,больше эмодзи,очень ярко]
-ВСТУПЛЕНИЕ: [1–2 предложения, ввод в тему, суть]
-ОСНОВНОЙ ТЕКСТ: [3–5 абзацев, факты + мнение + контекст + прогноз]
-ВЫВОД: [1–2 предложения, чёткая мысль]
-ХЕШТЕГИ: [2–3 хештега]
-ПРОМПТ_ДЛЯ_КАРТИНКИ: [промпт на английском, 30-50 слов]
-ВАЖНО!!! ОЧЕНЬ ВАЖНО !!! [Длина поста: не меньше 600–1000 символов.]"""
+ФОРМАТ ОТВЕТА:
+ЗАГОЛОВОК: [текст]
+ВСТУПЛЕНИЕ: [текст]
+ОСНОВНОЙ ТЕКСТ: [текст]
+ВЫВОД: [текст]
+ХЕШТЕГИ: [текст]
+ПРОМПТ_ДЛЯ_КАРТИНКИ: [текст]"""
 
     payload = {
         "model": "deepseek-chat",
@@ -502,17 +514,18 @@ async def rewrite_post(news, context):
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": f"Новость из {news['source']}:\nЗаголовок: {news['title']}\nТекст: {content_for_ai}"}
         ],
-        "temperature": 0.4,
+        "temperature": 0.7,
         "top_p": 0.9,
-        "max_tokens": 1500
+        "max_tokens": 2000
     }
     
     try:
-        response = requests.post(url, headers=headers, json=payload, timeout=45)
+        response = requests.post(url, headers=headers, json=payload, timeout=60)
         response.raise_for_status()
         result = response.json()
         content = result["choices"][0]["message"]["content"]
         
+        # Парсим ответ
         post_data = {
             "title": "",
             "intro": "",
@@ -537,14 +550,10 @@ async def rewrite_post(news, context):
             elif line.startswith("ПРОМПТ_ДЛЯ_КАРТИНКИ:"):
                 post_data["image_prompt"] = line.replace("ПРОМПТ_ДЛЯ_КАРТИНКИ:", "").strip()
         
-        if not post_data["title"]:
-            post_data["title"] = f"🤖 {news['title'][:50]}"
-        if not post_data["image_prompt"]:
-            post_data["image_prompt"] = f"Futuristic technology scene, digital innovation, cinematic lighting, 4K, high detail"
-        
+        # Собираем пост
         full_post = f"{post_data['title']}\n\n"
         if post_data["intro"]:
-            full_post += f"*{post_data['intro']}*\n\n"
+            full_post += f"{post_data['intro']}\n\n"
         if post_data["main_text"]:
             full_post += f"{post_data['main_text']}\n\n"
         if post_data["conclusion"]:
@@ -552,11 +561,118 @@ async def rewrite_post(news, context):
         if post_data["hashtags"]:
             full_post += f"{post_data['hashtags']}"
         
+        # Проверяем длину поста
+        post_length = len(full_post.strip())
+        await send_log(f"📏 Длина поста: {post_length} символов", context)
+        
+        # Если пост короче 600 символов — отправляем второй запрос на расширение
+        if post_length < 600:
+            await send_log(f"⚠️ Пост слишком короткий ({post_length} символов), отправляю запрос на расширение...", context)
+            
+            expand_prompt = f"""Этот пост получился слишком коротким ({post_length} символов). Нужно минимум 600 символов.
+
+    Расширь этот пост: добавь больше анализа, контекста, прогнозов, примеров, личного мнения. Если нужно — дополни своими знаниями.
+
+    Текущий пост:
+    {full_post}
+
+    Напиши расширенную версию этого же поста (минимум 600 символов). Сохрани структуру и стиль."""
+
+            payload_expand = {
+                "model": "deepseek-chat",
+                "messages": [
+                    {"role": "system", "content": "Ты — автор Telegram-канала. Расширь пост до минимум 600 символов. Добавь анализ, контекст, прогнозы, личное мнение. Сохрани стиль."},
+                    {"role": "user", "content": expand_prompt}
+                ],
+                "temperature": 0.7,
+                "max_tokens": 2000
+            }
+            
+            try:
+                response_expand = requests.post(url, headers=headers, json=payload_expand, timeout=60)
+                response_expand.raise_for_status()
+                result_expand = response_expand.json()
+                expanded_content = result_expand["choices"][0]["message"]["content"].strip()
+                
+                # Парсим расширенный ответ
+                expanded_data = {
+                    "title": "",
+                    "intro": "",
+                    "main_text": "",
+                    "conclusion": "",
+                    "hashtags": "",
+                    "image_prompt": ""
+                }
+                
+                for line in expanded_content.split('\n'):
+                    line = line.strip()
+                    if line.startswith("ЗАГОЛОВОК:"):
+                        expanded_data["title"] = line.replace("ЗАГОЛОВОК:", "").strip()
+                    elif line.startswith("ВСТУПЛЕНИЕ:"):
+                        expanded_data["intro"] = line.replace("ВСТУПЛЕНИЕ:", "").strip()
+                    elif line.startswith("ОСНОВНОЙ ТЕКСТ:"):
+                        expanded_data["main_text"] = line.replace("ОСНОВНОЙ ТЕКСТ:", "").strip()
+                    elif line.startswith("ВЫВОД:"):
+                        expanded_data["conclusion"] = line.replace("ВЫВОД:", "").strip()
+                    elif line.startswith("ХЕШТЕГИ:"):
+                        expanded_data["hashtags"] = line.replace("ХЕШТЕГИ:", "").strip()
+                    elif line.startswith("ПРОМПТ_ДЛЯ_КАРТИНКИ:"):
+                        expanded_data["image_prompt"] = line.replace("ПРОМПТ_ДЛЯ_КАРТИНКИ:", "").strip()
+                
+                # Если не удалось распарсить расширенный ответ - используем старый
+                if expanded_data["main_text"]:
+                    post_data = expanded_data
+                    full_post = f"{post_data['title']}\n\n"
+                    if post_data["intro"]:
+                        full_post += f"{post_data['intro']}\n\n"
+                    if post_data["main_text"]:
+                        full_post += f"{post_data['main_text']}\n\n"
+                    if post_data["conclusion"]:
+                        full_post += f"📌 {post_data['conclusion']}\n\n"
+                    if post_data["hashtags"]:
+                        full_post += f"{post_data['hashtags']}"
+                    
+                    await send_log(f"✅ Пост расширен до {len(full_post.strip())} символов", context)
+                else:
+                    # Если не удалось распарсить - добавляем свой анализ
+                    post_data["main_text"] += "\n\nМне кажется, эта тема очень важна для понимания того, куда движется технологический мир. Мы видим, как меняются подходы и открываются новые возможности. Важно быть в курсе, чтобы не отставать."
+                    full_post = f"{post_data['title']}\n\n"
+                    if post_data["intro"]:
+                        full_post += f"{post_data['intro']}\n\n"
+                    if post_data["main_text"]:
+                        full_post += f"{post_data['main_text']}\n\n"
+                    if post_data["conclusion"]:
+                        full_post += f"📌 {post_data['conclusion']}\n\n"
+                    if post_data["hashtags"]:
+                        full_post += f"{post_data['hashtags']}"
+                    await send_log(f"➕ Добавлен анализ, длина: {len(full_post.strip())} символов", context)
+                    
+            except Exception as e:
+                await send_log(f"⚠️ Ошибка расширения поста: {e}", context, is_error=True)
+                # Добавляем свой анализ к короткому посту
+                post_data["main_text"] += "\n\nМне кажется, эта тема очень важна для понимания того, куда движется технологический мир. Мы видим, как меняются подходы и открываются новые возможности. Важно быть в курсе, чтобы не отставать."
+                full_post = f"{post_data['title']}\n\n"
+                if post_data["intro"]:
+                    full_post += f"{post_data['intro']}\n\n"
+                if post_data["main_text"]:
+                    full_post += f"{post_data['main_text']}\n\n"
+                if post_data["conclusion"]:
+                    full_post += f"📌 {post_data['conclusion']}\n\n"
+                if post_data["hashtags"]:
+                    full_post += f"{post_data['hashtags']}"
+        
+        if not post_data["title"]:
+            post_data["title"] = f"🤖 {news['title'][:50]}"
+        if not post_data["image_prompt"]:
+            post_data["image_prompt"] = f"Futuristic technology scene, digital innovation, cinematic lighting, 4K, high detail"
+        if not post_data["hashtags"]:
+            post_data["hashtags"] = "#AI #Tech #Innovation"
+        
         if len(full_post.strip()) < 300:
             await send_log(f"⚠️ Пост слишком короткий ({len(full_post)} символов), пропускаем", context, is_error=True)
             return None, None, None
         
-        await send_log(f"✅ Рерайт готов ({len(full_post)} символов)", context)
+        await send_log(f"✅ Пост готов ({len(full_post)} символов)", context)
         await send_log(f"🎨 Промпт для картинки: {post_data['image_prompt'][:80]}...", context)
         
         return full_post, post_data["title"], post_data["image_prompt"]
@@ -895,15 +1011,18 @@ async def status_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     total_posts = c.fetchone()[0]
     c.execute("SELECT COUNT(*) FROM posts WHERE DATE(published_at) = DATE('now')")
     today_posts = c.fetchone()[0]
-    c.execute("SELECT COUNT(*) FROM logs WHERE DATE(created_at) = DATE('now') AND log_type = 'error'")
-    today_errors = c.fetchone()[0]
+    c.execute("SELECT COUNT(*) FROM posts WHERE status = 'published'")
+    published_posts = c.fetchone()[0]
     c.execute("SELECT COUNT(*) FROM posts WHERE status = 'pending'")
     pending_posts = c.fetchone()[0]
+    c.execute("SELECT COUNT(*) FROM logs WHERE DATE(created_at) = DATE('now') AND log_type = 'error'")
+    today_errors = c.fetchone()[0]
     conn.close()
     
     status_text = f"📊 **Статистика**\n\n"
     status_text += f"📰 Всего постов: {total_posts}\n"
     status_text += f"📆 Сегодня: {today_posts}\n"
+    status_text += f"✅ Опубликовано: {published_posts}\n"
     status_text += f"⏳ Ожидают модерации: {pending_posts}\n"
     status_text += f"❌ Ошибок сегодня: {today_errors}\n"
     status_text += f"📡 Источников: {len(RSS_FEEDS)}\n"
@@ -933,6 +1052,7 @@ if __name__ == "__main__":
     print("="*60)
     
     init_db()
+    clean_old_posts(7)  # Удаляем посты старше 7 дней при запуске
     
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
     
@@ -950,10 +1070,10 @@ if __name__ == "__main__":
     print("✅ Бот запущен")
     print("📌 Логи отправляются в Telegram и консоль")
     print("📌 Модерация — через кнопки в личке")
-    print("📌 Настройки API: temperature=0.4, top_p=0.9")
-    print("📌 Посты короче 300 символов пропускаются")
-    print("📌 Картинка генерируется через free-nano-banana-2 (60 попыток, ~3 минуты)")
+    print("📌 Посты: минимум 600 символов (автоматическое расширение)")
+    print("📌 Картинка генерируется через free-nano-banana-2 (60 попыток)")
     print("📌 Автопубликация через 1 час, если нет ответа")
+    print("📌 Старые посты удаляются через 7 дней")
     print("📌 Источники: RSS + NewsAPI + BeautifulSoup парсинг статей")
     print("="*60 + "\n")
     
