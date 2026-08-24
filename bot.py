@@ -916,26 +916,47 @@ async def publish_post(context, title, post_text):
             await send_log("❌ Нет поста для публикации", context, is_error=True)
             return
     
-    post_id, db_title, db_content, image_prompt, image_url = post
+    post_id, db_title, db_content, image_prompt, image_url_from_db = post
     
-    if not image_url:
-        if image_prompt:
-            await send_log(f"🎨 Генерация картинки по промпту...", context)
-            image_url = await generate_image_odirouter(image_prompt, context)
-        else:
-            image_url = get_placeholder_image()
-            await send_log("🔄 Промпта нет, использую заглушку", context)
-        
-        if image_url:
-            update_post_image(post_id, image_url)
-        else:
-            image_url = get_placeholder_image()
-            await send_log("🔄 Использую картинку-заглушку", context)
+    # ========== ПЫТАЕМСЯ СГЕНЕРИРОВАТЬ НОВУЮ КАРТИНКУ ==========
+    new_image_url = None
+    generation_success = False
     
+    if image_prompt:
+        await send_log(f"🎨 Пытаюсь сгенерировать НОВУЮ картинку по промпту...", context)
+        try:
+            new_image_url = await generate_image_odirouter(image_prompt, context)
+            if new_image_url:
+                generation_success = True
+                await send_log(f"  ✅ Новая картинка успешно сгенерирована", context)
+                # Сохраняем новую картинку в БД
+                update_post_image(post_id, new_image_url)
+            else:
+                await send_log(f"  ⚠️ Генерация не удалась (вернула None)", context, is_error=True)
+        except Exception as e:
+            await send_log(f"  ⚠️ Ошибка генерации: {e}", context, is_error=True)
+    else:
+        await send_log(f"🔄 Промпта нет, генерация невозможна", context)
+    
+    # ========== ВЫБИРАЕМ КАРТИНКУ ДЛЯ ПУБЛИКАЦИИ ==========
+    if generation_success and new_image_url:
+        # Используем новую картинку
+        image_url_to_use = new_image_url
+        await send_log(f"📸 Использую СВЕЖЕСГЕНЕРИРОВАННУЮ картинку", context)
+    elif image_url_from_db and image_url_from_db != get_placeholder_image():
+        # Если генерация не удалась, но есть картинка в БД — используем её
+        image_url_to_use = image_url_from_db
+        await send_log(f"🔄 Генерация не удалась, использую сохранённую картинку из БД (заглушка не считается)", context)
+    else:
+        # Если ничего нет — используем заглушку
+        image_url_to_use = get_placeholder_image()
+        await send_log(f"🔄 Нет доступных картинок, использую заглушку", context)
+    
+    # ========== ПУБЛИКАЦИЯ ==========
     try:
-        if image_url and image_url != get_placeholder_image():
+        if image_url_to_use and image_url_to_use != get_placeholder_image():
             try:
-                response = requests.get(image_url, timeout=30)
+                response = requests.get(image_url_to_use, timeout=30)
                 if response.status_code == 200:
                     image_path = "temp_publish.jpg"
                     with open(image_path, "wb") as f:
@@ -945,9 +966,12 @@ async def publish_post(context, title, post_text):
                     os.remove(image_path)
                     await send_log(f"✅ Пост опубликован с картинкой", context)
                     return
+                else:
+                    await send_log(f"⚠️ Не удалось скачать картинку (статус {response.status_code})", context, is_error=True)
             except Exception as e:
                 await send_log(f"⚠️ Ошибка отправки картинки: {e}", context, is_error=True)
         
+        # Если не удалось отправить с картинкой - отправляем текст
         await context.bot.send_message(chat_id=CHANNEL_ID, text=post_text)
         await send_log(f"✅ Пост опубликован без картинки", context)
         
