@@ -136,24 +136,6 @@ def get_post_by_id(post_id):
     conn.close()
     return result
 
-def is_post_exists(link, title=None):
-    """Проверяет, существует ли пост с такой ссылкой или похожим заголовком"""
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    
-    # Проверяем по ссылке (точное совпадение)
-    c.execute("SELECT id FROM posts WHERE link = ?", (link,))
-    result = c.fetchone()
-    
-    if not result and title:
-        # Проверяем по заголовку (первые 5 слов)
-        title_keywords = ' '.join(title.split()[:5])
-        c.execute("SELECT id FROM posts WHERE title LIKE ?", (f'%{title_keywords}%',))
-        result = c.fetchone()
-    
-    conn.close()
-    return result is not None
-
 def clean_old_posts(days=7):
     """Удаляет посты старше указанного количества дней"""
     conn = sqlite3.connect(DB_PATH)
@@ -176,7 +158,102 @@ def get_placeholder_image():
     return "https://via.placeholder.com/1280x720/1a1a2e/ffffff?text=AI+News"
 
 # ==========================================
-# 4. ПАРСИНГ ПОЛНОЙ СТАТЬИ (BeautifulSoup)
+# 4. УЛУЧШЕННАЯ ПРОВЕРКА ДУБЛИКАТОВ
+# ==========================================
+
+def get_all_titles_and_summaries():
+    """Возвращает все заголовки и описания из базы"""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT title, content FROM posts")
+    result = c.fetchall()
+    conn.close()
+    return result
+
+def is_similar_text(text1, text2):
+    """Проверяет, похожи ли два текста (по общим словам)"""
+    if not text1 or not text2:
+        return False
+    
+    # Стоп-слова (игнорируем при сравнении)
+    stop_words = {
+        'the', 'a', 'an', 'to', 'for', 'of', 'on', 'at', 'from', 'by', 
+        'in', 'with', 'without', 'and', 'or', 'but', 'for', 'of', 'the',
+        'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has',
+        'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should',
+        'may', 'might', 'must', 'shall', 'can', 'this', 'that', 'these',
+        'those', 'then', 'than', 'so', 'too', 'very', 'just', 'now'
+    }
+    
+    # Разбиваем на слова и убираем стоп-слова
+    words1 = set(text1.lower().split())
+    words2 = set(text2.lower().split())
+    
+    words1 = {w for w in words1 if w not in stop_words and len(w) > 3}
+    words2 = {w for w in words2 if w not in stop_words and len(w) > 3}
+    
+    if not words1 or not words2:
+        return False
+    
+    # Считаем общие слова
+    common = words1.intersection(words2)
+    
+    # Если больше 35% общих слов — считаем дубликатом
+    similarity = len(common) / max(len(words1), len(words2))
+    return similarity > 0.35
+
+def is_post_exists(link, title=None, summary=None):
+    """Проверяет, существует ли похожий пост"""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    
+    # 1. Проверяем по ссылке (точное совпадение)
+    c.execute("SELECT id FROM posts WHERE link = ?", (link,))
+    result = c.fetchone()
+    
+    if not result and title:
+        # 2. Проверяем по заголовку (первые 7 слов)
+        title_keywords = ' '.join(title.split()[:7])
+        c.execute("SELECT id, title, content FROM posts WHERE title LIKE ?", (f'%{title_keywords}%',))
+        results = c.fetchall()
+        
+        for post_id, existing_title, existing_summary in results:
+            # Проверяем схожесть заголовков
+            if is_similar_text(title, existing_title):
+                result = True
+                break
+            # Проверяем схожесть с summary (если есть)
+            if summary and existing_summary and is_similar_text(summary, existing_summary):
+                result = True
+                break
+    
+    conn.close()
+    return result is not None
+
+def remove_similar_posts():
+    """Удаляет похожие посты (оставляет первый)"""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    
+    # Получаем все посты
+    c.execute("SELECT id, title FROM posts ORDER BY id")
+    posts = c.fetchall()
+    
+    deleted = 0
+    for i, (id1, title1) in enumerate(posts):
+        for id2, title2 in posts[i+1:]:
+            if is_similar_text(title1, title2):
+                c.execute("DELETE FROM posts WHERE id = ?", (id2,))
+                deleted += 1
+                break
+    
+    conn.commit()
+    conn.close()
+    print(f"🧹 Удалено похожих дубликатов: {deleted}")
+    return deleted
+
+# ==========================================
+# 5. ПАРСИНГ ПОЛНОЙ СТАТЬИ (BeautifulSoup)
 # ==========================================
 def fetch_full_article(url):
     """Парсит полный текст статьи по ссылке с помощью BeautifulSoup"""
@@ -229,7 +306,7 @@ def fetch_full_article(url):
         article_content = re.sub(r'\s+', ' ', article_content)
         article_content = re.sub(r'\n+', '\n', article_content)
         
-        # Ограничиваем длину до 1500 символов (чтобы DeepSeek не пересказывал)
+        # Ограничиваем длину до 1500 символов
         if len(article_content) > 1500:
             article_content = article_content[:1500]
         
@@ -240,7 +317,7 @@ def fetch_full_article(url):
         return None
 
 # ==========================================
-# 5. ЛОГГЕР
+# 6. ЛОГГЕР
 # ==========================================
 async def send_log(message, context=None, is_error=False, send_to_admin=True):
     timestamp = datetime.now().strftime("%H:%M:%S")
@@ -258,7 +335,7 @@ async def send_log(message, context=None, is_error=False, send_to_admin=True):
             print(f"⚠️ Не удалось отправить лог в Telegram: {e}")
 
 # ==========================================
-# 6. ПАРСИНГ NEWSAPI
+# 7. ПАРСИНГ NEWSAPI
 # ==========================================
 def fetch_newsapi_news():
     """Парсит новости из NewsAPI"""
@@ -291,8 +368,12 @@ def fetch_newsapi_news():
                     if not article.get('description') or len(article['description']) < 50:
                         continue
                     
-                    # Проверяем на дубликаты (по ссылке и по заголовку)
-                    if is_post_exists(article.get('url', ''), article.get('title', '')):
+                    # Проверяем на дубликаты
+                    if is_post_exists(
+                        article.get('url', ''), 
+                        article.get('title', ''), 
+                        article.get('description', '')
+                    ):
                         continue
                     
                     news_list.append({
@@ -311,7 +392,7 @@ def fetch_newsapi_news():
     return news_list
 
 # ==========================================
-# 7. ПАРСИНГ НОВОСТЕЙ (RSS + NewsAPI)
+# 8. ПАРСИНГ НОВОСТЕЙ (RSS + NewsAPI)
 # ==========================================
 async def fetch_news(context):
     await send_log("🔍 Начинаю парсинг новостей...", context)
@@ -334,10 +415,6 @@ async def fetch_news(context):
             for entry in feed.entries[:5]:
                 link = entry.link
                 
-                # Проверяем на дубликаты (по ссылке и по заголовку)
-                if is_post_exists(link, entry.title):
-                    continue
-                
                 summary = ""
                 if hasattr(entry, 'summary') and entry.summary:
                     summary = entry.summary[:800]
@@ -351,6 +428,10 @@ async def fetch_news(context):
                 
                 if not summary or len(summary) < 30:
                     summary = ""
+                
+                # Проверяем на дубликаты (по ссылке, заголовку и описанию)
+                if is_post_exists(link, entry.title, summary):
+                    continue
                 
                 all_news.append({
                     "title": entry.title,
@@ -371,7 +452,7 @@ async def fetch_news(context):
     return all_news[:15]
 
 # ==========================================
-# 8. ВЫБОР ЛУЧШЕЙ НОВОСТИ
+# 9. ВЫБОР ЛУЧШЕЙ НОВОСТИ
 # ==========================================
 async def select_best_news(news_list, context):
     if not news_list:
@@ -443,7 +524,7 @@ async def select_best_news(news_list, context):
         return news_list[0]
 
 # ==========================================
-# 9. РЕРАЙТ ПОСТА + ГЕНЕРАЦИЯ ПРОМПТА ДЛЯ КАРТИНКИ
+# 10. РЕРАЙТ ПОСТА + ГЕНЕРАЦИЯ ПРОМПТА ДЛЯ КАРТИНКИ
 # ==========================================
 async def rewrite_post(news, context):
     await send_log(f"✍️ Создание авторского поста...", context)
@@ -491,7 +572,7 @@ async def rewrite_post(news, context):
 - Если не хватает информации — ДОПОЛНИ своими знаниями
 
 СТРУКТУРА ПОСТА (600-1000 символов):
-1. ЗАГОЛОВОК: яркий, интригующий, с эмодзи (до 10 слов)
+1. ЗАГОЛОВОК: очень яркий, заглавными буквами, интригующий, с много эмодзи (до 10 слов)
 2. ВСТУПЛЕНИЕ: вопрос или неожиданный факт (1-2 предложения)
 3. ОСНОВНАЯ ЧАСТЬ: твой анализ, мнение, контекст, прогнозы (3-5 абзацев)
 4. ВЫВОД: чёткая мысль или призыв к действию (1-2 предложения)
@@ -683,7 +764,7 @@ async def rewrite_post(news, context):
         return None, None, None
 
 # ==========================================
-# 10. ГЕНЕРАЦИЯ КАРТИНКИ (free-nano-banana-2) — 60 попыток
+# 11. ГЕНЕРАЦИЯ КАРТИНКИ (free-nano-banana-2) — 60 попыток
 # ==========================================
 async def generate_image_odirouter(prompt, context):
     """Генерирует картинку через free-nano-banana-2 (бесплатно)"""
@@ -700,7 +781,7 @@ async def generate_image_odirouter(prompt, context):
     
     payload = {
         "prompt": prompt,
-        "aspect_ratio": "9:16",
+        "aspect_ratio": "16:9",
         "resolution": "1K"
     }
     
@@ -753,7 +834,7 @@ async def generate_image_odirouter(prompt, context):
         return None
 
 # ==========================================
-# 11. МОДЕРАЦИЯ + АВТОПУБЛИКАЦИЯ ЧЕРЕЗ 1 ЧАС
+# 12. МОДЕРАЦИЯ + АВТОПУБЛИКАЦИЯ
 # ==========================================
 async def send_for_moderation(context, news, post_text, title, image_prompt, justification):
     saved = save_post(title, news['link'], post_text, image_prompt)
@@ -792,7 +873,7 @@ async def send_for_moderation(context, news, post_text, title, image_prompt, jus
 📊 **Обоснование выбора:**
 {justification}
 
-⏳ **Автопубликация через 1 час, если не ответить**
+⏳ **Автопубликация через 10 минут, если не ответить**
 
 ---
 ✅ Опубликовать
@@ -811,12 +892,12 @@ async def send_for_moderation(context, news, post_text, title, image_prompt, jus
     
     await context.bot.send_message(chat_id=ADMIN_ID, text=message_text, reply_markup=reply_markup)
     
-    # Запускаем таймер автопубликации через 1 час
+    # Запускаем таймер автопубликации через 10 минут
     asyncio.create_task(auto_publish_after_timeout(context, post_id, title, post_text))
 
 async def auto_publish_after_timeout(context, post_id, title, post_text):
-    """Автопубликация через 1 час, если пост всё ещё pending"""
-    await asyncio.sleep(3600)  # 1 час
+    """Автопубликация через 10 минут, если пост всё ещё pending"""
+    await asyncio.sleep(600)  # 10 минут
     
     # Проверяем статус поста
     post = get_post_by_id(post_id)
@@ -824,12 +905,12 @@ async def auto_publish_after_timeout(context, post_id, title, post_text):
         return
     
     if post[5] == 'pending':  # status = pending
-        await send_log(f"⏰ Автопубликация поста #{post_id} (таймаут 1 час)", context)
+        await send_log(f"⏰ Автопубликация поста #{post_id} (таймаут 10 минут)", context)
         update_post_status(post_id, 'published')
         await publish_post(context, title, post_text)
 
 # ==========================================
-# 12. ПУБЛИКАЦИЯ С КАРТИНКОЙ
+# 13. ПУБЛИКАЦИЯ С КАРТИНКОЙ
 # ==========================================
 async def publish_post(context, title, post_text):
     await send_log(f"📤 Публикация поста в канал...", context)
@@ -881,7 +962,7 @@ async def publish_post(context, title, post_text):
         await send_log(error_msg, context, is_error=True)
 
 # ==========================================
-# 13. ОСНОВНОЙ ЦИКЛ
+# 14. ОСНОВНОЙ ЦИКЛ
 # ==========================================
 async def prepare_and_moderate(context: ContextTypes.DEFAULT_TYPE):
     await send_log("="*50, context)
@@ -924,7 +1005,7 @@ async def prepare_and_moderate(context: ContextTypes.DEFAULT_TYPE):
         await send_log(error_msg, context, is_error=True)
 
 # ==========================================
-# 14. ОБРАБОТЧИКИ КНОПОК
+# 15. ОБРАБОТЧИКИ КНОПОК
 # ==========================================
 async def moderation_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -979,7 +1060,7 @@ async def moderation_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
         await prepare_and_moderate(context)
 
 # ==========================================
-# 15. КОМАНДЫ TELEGRAM
+# 16. КОМАНДЫ TELEGRAM
 # ==========================================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
@@ -991,7 +1072,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "🤖 **AI News Bot**\n\n"
         "Автоматический сбор и публикация AI-новостей с модерацией.\n"
-        f"📡 Посты выходят каждые 4 часа\n"
+        f"📡 Посты выходят каждые 3 часа\n"
         f"📌 Канал: {CHANNEL_ID}\n\n"
         "📌 Команды:\n"
         "/post — принудительный запуск цикла\n"
@@ -1026,7 +1107,7 @@ async def status_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     status_text += f"⏳ Ожидают модерации: {pending_posts}\n"
     status_text += f"❌ Ошибок сегодня: {today_errors}\n"
     status_text += f"📡 Источников: {len(RSS_FEEDS)}\n"
-    status_text += f"⏱️ Интервал: 4 часа\n"
+    status_text += f"⏱️ Интервал: 3 часа\n"
     status_text += f"📌 Канал: {CHANNEL_ID}"
     
     await update.message.reply_text(status_text)
@@ -1044,7 +1125,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await moderation_callback(update, context)
 
 # ==========================================
-# 16. ЗАПУСК
+# 17. ЗАПУСК
 # ==========================================
 if __name__ == "__main__":
     print("\n" + "="*60)
@@ -1052,7 +1133,8 @@ if __name__ == "__main__":
     print("="*60)
     
     init_db()
-    clean_old_posts(7)  # Удаляем посты старше 7 дней при запуске
+    clean_old_posts(7)  # Удаляем посты старше 7 дней
+    remove_similar_posts()  # Удаляем похожие дубликаты
     
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
     
@@ -1063,8 +1145,8 @@ if __name__ == "__main__":
     
     job_queue = app.job_queue
     if job_queue:
-        job_queue.run_repeating(prepare_and_moderate, interval=14400, first=10)
-        print("📡 Автопостинг: включён (интервал 4 часа)")
+        job_queue.run_repeating(prepare_and_moderate, interval=10800, first=10)
+        print("📡 Автопостинг: включён (интервал 3 часа)")
     
     print("="*60)
     print("✅ Бот запущен")
@@ -1072,7 +1154,7 @@ if __name__ == "__main__":
     print("📌 Модерация — через кнопки в личке")
     print("📌 Посты: минимум 600 символов (автоматическое расширение)")
     print("📌 Картинка генерируется через free-nano-banana-2 (60 попыток)")
-    print("📌 Автопубликация через 1 час, если нет ответа")
+    print("📌 Автопубликация через 10 минут, если нет ответа")
     print("📌 Старые посты удаляются через 7 дней")
     print("📌 Источники: RSS + NewsAPI + BeautifulSoup парсинг статей")
     print("="*60 + "\n")
