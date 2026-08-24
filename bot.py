@@ -164,14 +164,11 @@ def fetch_full_article(url):
         
         soup = BeautifulSoup(response.content, 'html.parser')
         
-        # Удаляем скрипты и стили
         for script in soup(["script", "style"]):
             script.decompose()
         
-        # Ищем основной контент
         article_content = ""
         
-        # Пробуем найти статью по разным селекторам
         selectors = [
             'article',
             '.article-content',
@@ -202,6 +199,7 @@ def fetch_full_article(url):
         article_content = re.sub(r'\s+', ' ', article_content)
         article_content = re.sub(r'\n+', '\n', article_content)
         
+        # Оставляем полную статью (до 3000 символов)
         if len(article_content) > 3000:
             article_content = article_content[:3000]
         
@@ -382,7 +380,7 @@ async def rewrite_post(news, context):
     await send_log(f"✍️ Создание авторской колонки...", context)
     
     # Парсим полную статью
-    await send_log(f"📄 Парсинг материала...", context)
+    await send_log(f"📄 Парсинг полной статьи...", context)
     full_content = fetch_full_article(news['link'])
     
     if not full_content or len(full_content) < 200:
@@ -393,7 +391,7 @@ async def rewrite_post(news, context):
             await send_log(f"❌ Недостаточно контента для создания колонки", context, is_error=True)
             return None, None, None
     
-    await send_log(f"✅ Собрано {len(full_content)} символов материала", context)
+    await send_log(f"✅ Спарсено {len(full_content)} символов", context)
     
     url = "https://api.deepseek.com/v1/chat/completions"
     headers = {
@@ -401,52 +399,60 @@ async def rewrite_post(news, context):
         "Content-Type": "application/json"
     }
     
-    system_prompt = """Ты — автор экспертного Telegram-канала о технологиях, AI и инновациях. Твоя аудитория — люди, которые хотят понимать, что происходит в мире технологий, и как это влияет на их жизнь.
+    system_prompt = """Ты — независимый журналист и автор Telegram-канала о технологиях.
 
-Ты пишешь как живой человек, а не как новостной агрегатор. У тебя есть своё мнение, стиль и голос.
+Твоя задача: написать авторскую колонку (600-800 символов) на основе текста ниже.
 
-Правила:
-1. Начни с сути: сразу скажи, что произошло и почему это важно
-2. Добавь контекст: что было до этого, что изменилось сейчас
-3. Дай свою оценку: что ты думаешь об этом, почему это хорошо/плохо/интересно
-4. Сделай прогноз: что будет дальше, как это повлияет на рынок или обычных людей
-5. Пиши живым языком: короткие предложения, эмодзи, вопросы к читателю
-6. Не используй кликбейт и пустые фразы
-7. Если упоминаются люди или компании — дай короткую справку (кто это, чем известны)
+ЖЁСТКИЕ ПРАВИЛА:
+1. НЕ пересказывай текст — только твой анализ и мнение
+2. НЕ упоминай источники, СМИ, компании, сайты
+3. НЕ используй фразы: "согласно", "как сообщает", "по данным", "компания заявила"
+4. Пиши как человек, а не как новостной агрегатор
+5. Пост должен быть 600-800 символов
 
-Важно: В конце ответа ты должен сгенерировать промпт для генерации картинки через AI.
-Промпт должен быть на английском языке, содержать 30-50 слов.
-Опиши визуальную сцену, которая отражает суть поста.
+СТРУКТУРА ПОСТА:
+1. Заголовок: интрига, до 8 слов, с эмодзи (80-100 символов)
+2. Вступление: вопрос к читателю или неожиданный факт (100-150 символов)
+3. Основная часть: твой анализ, прогнозы, личное мнение (300-400 символов)
+4. Вывод: чёткая мысль, призыв или прогноз (80-100 символов)
+5. Хештеги: 2-3 шт (40-60 символов)
 
-Требования к промпту:
-- Укажи стиль: cinematic, photorealistic, futuristic, minimal, vibrant
-- Добавь детали: объекты, люди, цвета, освещение, ракурс
-- Передай атмосферу: энергичная, спокойная, тревожная, вдохновляющая
-- Не используй общие слова вроде "AI technology" или "digital art"
-- Промпт должен быть конкретным и визуальным
+ИТОГО: 600-800 символов
 
-Пример хорошего промпта:
-"A futuristic server room with glowing blue data streams, a human silhouette standing in the center, dramatic backlighting, cool neon tones, cinematic wide shot, 4K, photorealistic"
+ПРИМЕР ХОРОШЕГО ПОСТА:
+"🤯 OpenAI развернулась на 180°: теперь сама просит усилить закон об ИИ
 
-Формат ответа:
-ЗАГОЛОВОК: [короткий, до 10 слов, с эмодзи, интригующий]
-ВСТУПЛЕНИЕ: [1–2 предложения, ввод в тему, суть]
-ОСНОВНОЙ ТЕКСТ: [3–5 абзацев, факты + мнение + контекст + прогноз]
-ВЫВОД: [1–2 предложения, чёткая мысль]
-ХЕШТЕГИ: [2–3 хештега]
-ПРОМПТ_ДЛЯ_КАРТИНКИ: [промпт на английском, 30-50 слов]
+Помните, как в прошлом году все обсуждали, что OpenAI лоббирует против регулирования? Так вот — сценарий сменился. Компания, которая ещё недавно сопротивлялась, теперь публично просит Калифорнию сделать закон об ИИ жёстче. Что-то пошло не так? Или наоборот — всё идёт по плану?
 
-Длина поста: 600–1000 символов."""
+Я вижу в этом развороте три причины. Первая: OpenAI поняла, что регулирование неизбежно, и хочет участвовать в его создании. Вторая: это способ отсечь мелких конкурентов. Третья: компания готовится к выходу на IPO.
 
+Мне кажется, это очень умный ход. Когда большие игроки просят правил — они просят их для других, а не для себя.
+
+#AI #OpenAI #Regulation"
+
+ФОРМАТ ОТВЕТА (строго):
+ЗАГОЛОВОК: [текст]
+ТЕКСТ: [текст на 600-800 символов]
+ХЕШТЕГИ: [теги]"""
+
+    user_message = f"""Прочитай этот текст и напиши авторскую колонку (600-800 символов):
+
+{full_content}
+
+Помни: НЕ пересказывай текст. Только твой анализ, мнение и прогнозы. Ты — независимый журналист."""
+
+    if len(user_message) > 6000:
+        user_message = user_message[:6000]
+    
     payload = {
         "model": "deepseek-chat",
         "messages": [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": f"Напиши колонку на тему: {news['title']}\n\nИнформация для размышления: {full_content[:1000]}"}
+            {"role": "user", "content": user_message}
         ],
         "temperature": 0.85,
         "top_p": 0.9,
-        "max_tokens": 2000
+        "max_tokens": 2500
     }
     
     try:
@@ -473,8 +479,8 @@ async def rewrite_post(news, context):
             if line.startswith("ЗАГОЛОВОК:"):
                 post_data["title"] = line.replace("ЗАГОЛОВОК:", "").strip()
                 current_section = "text"
-            elif line.startswith("ТЕКСТ_ПОСТА:"):
-                post_data["text"] = line.replace("ТЕКСТ_ПОСТА:", "").strip()
+            elif line.startswith("ТЕКСТ:"):
+                post_data["text"] = line.replace("ТЕКСТ:", "").strip()
                 current_section = "text"
             elif line.startswith("ХЕШТЕГИ:"):
                 post_data["hashtags"] = line.replace("ХЕШТЕГИ:", "").strip()
@@ -489,36 +495,57 @@ async def rewrite_post(news, context):
                     else:
                         post_data["text"] = line
         
-        # Проверяем и обрезаем текст до 1000 символов
-        if post_data["text"]:
-            post_data["text"] = re.sub(r'\s+', ' ', post_data["text"])
+        # Проверяем и корректируем длину
+        forbidden_phrases = [
+            "согласно источнику", "как сообщает", "по данным",
+            "компания заявила", "в статье говорится", "источник сообщает"
+        ]
+        
+        # Проверяем на запрещённые фразы
+        contains_forbidden = False
+        for phrase in forbidden_phrases:
+            if phrase.lower() in post_data["text"].lower():
+                contains_forbidden = True
+                await send_log(f"⚠️ Обнаружена запрещённая фраза: {phrase}", context)
+                break
+        
+        # Если есть запрещённые фразы или текст слишком короткий
+        if contains_forbidden or len(post_data["text"]) < 500:
+            await send_log(f"🔄 Отправляю повторный запрос (текст {len(post_data['text'])} символов)", context)
             
-            if len(post_data["text"]) > 1050:
-                post_data["text"] = post_data["text"][:1000] + "..."
-                await send_log(f"✂️ Текст обрезан до 1000 символов", context)
+            retry_prompt = f"""Перепиши этот текст. Убери все упоминания источников. Добавь своё мнение. Минимум 600 символов.
+
+Твой ответ должен начинаться с "Мне кажется..." или "Я вижу в этом..."
+
+{post_data['text']}"""
             
-            elif len(post_data["text"]) < 800:
-                await send_log(f"⚠️ Текст слишком короткий ({len(post_data['text'])} символов), дополняем...", context)
-                expand_prompt = f"Расширь этот текст до 1000 символов, добавь анализ и прогнозы, но НЕ упоминай источники:\n\n{post_data['text']}"
-                payload_expand = {
-                    "model": "deepseek-chat",
-                    "messages": [
-                        {"role": "system", "content": "Ты — журналист. Расширь текст до 1000 символов. Добавь анализ, прогнозы, личное мнение. НЕ упоминай источники."},
-                        {"role": "user", "content": expand_prompt}
-                    ],
-                    "temperature": 0.8,
-                    "max_tokens": 2000
-                }
-                try:
-                    response_expand = requests.post(url, headers=headers, json=payload_expand, timeout=60)
-                    response_expand.raise_for_status()
-                    result_expand = response_expand.json()
-                    expanded_text = result_expand["choices"][0]["message"]["content"].strip()
-                    if len(expanded_text) > 800:
-                        post_data["text"] = expanded_text[:1000]
-                        await send_log(f"✅ Текст расширен до {len(post_data['text'])} символов", context)
-                except:
-                    pass
+            payload_retry = {
+                "model": "deepseek-chat",
+                "messages": [
+                    {"role": "system", "content": "Ты — независимый журналист. Перепиши текст своим языком. Убери все ссылки на источники. Только твоё мнение."},
+                    {"role": "user", "content": retry_prompt}
+                ],
+                "temperature": 0.9,
+                "max_tokens": 2000
+            }
+            
+            try:
+                response_retry = requests.post(url, headers=headers, json=payload_retry, timeout=60)
+                response_retry.raise_for_status()
+                result_retry = response_retry.json()
+                post_data["text"] = result_retry["choices"][0]["message"]["content"].strip()
+                await send_log(f"✅ Повторный запрос выполнен, текст: {len(post_data['text'])} символов", context)
+            except Exception as e:
+                await send_log(f"⚠️ Ошибка повторного запроса: {e}", context, is_error=True)
+        
+        # Проверяем финальную длину
+        if len(post_data["text"]) > 850:
+            post_data["text"] = post_data["text"][:800] + "..."
+            await send_log(f"✂️ Текст обрезан до 800 символов", context)
+        elif len(post_data["text"]) < 500:
+            # Если всё ещё коротко — добавляем свой анализ
+            post_data["text"] += "\n\nМне кажется, эта тема показывает, как быстро меняется мир технологий. Важно следить за такими изменениями и адаптироваться к ним."
+            await send_log(f"➕ Добавлен анализ, текст: {len(post_data['text'])} символов", context)
         
         if not post_data["title"]:
             post_data["title"] = f"💡 {news['title'][:50]}"
@@ -529,11 +556,8 @@ async def rewrite_post(news, context):
         if not post_data["image_prompt"]:
             post_data["image_prompt"] = generate_image_prompt_from_post(news['title'], full_content)
         
+        # Собираем финальный пост
         full_post = f"{post_data['title']}\n\n{post_data['text']}\n\n{post_data['hashtags']}"
-        
-        if len(full_post) > 1100:
-            full_post = full_post[:1050] + "..."
-            await send_log(f"✂️ Финальный пост обрезан до 1050 символов", context)
         
         await send_log(f"✅ Колонка готова ({len(full_post)} символов)", context)
         await send_log(f"🎨 Промпт для картинки: {post_data['image_prompt'][:80]}...", context)
@@ -543,6 +567,8 @@ async def rewrite_post(news, context):
     except Exception as e:
         error_msg = f"❌ Ошибка создания колонки: {e}"
         await send_log(error_msg, context, is_error=True)
+        
+        # Фолбэк
         image_prompt = generate_image_prompt_from_post(news['title'], full_content)
         fallback_post = f"""💡 {news['title'][:50]}
 
@@ -589,7 +615,6 @@ async def generate_image_odirouter(prompt, context):
             return None
         
         await send_log(f"  ✅ Задача создана. ID: {request_id}", context)
-        await send_log(f"  📊 Статус: В очереди (позиция {task_data.get('queue_position', 0)})", context)
         
         status_url = f"https://api.odirouter.ai/model/v1/queue/free-nano-banana-2/requests/{request_id}/status"
         attempts = 0
@@ -956,10 +981,10 @@ if __name__ == "__main__":
     print("✅ Бот запущен")
     print("📌 Логи отправляются в Telegram и консоль")
     print("📌 Модерация — через кнопки в личке")
-    print("📌 Посты — авторские колонки, ~1000 символов")
+    print("📌 Посты — авторские колонки, 600-800 символов")
     print("📌 БЕЗ упоминаний источников и СМИ")
-    print("📌 Парсинг полных статей через BeautifulSoup")
-    print("📌 Картинка генерируется через free-nano-banana-2")
+    print("📌 Парсинг полных статей через BeautifulSoup (до 3000 символов)")
+    print("📌 Картинка генерируется через free-nano-banana-2 (1K)")
     print("📌 Прогресс генерации картинки отображается в логах")
     print("📌 Автопубликация через 1 час")
     print("="*60 + "\n")
