@@ -56,7 +56,7 @@ RSS_FEEDS = [
 ]
 
 # ==========================================
-# 3. БАЗА ДАННЫХ
+# 3. БАЗА ДАННЫХ (ПОСТОЯННАЯ)
 # ==========================================
 DB_PATH = "news_bot.db"
 
@@ -81,7 +81,7 @@ def init_db():
     )''')
     conn.commit()
     conn.close()
-    print("✅ База данных инициализирована")
+    print(f"✅ База данных инициализирована: {os.path.abspath(DB_PATH)}")
 
 def save_post(title, link, content, image_prompt=None, image_url=None):
     conn = sqlite3.connect(DB_PATH)
@@ -90,8 +90,9 @@ def save_post(title, link, content, image_prompt=None, image_url=None):
         c.execute("INSERT INTO posts (title, link, content, image_prompt, image_url, status) VALUES (?, ?, ?, ?, ?, 'pending')",
                   (title, link, content, image_prompt, image_url))
         conn.commit()
+        post_id = c.lastrowid
         conn.close()
-        print(f"✅ Пост сохранён: {title[:40]}...")
+        print(f"✅ Пост #{post_id} сохранён: {title[:40]}...")
         return True
     except sqlite3.IntegrityError:
         conn.close()
@@ -136,7 +137,25 @@ def get_post_by_id(post_id):
     conn.close()
     return result
 
-def clean_old_posts(days=7):
+def get_all_titles_and_summaries():
+    """Возвращает все заголовки и содержимое из базы"""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT title, content FROM posts")
+    result = c.fetchall()
+    conn.close()
+    return result
+
+def get_posts_by_status(status):
+    """Возвращает все посты с указанным статусом"""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT id, title, content, published_at FROM posts WHERE status = ? ORDER BY id DESC", (status,))
+    result = c.fetchall()
+    conn.close()
+    return result
+
+def clean_old_posts(days=30):
     """Удаляет посты старше указанного количества дней"""
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -161,21 +180,11 @@ def get_placeholder_image():
 # 4. УЛУЧШЕННАЯ ПРОВЕРКА ДУБЛИКАТОВ
 # ==========================================
 
-def get_all_titles_and_summaries():
-    """Возвращает все заголовки и описания из базы"""
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute("SELECT title, content FROM posts")
-    result = c.fetchall()
-    conn.close()
-    return result
-
 def is_similar_text(text1, text2):
     """Проверяет, похожи ли два текста (по общим словам)"""
     if not text1 or not text2:
         return False
     
-    # Стоп-слова (игнорируем при сравнении)
     stop_words = {
         'the', 'a', 'an', 'to', 'for', 'of', 'on', 'at', 'from', 'by', 
         'in', 'with', 'without', 'and', 'or', 'but', 'for', 'of', 'the',
@@ -185,7 +194,6 @@ def is_similar_text(text1, text2):
         'those', 'then', 'than', 'so', 'too', 'very', 'just', 'now'
     }
     
-    # Разбиваем на слова и убираем стоп-слова
     words1 = set(text1.lower().split())
     words2 = set(text2.lower().split())
     
@@ -195,10 +203,7 @@ def is_similar_text(text1, text2):
     if not words1 or not words2:
         return False
     
-    # Считаем общие слова
     common = words1.intersection(words2)
-    
-    # Если больше 35% общих слов — считаем дубликатом
     similarity = len(common) / max(len(words1), len(words2))
     return similarity > 0.35
 
@@ -207,22 +212,20 @@ def is_post_exists(link, title=None, summary=None):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     
-    # 1. Проверяем по ссылке (точное совпадение)
+    # 1. Проверяем по ссылке
     c.execute("SELECT id FROM posts WHERE link = ?", (link,))
     result = c.fetchone()
     
     if not result and title:
-        # 2. Проверяем по заголовку (первые 7 слов)
+        # 2. Проверяем по ключевым словам
         title_keywords = ' '.join(title.split()[:7])
         c.execute("SELECT id, title, content FROM posts WHERE title LIKE ?", (f'%{title_keywords}%',))
         results = c.fetchall()
         
         for post_id, existing_title, existing_summary in results:
-            # Проверяем схожесть заголовков
             if is_similar_text(title, existing_title):
                 result = True
                 break
-            # Проверяем схожесть с summary (если есть)
             if summary and existing_summary and is_similar_text(summary, existing_summary):
                 result = True
                 break
@@ -235,7 +238,6 @@ def remove_similar_posts():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     
-    # Получаем все посты
     c.execute("SELECT id, title FROM posts ORDER BY id")
     posts = c.fetchall()
     
@@ -266,14 +268,11 @@ def fetch_full_article(url):
         
         soup = BeautifulSoup(response.content, 'html.parser')
         
-        # Удаляем скрипты и стили
         for script in soup(["script", "style"]):
             script.decompose()
         
-        # Ищем основной контент
         article_content = ""
         
-        # Пробуем найти статью по разным селекторам
         selectors = [
             'article',
             '.article-content',
@@ -296,17 +295,14 @@ def fetch_full_article(url):
                 if article_content:
                     break
         
-        # Если не нашли по селекторам - берём всё тело
         if not article_content:
             body = soup.find('body')
             if body:
                 article_content = body.get_text(separator=' ', strip=True)
         
-        # Очищаем текст
         article_content = re.sub(r'\s+', ' ', article_content)
         article_content = re.sub(r'\n+', '\n', article_content)
         
-        # Ограничиваем длину до 1500 символов
         if len(article_content) > 1500:
             article_content = article_content[:1500]
         
@@ -344,8 +340,6 @@ def fetch_newsapi_news():
         return []
     
     news_list = []
-    
-    # Категории для поиска
     categories = ['technology', 'science', 'business']
     
     for category in categories:
@@ -364,16 +358,10 @@ def fetch_newsapi_news():
             
             if data.get('status') == 'ok':
                 for article in data.get('articles', []):
-                    # Пропускаем статьи без описания
                     if not article.get('description') or len(article['description']) < 50:
                         continue
                     
-                    # Проверяем на дубликаты
-                    if is_post_exists(
-                        article.get('url', ''), 
-                        article.get('title', ''), 
-                        article.get('description', '')
-                    ):
+                    if is_post_exists(article.get('url', ''), article.get('title', ''), article.get('description', '')):
                         continue
                     
                     news_list.append({
@@ -398,7 +386,6 @@ async def fetch_news(context):
     await send_log("🔍 Начинаю парсинг новостей...", context)
     all_news = []
     
-    # ========== ПАРСИМ NEWSAPI ==========
     if NEWSAPI_KEY:
         newsapi_news = fetch_newsapi_news()
         if newsapi_news:
@@ -407,7 +394,6 @@ async def fetch_news(context):
     else:
         await send_log("  ⚠️ NewsAPI ключ не задан, пропускаем", context)
     
-    # ========== ПАРСИМ RSS ==========
     for source in RSS_FEEDS:
         try:
             feed = feedparser.parse(source)
@@ -429,7 +415,6 @@ async def fetch_news(context):
                 if not summary or len(summary) < 30:
                     summary = ""
                 
-                # Проверяем на дубликаты (по ссылке, заголовку и описанию)
                 if is_post_exists(link, entry.title, summary):
                     continue
                 
@@ -533,7 +518,6 @@ async def rewrite_post(news, context):
         await send_log(f"⚠️ Новость без описания, пропускаем: {news['title'][:60]}...", context, is_error=True)
         return None, None, None
     
-    # ========== ПАРСИМ ПОЛНУЮ СТАТЬЮ ==========
     full_content = None
     if news.get("link"):
         await send_log(f"📄 Парсинг полной статьи...", context)
@@ -541,7 +525,6 @@ async def rewrite_post(news, context):
         if full_content:
             await send_log(f"  ✅ Спарсено {len(full_content)} символов", context)
     
-    # Если статья не спарсилась - используем summary
     content_for_ai = full_content if full_content else news['summary'][:500]
     
     url = "https://api.deepseek.com/v1/chat/completions"
@@ -550,13 +533,26 @@ async def rewrite_post(news, context):
         "Content-Type": "application/json"
     }
     
-    system_prompt = """Ты — автор экспертного Telegram-канала о технологиях, AI и инновациях.
+    system_prompt = """ТЫ — ГЛАВНЫЙ РЕДАКТОР ФУТУРИСТИЧЕСКОГО ТЕХНОЛОГИЧЕСКОГО КАНАЛА 🌟
 
 ТЫ ЖИВОЙ ЧЕЛОВЕК:
 - У тебя есть своё мнение, стиль и голос
 - Ты пишешь как друг, который разбирается в теме
 - Ты используешь эмодзи, вопросы к читателю, живые формулировки
 - Ты НЕ пишешь как новостной агрегатор
+
+ТВОЙ СТИЛЬ:
+- ЯРКИЙ, ЭМОЦИОНАЛЬНЫЙ, ФУТУРИСТИЧЕСКИЙ 🚀
+- Ты пишешь так, будто смотришь в 2050 год из 2026
+- Используй МНОГО ЭМОДЗИ: 🧠 ⚡ 💎 🔥 💡 🚀 ✨ 🤖 🎯
+- Пиши КАПСОМ в ключевых моментах для усиления
+- Добавляй восклицательные знаки и вопросы к читателю
+
+ТВОЙ ТОН:
+- ЭКСПЕРТНЫЙ, но РАЗГОВОРНЫЙ
+- БУДУЩЕЕ УЖЕ НАСТУПИЛО — ты просто описываешь его
+- СМЕЛЫЙ ПРОГНОЗ: что будет через 5 лет
+- ЛИЧНОЕ МНЕНИЕ: "мне кажется", "я вижу в этом"
 
 ТВОЯ ЗАДАЧА:
 1. Прочитай статью и ПОЛНОСТЬЮ ПЕРЕРАБОТАЙ её в авторский пост
@@ -565,21 +561,26 @@ async def rewrite_post(news, context):
 4. Сделай прогноз: "что будет дальше", "как это повлияет"
 5. Задавай вопросы читателю: "представьте", "а вы замечали"
 
-ЖЁСТКИЕ ТРЕБОВАНИЯ К ДЛИНЕ:
-- Пост ДОЛЖЕН БЫТЬ минимум 600 символов, но не длиннее 1000 (это обязательно!)
-- Если после написания пост короче 600 символов — ПЕРЕПИШИ ЕГО снова
-- Добавь больше анализа, контекста, примеров, прогнозов
-- Если не хватает информации — ДОПОЛНИ своими знаниями
+ЖЁСТКИЕ ТРЕБОВАНИЯ:
+- Пост: 600-950 символов (не больше 950!)
+- ЗАПРЕЩЕНО: "согласно", "как сообщает", ссылки на источники
+- ОБЯЗАТЕЛЬНО: личное мнение и прогнозы
+- ЯРКИЙ СТИЛЬ: как обложка киберпанк-журнала
 
-СТРУКТУРА ПОСТА (600-1000 символов):
-1. ЗАГОЛОВОК: очень яркий, заглавными буквами, интригующий, с много эмодзи (до 10 слов)
-2. ВСТУПЛЕНИЕ: вопрос или неожиданный факт (1-2 предложения)
-3. ОСНОВНАЯ ЧАСТЬ: твой анализ, мнение, контекст, прогнозы (3-5 абзацев)
-4. ВЫВОД: чёткая мысль или призыв к действию (1-2 предложения)
+СТРУКТУРА ПОСТА:
+1. ЗАГОЛОВОК: КАПС + ЭМОДЗИ (до 10 слов)
+2. ВСТУПЛЕНИЕ: вопрос или шокирующий факт
+3. ОСНОВНАЯ ЧАСТЬ: анализ + мнение + прогноз
+4. ВЫВОД: мощная мысль
 5. ХЕШТЕГИ: 2-3 шт
-6. ПРОМПТ_ДЛЯ_КАРТИНКИ: 30-50 слов на английском
+6. ПРОМПТ_ДЛЯ_КАРТИНКИ: 30-50 слов, кинематографичный
 
-ВАЖНО! Если пост получился короче 600 символов или длиннее 1000 символов — перепиши его СНОВА, добавив больше анализа и контента.
+ПРИМЕР СТИЛЯ:
+"🧠 МОЗГ В КЛЕТКЕ: DeepMind сделали ИИ, который думает как человек?
+
+Представьте: вы разговариваете с нейросетью, и она НЕ тупит. Звучит как фантастика? А это уже реальность...
+
+Я вижу в этом развороте три причины. Первая:..."
 
 ФОРМАТ ОТВЕТА:
 ЗАГОЛОВОК: [текст]
@@ -595,7 +596,7 @@ async def rewrite_post(news, context):
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": f"Новость из {news['source']}:\nЗаголовок: {news['title']}\nТекст: {content_for_ai}"}
         ],
-        "temperature": 0.7,
+        "temperature": 0.8,
         "top_p": 0.9,
         "max_tokens": 2000
     }
@@ -606,7 +607,6 @@ async def rewrite_post(news, context):
         result = response.json()
         content = result["choices"][0]["message"]["content"]
         
-        # Парсим ответ
         post_data = {
             "title": "",
             "intro": "",
@@ -631,7 +631,6 @@ async def rewrite_post(news, context):
             elif line.startswith("ПРОМПТ_ДЛЯ_КАРТИНКИ:"):
                 post_data["image_prompt"] = line.replace("ПРОМПТ_ДЛЯ_КАРТИНКИ:", "").strip()
         
-        # Собираем пост
         full_post = f"{post_data['title']}\n\n"
         if post_data["intro"]:
             full_post += f"{post_data['intro']}\n\n"
@@ -642,30 +641,28 @@ async def rewrite_post(news, context):
         if post_data["hashtags"]:
             full_post += f"{post_data['hashtags']}"
         
-        # Проверяем длину поста
         post_length = len(full_post.strip())
         await send_log(f"📏 Длина поста: {post_length} символов", context)
         
-        # Если пост короче 600 символов — отправляем второй запрос на расширение
         if post_length < 600:
             await send_log(f"⚠️ Пост слишком короткий ({post_length} символов), отправляю запрос на расширение...", context)
             
             expand_prompt = f"""Этот пост получился слишком коротким ({post_length} символов). Нужно минимум 600 символов.
 
-    Расширь этот пост: добавь больше анализа, контекста, прогнозов, примеров, личного мнения. Если нужно — дополни своими знаниями.
+    Расширь этот пост в ФУТУРИСТИЧЕСКОМ СТИЛЕ: добавь больше анализа, прогнозов, примеров, личного мнения, эмодзи. Если нужно — дополни своими знаниями.
 
     Текущий пост:
     {full_post}
 
-    Напиши расширенную версию этого же поста (минимум 600 символов). Сохрани структуру и стиль."""
+    Напиши расширенную версию этого же поста (минимум 600 символов). Сохрани стиль и структуру."""
 
             payload_expand = {
                 "model": "deepseek-chat",
                 "messages": [
-                    {"role": "system", "content": "Ты — автор Telegram-канала. Расширь пост до минимум 600 символов. Добавь анализ, контекст, прогнозы, личное мнение. Сохрани стиль."},
+                    {"role": "system", "content": "Ты — главный редактор футуристического канала. Расширь пост до минимум 600 символов. Добавь анализ, прогнозы, эмодзи, личное мнение. Сохрани яркий стиль."},
                     {"role": "user", "content": expand_prompt}
                 ],
-                "temperature": 0.7,
+                "temperature": 0.8,
                 "max_tokens": 2000
             }
             
@@ -675,7 +672,6 @@ async def rewrite_post(news, context):
                 result_expand = response_expand.json()
                 expanded_content = result_expand["choices"][0]["message"]["content"].strip()
                 
-                # Парсим расширенный ответ
                 expanded_data = {
                     "title": "",
                     "intro": "",
@@ -700,7 +696,6 @@ async def rewrite_post(news, context):
                     elif line.startswith("ПРОМПТ_ДЛЯ_КАРТИНКИ:"):
                         expanded_data["image_prompt"] = line.replace("ПРОМПТ_ДЛЯ_КАРТИНКИ:", "").strip()
                 
-                # Если не удалось распарсить расширенный ответ - используем старый
                 if expanded_data["main_text"]:
                     post_data = expanded_data
                     full_post = f"{post_data['title']}\n\n"
@@ -715,8 +710,7 @@ async def rewrite_post(news, context):
                     
                     await send_log(f"✅ Пост расширен до {len(full_post.strip())} символов", context)
                 else:
-                    # Если не удалось распарсить - добавляем свой анализ
-                    post_data["main_text"] += "\n\nМне кажется, эта тема очень важна для понимания того, куда движется технологический мир. Мы видим, как меняются подходы и открываются новые возможности. Важно быть в курсе, чтобы не отставать."
+                    post_data["main_text"] += "\n\n🚀 ТЕХНОЛОГИИ НЕ ЖДУТ. Мир меняется прямо сейчас, и мы становимся свидетелями этого великого перехода в новую эру. Вопрос не в том, БУДЕТ ли это, а в том, КОГДА это станет нашей реальностью."
                     full_post = f"{post_data['title']}\n\n"
                     if post_data["intro"]:
                         full_post += f"{post_data['intro']}\n\n"
@@ -726,12 +720,11 @@ async def rewrite_post(news, context):
                         full_post += f"📌 {post_data['conclusion']}\n\n"
                     if post_data["hashtags"]:
                         full_post += f"{post_data['hashtags']}"
-                    await send_log(f"➕ Добавлен анализ, длина: {len(full_post.strip())} символов", context)
+                    await send_log(f"➕ Добавлен прогноз, длина: {len(full_post.strip())} символов", context)
                     
             except Exception as e:
                 await send_log(f"⚠️ Ошибка расширения поста: {e}", context, is_error=True)
-                # Добавляем свой анализ к короткому посту
-                post_data["main_text"] += "\n\nМне кажется, эта тема очень важна для понимания того, куда движется технологический мир. Мы видим, как меняются подходы и открываются новые возможности. Важно быть в курсе, чтобы не отставать."
+                post_data["main_text"] += "\n\n🚀 ТЕХНОЛОГИИ НЕ ЖДУТ. Мир меняется прямо сейчас, и мы становимся свидетелями этого великого перехода в новую эру. Вопрос не в том, БУДЕТ ли это, а в том, КОГДА это станет нашей реальностью."
                 full_post = f"{post_data['title']}\n\n"
                 if post_data["intro"]:
                     full_post += f"{post_data['intro']}\n\n"
@@ -742,12 +735,16 @@ async def rewrite_post(news, context):
                 if post_data["hashtags"]:
                     full_post += f"{post_data['hashtags']}"
         
+        if len(full_post.strip()) > 950:
+            full_post = full_post[:947] + "..."
+            await send_log(f"✂️ Пост обрезан до 950 символов", context)
+        
         if not post_data["title"]:
             post_data["title"] = f"🤖 {news['title'][:50]}"
         if not post_data["image_prompt"]:
-            post_data["image_prompt"] = f"Futuristic technology scene, digital innovation, cinematic lighting, 4K, high detail"
+            post_data["image_prompt"] = f"Futuristic cyberpunk technology scene, neon lights, digital innovation, cinematic 4K, photorealistic, dramatic lighting, blue and purple tones"
         if not post_data["hashtags"]:
-            post_data["hashtags"] = "#AI #Tech #Innovation"
+            post_data["hashtags"] = "#AI #Tech #Future"
         
         if len(full_post.strip()) < 300:
             await send_log(f"⚠️ Пост слишком короткий ({len(full_post)} символов), пропускаем", context, is_error=True)
@@ -764,7 +761,7 @@ async def rewrite_post(news, context):
         return None, None, None
 
 # ==========================================
-# 11. ГЕНЕРАЦИЯ КАРТИНКИ (free-nano-banana-2) — 60 попыток
+# 11. ГЕНЕРАЦИЯ КАРТИНКИ (free-nano-banana-2)
 # ==========================================
 async def generate_image_odirouter(prompt, context):
     """Генерирует картинку через free-nano-banana-2 (бесплатно)"""
@@ -843,7 +840,6 @@ async def send_for_moderation(context, news, post_text, title, image_prompt, jus
         await send_log(f"⚠️ Пост не сохранён (дубликат): {news['link']}", context, is_error=True)
         return
     
-    # Получаем ID сохранённого поста
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT id FROM posts WHERE link = ? ORDER BY id DESC LIMIT 1", (news['link'],))
@@ -892,19 +888,17 @@ async def send_for_moderation(context, news, post_text, title, image_prompt, jus
     
     await context.bot.send_message(chat_id=ADMIN_ID, text=message_text, reply_markup=reply_markup)
     
-    # Запускаем таймер автопубликации через 10 минут
     asyncio.create_task(auto_publish_after_timeout(context, post_id, title, post_text))
 
 async def auto_publish_after_timeout(context, post_id, title, post_text):
     """Автопубликация через 10 минут, если пост всё ещё pending"""
-    await asyncio.sleep(600)  # 10 минут
+    await asyncio.sleep(600)
     
-    # Проверяем статус поста
     post = get_post_by_id(post_id)
     if not post:
         return
     
-    if post[5] == 'pending':  # status = pending
+    if post[5] == 'pending':
         await send_log(f"⏰ Автопубликация поста #{post_id} (таймаут 10 минут)", context)
         update_post_status(post_id, 'published')
         await publish_post(context, title, post_text)
@@ -962,7 +956,72 @@ async def publish_post(context, title, post_text):
         await send_log(error_msg, context, is_error=True)
 
 # ==========================================
-# 14. ОСНОВНОЙ ЦИКЛ
+# 14. КНОПКИ УПРАВЛЕНИЯ (НОВЫЕ)
+# ==========================================
+async def admin_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Главное меню администратора"""
+    if update.effective_user.id != ADMIN_ID:
+        await update.message.reply_text("⛔ У вас нет прав на эту команду.")
+        return
+    
+    keyboard = [
+        [InlineKeyboardButton("📰 Новый пост", callback_data="post_now")],
+        [InlineKeyboardButton("📊 Статус", callback_data="status")],
+        [InlineKeyboardButton("📋 Список постов", callback_data="list_posts")],
+        [InlineKeyboardButton("🧹 Очистить старые посты", callback_data="clean_posts")],
+        [InlineKeyboardButton("🔄 Перезапустить цикл", callback_data="restart_cycle")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await update.message.reply_text(
+        "🤖 **Панель управления ботом**\n\n"
+        "Выберите действие:",
+        reply_markup=reply_markup
+    )
+
+async def list_posts_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Показывает последние посты"""
+    if update.effective_user.id != ADMIN_ID:
+        await update.message.reply_text("⛔ У вас нет прав.")
+        return
+    
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT id, title, status, published_at FROM posts ORDER BY id DESC LIMIT 10")
+    rows = c.fetchall()
+    conn.close()
+    
+    if not rows:
+        await update.message.reply_text("📭 В базе нет постов.")
+        return
+    
+    text = "📋 **Последние посты в БД:**\n\n"
+    for row in rows:
+        status_emoji = "✅" if row[2] == "published" else "⏳"
+        text += f"{status_emoji} ID: `{row[0]}` | {row[1][:40]}...\nСтатус: {row[2]} | {row[3][:16]}\n\n"
+    
+    await update.message.reply_text(text, parse_mode='Markdown')
+
+async def clean_posts_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Очищает старые посты"""
+    if update.effective_user.id != ADMIN_ID:
+        await update.message.reply_text("⛔ У вас нет прав.")
+        return
+    
+    deleted = clean_old_posts(7)
+    await update.message.reply_text(f"🧹 Удалено {deleted} старых постов (старше 7 дней).")
+
+async def restart_cycle_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Перезапускает цикл подготовки поста"""
+    if update.effective_user.id != ADMIN_ID:
+        await update.message.reply_text("⛔ У вас нет прав.")
+        return
+    
+    await update.message.reply_text("🔄 Перезапускаю цикл подготовки поста...")
+    await prepare_and_moderate(context)
+
+# ==========================================
+# 15. ОСНОВНОЙ ЦИКЛ
 # ==========================================
 async def prepare_and_moderate(context: ContextTypes.DEFAULT_TYPE):
     await send_log("="*50, context)
@@ -1005,7 +1064,7 @@ async def prepare_and_moderate(context: ContextTypes.DEFAULT_TYPE):
         await send_log(error_msg, context, is_error=True)
 
 # ==========================================
-# 15. ОБРАБОТЧИКИ КНОПОК
+# 16. ОБРАБОТЧИКИ КНОПОК
 # ==========================================
 async def moderation_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -1015,7 +1074,6 @@ async def moderation_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
     callback_type = data.split('_')[0]
     
     if callback_type == "publish":
-        # Извлекаем post_id
         try:
             post_id = int(data.split('_')[1])
         except:
@@ -1058,14 +1116,26 @@ async def moderation_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
     elif callback_type == "next":
         await query.message.reply_text("🔄 Загружаю следующую новость...")
         await prepare_and_moderate(context)
+    
+    elif callback_type == "list_posts":
+        await list_posts_cmd(update, context)
+    
+    elif callback_type == "clean_posts":
+        deleted = clean_old_posts(7)
+        await query.message.reply_text(f"🧹 Удалено {deleted} старых постов (старше 7 дней).")
+    
+    elif callback_type == "restart_cycle":
+        await query.message.reply_text("🔄 Перезапускаю цикл подготовки поста...")
+        await prepare_and_moderate(context)
 
 # ==========================================
-# 16. КОМАНДЫ TELEGRAM
+# 17. КОМАНДЫ TELEGRAM
 # ==========================================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton("📰 Пост сейчас", callback_data="post_now")],
-        [InlineKeyboardButton("📊 Статус", callback_data="status")]
+        [InlineKeyboardButton("📊 Статус", callback_data="status")],
+        [InlineKeyboardButton("🔧 Админ-панель", callback_data="admin_panel")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
@@ -1077,6 +1147,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "📌 Команды:\n"
         "/post — принудительный запуск цикла\n"
         "/status — статистика\n"
+        "/admin — панель управления\n"
         "/start — это меню",
         reply_markup=reply_markup
     )
@@ -1121,11 +1192,21 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await prepare_and_moderate(context)
     elif query.data == "status":
         await status_cmd(update, context)
+    elif query.data == "admin_panel":
+        await admin_menu(update, context)
+    elif query.data == "list_posts":
+        await list_posts_cmd(update, context)
+    elif query.data == "clean_posts":
+        deleted = clean_old_posts(7)
+        await query.message.reply_text(f"🧹 Удалено {deleted} старых постов (старше 7 дней).")
+    elif query.data == "restart_cycle":
+        await query.message.reply_text("🔄 Перезапускаю цикл подготовки поста...")
+        await prepare_and_moderate(context)
     else:
         await moderation_callback(update, context)
 
 # ==========================================
-# 17. ЗАПУСК
+# 18. ЗАПУСК
 # ==========================================
 if __name__ == "__main__":
     print("\n" + "="*60)
@@ -1133,14 +1214,15 @@ if __name__ == "__main__":
     print("="*60)
     
     init_db()
-    clean_old_posts(7)  # Удаляем посты старше 7 дней
-    remove_similar_posts()  # Удаляем похожие дубликаты
+    clean_old_posts(30)
+    remove_similar_posts()
     
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
     
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("post", post_now))
     app.add_handler(CommandHandler("status", status_cmd))
+    app.add_handler(CommandHandler("admin", admin_menu))
     app.add_handler(CallbackQueryHandler(button_handler))
     
     job_queue = app.job_queue
@@ -1152,11 +1234,11 @@ if __name__ == "__main__":
     print("✅ Бот запущен")
     print("📌 Логи отправляются в Telegram и консоль")
     print("📌 Модерация — через кнопки в личке")
-    print("📌 Посты: минимум 600 символов (автоматическое расширение)")
-    print("📌 Картинка генерируется через free-nano-banana-2 (60 попыток)")
-    print("📌 Автопубликация через 10 минут, если нет ответа")
-    print("📌 Старые посты удаляются через 7 дней")
-    print("📌 Источники: RSS + NewsAPI + BeautifulSoup парсинг статей")
+    print("📌 Посты: 600-950 символов, футуристический стиль")
+    print("📌 Картинка генерируется через free-nano-banana-2")
+    print("📌 Автопубликация через 10 минут")
+    print("📌 Старые посты удаляются через 30 дней")
+    print("📌 Источники: RSS + NewsAPI + BeautifulSoup")
     print("="*60 + "\n")
     
     app.run_polling()
