@@ -471,6 +471,7 @@ async def rewrite_post(news, context):
 - Передай атмосферу: энергичная, спокойная, тревожная, вдохновляющая
 - Не используй общие слова вроде "AI technology" или "digital art"
 - Промпт должен быть конкретным и визуальным
+- Если пост получился меньше 600 символов,то перепиши и добавь своё мнение,для увеличения длины поста на 600 символов
 
 Пример хорошего промпта:
 "A futuristic server room with glowing blue data streams, a human silhouette standing in the center, dramatic backlighting, cool neon tones, cinematic wide shot, 4K, photorealistic"
