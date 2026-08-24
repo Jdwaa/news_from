@@ -11,6 +11,7 @@ import asyncio
 from datetime import datetime, timedelta
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
+from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -22,6 +23,7 @@ CHANNEL_ID = os.getenv("CHANNEL_ID")
 ADMIN_ID = int(os.getenv("ADMIN_ID", 0))
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 ODIROUTER_API_KEY = os.getenv("ODIROUTER_API_KEY")
+NEWSAPI_KEY = os.getenv("NEWSAPI_KEY")
 
 # Проверка обязательных переменных
 if not TELEGRAM_TOKEN:
@@ -36,7 +38,7 @@ if not ODIROUTER_API_KEY:
     raise ValueError("❌ ODIROUTER_API_KEY не задан!")
 
 # ==========================================
-# 2. ИСТОЧНИКИ НОВОСТЕЙ
+# 2. ИСТОЧНИКИ НОВОСТЕЙ (RSS)
 # ==========================================
 RSS_FEEDS = [
     "https://techcrunch.com/category/artificial-intelligence/feed/",
@@ -153,7 +155,71 @@ def get_placeholder_image():
     return "https://via.placeholder.com/1280x720/1a1a2e/ffffff?text=AI+News"
 
 # ==========================================
-# 4. ЛОГГЕР
+# 4. ПАРСИНГ ПОЛНОЙ СТАТЬИ (BeautifulSoup)
+# ==========================================
+def fetch_full_article(url):
+    """Парсит полный текст статьи по ссылке с помощью BeautifulSoup"""
+    try:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        response = requests.get(url, headers=headers, timeout=15)
+        response.raise_for_status()
+        
+        soup = BeautifulSoup(response.content, 'html.parser')
+        
+        # Удаляем скрипты и стили
+        for script in soup(["script", "style"]):
+            script.decompose()
+        
+        # Ищем основной контент
+        article_content = ""
+        
+        # Пробуем найти статью по разным селекторам
+        selectors = [
+            'article',
+            '.article-content',
+            '.post-content',
+            '.entry-content',
+            '.content',
+            'main',
+            '.story-content',
+            '.blog-post-content'
+        ]
+        
+        for selector in selectors:
+            elements = soup.select(selector)
+            if elements:
+                for element in elements:
+                    text = element.get_text(separator=' ', strip=True)
+                    if len(text) > 500:
+                        article_content = text
+                        break
+                if article_content:
+                    break
+        
+        # Если не нашли по селекторам - берём всё тело
+        if not article_content:
+            body = soup.find('body')
+            if body:
+                article_content = body.get_text(separator=' ', strip=True)
+        
+        # Очищаем текст
+        article_content = re.sub(r'\s+', ' ', article_content)
+        article_content = re.sub(r'\n+', '\n', article_content)
+        
+        # Ограничиваем длину до 1500 символов (чтобы DeepSeek не пересказывал)
+        if len(article_content) > 1500:
+            article_content = article_content[:1500]
+        
+        return article_content.strip()
+        
+    except Exception as e:
+        print(f"⚠️ Ошибка парсинга статьи: {e}")
+        return None
+
+# ==========================================
+# 5. ЛОГГЕР
 # ==========================================
 async def send_log(message, context=None, is_error=False, send_to_admin=True):
     timestamp = datetime.now().strftime("%H:%M:%S")
@@ -171,12 +237,75 @@ async def send_log(message, context=None, is_error=False, send_to_admin=True):
             print(f"⚠️ Не удалось отправить лог в Telegram: {e}")
 
 # ==========================================
-# 5. ПАРСИНГ НОВОСТЕЙ
+# 6. ПАРСИНГ NEWSAPI
+# ==========================================
+def fetch_newsapi_news():
+    """Парсит новости из NewsAPI"""
+    if not NEWSAPI_KEY:
+        print("⚠️ NEWSAPI_KEY не задан, пропускаем NewsAPI")
+        return []
+    
+    news_list = []
+    
+    # Категории для поиска
+    categories = ['technology', 'science', 'business']
+    
+    for category in categories:
+        try:
+            url = "https://newsapi.org/v2/top-headlines"
+            params = {
+                'category': category,
+                'language': 'en',
+                'pageSize': 5,
+                'apiKey': NEWSAPI_KEY
+            }
+            
+            response = requests.get(url, params=params, timeout=15)
+            response.raise_for_status()
+            data = response.json()
+            
+            if data.get('status') == 'ok':
+                for article in data.get('articles', []):
+                    # Пропускаем статьи без описания
+                    if not article.get('description') or len(article['description']) < 50:
+                        continue
+                    
+                    # Проверяем на дубликаты
+                    if is_post_exists(article.get('url', '')):
+                        continue
+                    
+                    news_list.append({
+                        "title": article.get('title', ''),
+                        "link": article.get('url', ''),
+                        "summary": article.get('description', '')[:800],
+                        "source": f"NewsAPI/{category}",
+                        "has_description": True
+                    })
+                
+                print(f"  ✅ NewsAPI ({category}): {len(data.get('articles', []))} новостей")
+                
+        except Exception as e:
+            print(f"⚠️ Ошибка парсинга NewsAPI ({category}): {e}")
+    
+    return news_list
+
+# ==========================================
+# 7. ПАРСИНГ НОВОСТЕЙ (RSS + NewsAPI)
 # ==========================================
 async def fetch_news(context):
     await send_log("🔍 Начинаю парсинг новостей...", context)
     all_news = []
     
+    # ========== ПАРСИМ NEWSAPI ==========
+    if NEWSAPI_KEY:
+        newsapi_news = fetch_newsapi_news()
+        if newsapi_news:
+            all_news.extend(newsapi_news)
+            await send_log(f"  ✅ NewsAPI: {len(newsapi_news)} новостей", context)
+    else:
+        await send_log("  ⚠️ NewsAPI ключ не задан, пропускаем", context)
+    
+    # ========== ПАРСИМ RSS ==========
     for source in RSS_FEEDS:
         try:
             feed = feedparser.parse(source)
@@ -216,10 +345,10 @@ async def fetch_news(context):
     
     random.shuffle(all_news)
     await send_log(f"📊 Всего собрано уникальных новостей: {len(all_news)}", context)
-    return all_news[:10]
+    return all_news[:15]  # Увеличил до 15, чтобы было больше выбора
 
 # ==========================================
-# 6. ВЫБОР ЛУЧШЕЙ НОВОСТИ
+# 8. ВЫБОР ЛУЧШЕЙ НОВОСТИ
 # ==========================================
 async def select_best_news(news_list, context):
     if not news_list:
@@ -291,7 +420,7 @@ async def select_best_news(news_list, context):
         return news_list[0]
 
 # ==========================================
-# 7. РЕРАЙТ ПОСТА + ГЕНЕРАЦИЯ ПРОМПТА ДЛЯ КАРТИНКИ
+# 9. РЕРАЙТ ПОСТА + ГЕНЕРАЦИЯ ПРОМПТА ДЛЯ КАРТИНКИ
 # ==========================================
 async def rewrite_post(news, context):
     await send_log(f"✍️ Глубокий рерайт новости...", context)
@@ -299,6 +428,17 @@ async def rewrite_post(news, context):
     if not news.get("summary") or len(news["summary"]) < 50:
         await send_log(f"⚠️ Новость без описания, пропускаем: {news['title'][:60]}...", context, is_error=True)
         return None, None, None
+    
+    # ========== ПАРСИМ ПОЛНУЮ СТАТЬЮ ==========
+    full_content = None
+    if news.get("link"):
+        await send_log(f"📄 Парсинг полной статьи: {news['link'][:60]}...", context)
+        full_content = fetch_full_article(news['link'])
+        if full_content:
+            await send_log(f"  ✅ Спарсено {len(full_content)} символов", context)
+    
+    # Если статья не спарсилась - используем summary
+    content_for_ai = full_content if full_content else news['summary'][:500]
     
     url = "https://api.deepseek.com/v1/chat/completions"
     headers = {
@@ -347,7 +487,7 @@ async def rewrite_post(news, context):
         "model": "deepseek-chat",
         "messages": [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": f"Новость из {news['source']}:\nЗаголовок: {news['title']}\nТекст: {news['summary']}"}
+            {"role": "user", "content": f"Новость из {news['source']}:\nЗаголовок: {news['title']}\nТекст: {content_for_ai}"}
         ],
         "temperature": 0.4,
         "top_p": 0.9,
@@ -414,7 +554,7 @@ async def rewrite_post(news, context):
         return None, None, None
 
 # ==========================================
-# 8. ГЕНЕРАЦИЯ КАРТИНКИ (free-nano-banana-2) — 60 попыток
+# 10. ГЕНЕРАЦИЯ КАРТИНКИ (free-nano-banana-2) — 60 попыток
 # ==========================================
 async def generate_image_odirouter(prompt, context):
     """Генерирует картинку через free-nano-banana-2 (бесплатно)"""
@@ -484,7 +624,7 @@ async def generate_image_odirouter(prompt, context):
         return None
 
 # ==========================================
-# 9. МОДЕРАЦИЯ + АВТОПУБЛИКАЦИЯ ЧЕРЕЗ 1 ЧАС
+# 11. МОДЕРАЦИЯ + АВТОПУБЛИКАЦИЯ ЧЕРЕЗ 1 ЧАС
 # ==========================================
 async def send_for_moderation(context, news, post_text, title, image_prompt, justification):
     saved = save_post(title, news['link'], post_text, image_prompt)
@@ -560,7 +700,7 @@ async def auto_publish_after_timeout(context, post_id, title, post_text):
         await publish_post(context, title, post_text)
 
 # ==========================================
-# 10. ПУБЛИКАЦИЯ С КАРТИНКОЙ
+# 12. ПУБЛИКАЦИЯ С КАРТИНКОЙ
 # ==========================================
 async def publish_post(context, title, post_text):
     await send_log(f"📤 Публикация поста в канал...", context)
@@ -612,7 +752,7 @@ async def publish_post(context, title, post_text):
         await send_log(error_msg, context, is_error=True)
 
 # ==========================================
-# 11. ОСНОВНОЙ ЦИКЛ
+# 13. ОСНОВНОЙ ЦИКЛ
 # ==========================================
 async def prepare_and_moderate(context: ContextTypes.DEFAULT_TYPE):
     await send_log("="*50, context)
@@ -655,7 +795,7 @@ async def prepare_and_moderate(context: ContextTypes.DEFAULT_TYPE):
         await send_log(error_msg, context, is_error=True)
 
 # ==========================================
-# 12. ОБРАБОТЧИКИ КНОПОК
+# 14. ОБРАБОТЧИКИ КНОПОК
 # ==========================================
 async def moderation_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -710,7 +850,7 @@ async def moderation_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
         await prepare_and_moderate(context)
 
 # ==========================================
-# 13. КОМАНДЫ TELEGRAM
+# 15. КОМАНДЫ TELEGRAM
 # ==========================================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
@@ -772,7 +912,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await moderation_callback(update, context)
 
 # ==========================================
-# 14. ЗАПУСК
+# 16. ЗАПУСК
 # ==========================================
 if __name__ == "__main__":
     print("\n" + "="*60)
@@ -801,6 +941,7 @@ if __name__ == "__main__":
     print("📌 Посты короче 300 символов пропускаются")
     print("📌 Картинка генерируется через free-nano-banana-2 (60 попыток, ~3 минуты)")
     print("📌 Автопубликация через 1 час, если нет ответа")
+    print("📌 Источники: RSS + NewsAPI + BeautifulSoup парсинг статей")
     print("="*60 + "\n")
     
     app.run_polling()
