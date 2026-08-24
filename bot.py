@@ -136,11 +136,22 @@ def get_post_by_id(post_id):
     conn.close()
     return result
 
-def is_post_exists(link):
+def is_post_exists(link, title=None):
+    """Проверяет, существует ли пост с такой ссылкой или похожим заголовком"""
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
+    
+    # Проверяем по ссылке
     c.execute("SELECT id FROM posts WHERE link = ?", (link,))
     result = c.fetchone()
+    
+    if not result and title:
+        # Проверяем по заголовку (упрощённо)
+        # Берём первые 5 слов заголовка
+        title_keywords = ' '.join(title.split()[:5])
+        c.execute("SELECT id FROM posts WHERE title LIKE ?", (f'%{title_keywords}%',))
+        result = c.fetchone()
+    
     conn.close()
     return result is not None
 
