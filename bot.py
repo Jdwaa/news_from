@@ -700,7 +700,7 @@ async def generate_image_odirouter(prompt, context):
     
     payload = {
         "prompt": prompt,
-        "aspect_ratio": "16:9",
+        "aspect_ratio": "9:16",
         "resolution": "1K"
     }
     
