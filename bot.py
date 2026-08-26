@@ -763,72 +763,84 @@ async def rewrite_post(news, context):
         return None, None, None
 
 # ==========================================
-# 11. ГЕНЕРАЦИЯ КАРТИНКИ (free-nano-banana-2)
+# 
+# ==========================================
+# ==========================================
+# 11. ГЕНЕРАЦИЯ КАРТИНКИ (KLING 1.0 через OdiRouter)
 # ==========================================
 async def generate_image_odirouter(prompt, context):
-    """Генерирует картинку через free-nano-banana-2 (бесплатно)"""
-    await send_log(f"🎨 Генерация картинки...", context)
+    """Генерирует картинку через Kling Image 1.0 (OdiRouter)"""
+    await send_log(f"🎨 Генерация картинки через Kling 1.0...", context)
     
-    url = "https://api.odirouter.ai/model/v1/queue/free-nano-banana-2"
+    # Убедимся, что промпт не слишком длинный
+    if len(prompt) > 500:
+        prompt = prompt[:500]
+    
+    # Формируем промпт для реалистичной картинки (улучшенный)
+    enhanced_prompt = f"{prompt}, photorealistic, 8k, high quality, sharp focus, cinematic lighting, detailed, professional photography"
+    
+    url = "https://api.odirouter.ai/v1/chat/completions"
     headers = {
         "Authorization": f"Bearer {ODIROUTER_API_KEY}",
         "Content-Type": "application/json"
     }
     
-    if len(prompt) > 500:
-        prompt = prompt[:500]
-    
     payload = {
-        "prompt": prompt,
-        "aspect_ratio": "16:9",
-        "resolution": "1K"
+        "model": "kling-image-v1",  # Kling 1.0
+        "messages": [
+            {
+                "role": "user",
+                "content": enhanced_prompt
+            }
+        ],
+        "max_tokens": 4096,
+        "temperature": 0.7
     }
     
     try:
-        response = requests.post(url, headers=headers, json=payload, timeout=30)
+        response = requests.post(url, headers=headers, json=payload, timeout=60)
         response.raise_for_status()
-        task_data = response.json()
-        request_id = task_data.get("request_id")
+        result = response.json()
         
-        if not request_id:
-            await send_log("  ❌ Не удалось получить request_id", context, is_error=True)
-            return None
+        # Извлекаем URL картинки из ответа
+        # Формат ответа может отличаться, пробуем разные варианты
+        image_url = None
         
-        await send_log(f"  ✅ Задача создана: {request_id}", context)
+        # Вариант 1: прямая ссылка в content
+        if "choices" in result and len(result["choices"]) > 0:
+            content = result["choices"][0].get("message", {}).get("content", "")
+            # Ищем ссылку на изображение в тексте
+            import re
+            url_match = re.search(r'https?://[^\s]+\.(?:jpg|jpeg|png|webp|gif)', content)
+            if url_match:
+                image_url = url_match.group(0)
+                await send_log(f"  ✅ Найдена ссылка в content", context)
         
-        status_url = f"https://api.odirouter.ai/model/v1/queue/free-nano-banana-2/requests/{request_id}/status"
-        attempts = 0
-        max_attempts = 60
-        while attempts < max_attempts:
-            status_response = requests.get(status_url, headers=headers)
-            status_data = status_response.json()
-            current_status = status_data.get("status")
-            attempts += 1
-            await send_log(f"  ⏳ Статус: {current_status} (попытка {attempts}/{max_attempts})", context)
-            
-            if current_status == "COMPLETED":
-                await send_log("  ✅ Картинка сгенерирована", context)
-                break
-            elif current_status in ["FAILED", "CANCELED"]:
-                await send_log(f"  ❌ Ошибка генерации", context, is_error=True)
-                return None
-            time.sleep(3)
+        # Вариант 2: если ссылка в другом поле
+        if not image_url and "data" in result:
+            if isinstance(result["data"], list) and len(result["data"]) > 0:
+                if "url" in result["data"][0]:
+                    image_url = result["data"][0]["url"]
+                    await send_log(f"  ✅ Найдена ссылка в data", context)
+        
+        # Вариант 3: если есть поле image_url
+        if not image_url and "image_url" in result:
+            image_url = result["image_url"]
+            await send_log(f"  ✅ Найдена ссылка в image_url", context)
+        
+        if image_url:
+            await send_log(f"  ✅ Картинка сгенерирована: {image_url[:60]}...", context)
+            return image_url
         else:
-            await send_log("  ⏰ Таймаут генерации (3 минуты)", context, is_error=True)
+            await send_log(f"  ⚠️ Не удалось найти ссылку на картинку в ответе", context, is_error=True)
+            await send_log(f"  📄 Ответ: {str(result)[:300]}", context)
             return None
         
-        result_url = f"https://api.odirouter.ai/model/v1/queue/free-nano-banana-2/requests/{request_id}/response"
-        result_response = requests.get(result_url, headers=headers)
-        result_data = result_response.json()
-        
-        for item in result_data.get("output", []):
-            for content in item.get("content", []):
-                if content.get("type") == "image" and "url" in content:
-                    return content["url"]
+    except requests.exceptions.Timeout:
+        await send_log(f"  ⏰ Таймаут генерации картинки (60 сек)", context, is_error=True)
         return None
-        
     except Exception as e:
-        error_msg = f"❌ Ошибка генерации картинки: {e}"
+        error_msg = f"❌ Ошибка генерации картинки через Kling: {e}"
         await send_log(error_msg, context, is_error=True)
         return None
 
