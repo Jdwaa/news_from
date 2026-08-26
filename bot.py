@@ -763,85 +763,148 @@ async def rewrite_post(news, context):
         return None, None, None
 
 # ==========================================
-# 
-# ==========================================
-# ==========================================
-# 11. ГЕНЕРАЦИЯ КАРТИНКИ (KLING 1.0 через OdiRouter)
+# 11. ГЕНЕРАЦИЯ КАРТИНКИ (Kling 1.0 по документации OdiRouter)
 # ==========================================
 async def generate_image_odirouter(prompt, context):
-    """Генерирует картинку через Kling Image 1.0 (OdiRouter)"""
+    """Генерирует картинку через Kling 1.0 (OdiRouter) строго по документации"""
     await send_log(f"🎨 Генерация картинки через Kling 1.0...", context)
     
-    # Убедимся, что промпт не слишком длинный
-    if len(prompt) > 500:
-        prompt = prompt[:500]
+    # Ограничиваем длину промпта (максимум 2500 символов)
+    if len(prompt) > 2500:
+        prompt = prompt[:2500]
     
-    # Формируем промпт для реалистичной картинки (улучшенный)
-    enhanced_prompt = f"{prompt}, photorealistic, 8k, high quality, sharp focus, cinematic lighting, detailed, professional photography"
+    # Улучшаем промпт для Kling (без лишних деталей)
+    enhanced_prompt = f"{prompt}, photorealistic, 8k, high quality, sharp focus, detailed, professional photography, cinematic lighting"
     
-    url = "https://api.odirouter.ai/v1/chat/completions"
+    # ========== 1. СОЗДАЁМ ЗАДАЧУ ==========
+    url = "https://api.odirouter.ai/model/v1/queue/kling-v1-image"
     headers = {
         "Authorization": f"Bearer {ODIROUTER_API_KEY}",
         "Content-Type": "application/json"
     }
     
     payload = {
-        "model": "kling-image-v1",  # Kling 1.0
-        "messages": [
-            {
-                "role": "user",
-                "content": enhanced_prompt
-            }
-        ],
-        "max_tokens": 4096,
-        "temperature": 0.7
+        "prompt": enhanced_prompt,
+        "negative_prompt": "low quality, blurry, distorted, ugly, bad anatomy, messy, cluttered, watermark, text, extra objects, wrong colors",
+        "resolution": "1k",
+        "n": 1,
+        "aspect_ratio": "16:9",
+        "image_fidelity": 0.5,
+        "watermark_info": {
+            "enabled": False
+        }
     }
     
     try:
-        response = requests.post(url, headers=headers, json=payload, timeout=60)
+        await send_log(f"  📤 Отправка задачи в очередь...", context)
+        response = requests.post(url, headers=headers, json=payload, timeout=30)
         response.raise_for_status()
-        result = response.json()
+        task_data = response.json()
         
-        # Извлекаем URL картинки из ответа
-        # Формат ответа может отличаться, пробуем разные варианты
+        request_id = task_data.get("request_id")
+        if not request_id:
+            await send_log(f"  ❌ Не удалось получить request_id", context, is_error=True)
+            return None
+        
+        await send_log(f"  ✅ Задача создана: {request_id}", context)
+        await send_log(f"  📊 Позиция в очереди: {task_data.get('queue_position', 'неизвестно')}", context)
+        
+        # ========== 2. ПОЛУЧАЕМ URL ДЛЯ СТАТУСА ==========
+        status_url = task_data.get("status_url")
+        if not status_url:
+            status_url = f"https://api.odirouter.ai/model/v1/queue/kling-v1-image/requests/{request_id}/status"
+        
+        # ========== 3. ЖДЁМ ЗАВЕРШЕНИЯ ==========
+        attempts = 0
+        max_attempts = 45  # 45 * 3 сек = 135 сек (2 мин 15 сек)
+        last_status = None
+        
+        while attempts < max_attempts:
+            try:
+                status_response = requests.get(status_url, headers=headers, timeout=10)
+                status_response.raise_for_status()
+                status_data = status_response.json()
+                
+                current_status = status_data.get("status")
+                last_status = current_status
+                attempts += 1
+                
+                # Статусы: PENDING, PROCESSING, COMPLETED, FAILED, CANCELED
+                await send_log(f"  ⏳ Статус: {current_status} (попытка {attempts}/{max_attempts})", context)
+                
+                if current_status == "COMPLETED":
+                    await send_log(f"  ✅ Генерация завершена", context)
+                    break
+                elif current_status in ["FAILED", "CANCELED"]:
+                    error_msg = status_data.get("error", "Неизвестная ошибка")
+                    await send_log(f"  ❌ Генерация не удалась: {error_msg}", context, is_error=True)
+                    return None
+                elif current_status in ["PENDING", "PROCESSING"]:
+                    # Ждём
+                    pass
+                else:
+                    await send_log(f"  ⚠️ Неизвестный статус: {current_status}", context)
+                
+                await asyncio.sleep(3)  # Пауза 3 секунды
+                
+            except requests.exceptions.Timeout:
+                await send_log(f"  ⏰ Таймаут проверки статуса", context, is_error=True)
+                await asyncio.sleep(5)
+                continue
+            except requests.exceptions.RequestException as e:
+                await send_log(f"  ⚠️ Ошибка проверки статуса: {e}", context, is_error=True)
+                await asyncio.sleep(5)
+                continue
+        
+        if attempts >= max_attempts:
+            await send_log(f"  ⏰ Таймаут ожидания генерации (более 2 минут)", context, is_error=True)
+            return None
+        
+        if last_status != "COMPLETED":
+            await send_log(f"  ❌ Генерация не завершена успешно (статус: {last_status})", context, is_error=True)
+            return None
+        
+        # ========== 4. ПОЛУЧАЕМ РЕЗУЛЬТАТ ==========
+        result_url = task_data.get("response_url")
+        if not result_url:
+            result_url = f"https://api.odirouter.ai/model/v1/queue/kling-v1-image/requests/{request_id}/response"
+        
+        result_response = requests.get(result_url, headers=headers, timeout=30)
+        result_response.raise_for_status()
+        result_data = result_response.json()
+        
+        # Извлекаем URL картинки согласно документации
         image_url = None
-        
-        # Вариант 1: прямая ссылка в content
-        if "choices" in result and len(result["choices"]) > 0:
-            content = result["choices"][0].get("message", {}).get("content", "")
-            # Ищем ссылку на изображение в тексте
-            import re
-            url_match = re.search(r'https?://[^\s]+\.(?:jpg|jpeg|png|webp|gif)', content)
-            if url_match:
-                image_url = url_match.group(0)
-                await send_log(f"  ✅ Найдена ссылка в content", context)
-        
-        # Вариант 2: если ссылка в другом поле
-        if not image_url and "data" in result:
-            if isinstance(result["data"], list) and len(result["data"]) > 0:
-                if "url" in result["data"][0]:
-                    image_url = result["data"][0]["url"]
-                    await send_log(f"  ✅ Найдена ссылка в data", context)
-        
-        # Вариант 3: если есть поле image_url
-        if not image_url and "image_url" in result:
-            image_url = result["image_url"]
-            await send_log(f"  ✅ Найдена ссылка в image_url", context)
+        if "output" in result_data and isinstance(result_data["output"], list):
+            for item in result_data["output"]:
+                if "content" in item and isinstance(item["content"], list):
+                    for content_item in item["content"]:
+                        if content_item.get("type") == "image" and "url" in content_item:
+                            image_url = content_item["url"]
+                            break
+                if image_url:
+                    break
         
         if image_url:
             await send_log(f"  ✅ Картинка сгенерирована: {image_url[:60]}...", context)
             return image_url
         else:
-            await send_log(f"  ⚠️ Не удалось найти ссылку на картинку в ответе", context, is_error=True)
-            await send_log(f"  📄 Ответ: {str(result)[:300]}", context)
+            await send_log(f"  ⚠️ Не удалось найти URL картинки в ответе", context, is_error=True)
+            await send_log(f"  📄 Ответ: {str(result_data)[:300]}", context)
             return None
         
     except requests.exceptions.Timeout:
-        await send_log(f"  ⏰ Таймаут генерации картинки (60 сек)", context, is_error=True)
+        await send_log(f"  ⏰ Таймаут запроса к OdiRouter", context, is_error=True)
+        return None
+    except requests.exceptions.RequestException as e:
+        error_msg = f"❌ Ошибка запроса к OdiRouter: {e}"
+        await send_log(error_msg, context, is_error=True)
         return None
     except Exception as e:
         error_msg = f"❌ Ошибка генерации картинки через Kling: {e}"
         await send_log(error_msg, context, is_error=True)
+        import traceback
+        await send_log(f"  📄 {traceback.format_exc()[:300]}", context, is_error=True)
         return None
 
 # ==========================================
