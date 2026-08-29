@@ -1,0 +1,261 @@
+[
+  {
+    "event": "news_selected",
+    "title": "Aramb",
+    "source": "www.producthunt.com",
+    "justification": "Новость предлагает конкретный инструмент, который позволяет обычному пользователю быстро создавать и монетизировать AI-агентов без глубоких технических знаний. Это практичный и полезный лайфхак для тех, кто хочет использовать AI для заработка или автоматизации задач.",
+    "timestamp": "2026-08-28T13:03:16.420352"
+  },
+  {
+    "event": "news_selected",
+    "title": "screenpipe",
+    "source": "www.producthunt.com",
+    "justification": "Это необычное применение AI, которое напрямую полезно каждому, кто работает за компьютером — инструмент записывает экран и превращает действия в автоматизацию. Это практичный лайфхак для повышения продуктивности, в отличие от корпоративных или научных новостей.",
+    "timestamp": "2026-08-28T13:07:14.526783"
+  },
+  {
+    "event": "post_generated",
+    "title": "ТВОЙ КОМПЬЮТЕР ЗАПОМНИТ ВСЁ. НАВСЕГДА. 🤯💾",
+    "length": 950,
+    "source": "www.producthunt.com",
+    "timestamp": "2026-08-28T13:07:32.402349"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 560,
+    "timestamp": "2026-08-28T13:29:13.243737"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 7,
+    "length": 41,
+    "timestamp": "2026-08-28T13:29:13.288415"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 560,
+    "timestamp": "2026-08-28T13:32:36.628667"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 7,
+    "length": 41,
+    "timestamp": "2026-08-28T13:32:36.657547"
+  },
+  {
+    "event": "post_published",
+    "post_id": 1,
+    "title": "🚀 ТЕСТОВЫЙ ПОСТ: ИИ уже здесь",
+    "has_image": false,
+    "timestamp": "2026-08-28T13:37:23.139642"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 4,
+    "length": 628,
+    "timestamp": "2026-08-28T13:43:28.728138"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 2,
+    "length": 950,
+    "timestamp": "2026-08-28T13:43:35.967220"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 3,
+    "length": 529,
+    "timestamp": "2026-08-28T13:43:43.859899"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 2,
+    "length": 832,
+    "timestamp": "2026-08-28T13:43:51.347086"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 2,
+    "length": 933,
+    "timestamp": "2026-08-28T13:44:00.157912"
+  },
+  {
+    "event": "post_published",
+    "post_id": 2,
+    "title": "GOOGLE ПРЕВРАЩАЕТСЯ В ТВОЕГО ЛИЧНОГО ТУРАГЕНТА 🧠✈️",
+    "has_image": true,
+    "timestamp": "2026-08-28T13:51:12.171617"
+  },
+  {
+    "event": "post_published",
+    "post_id": 3,
+    "title": "СДЕЛКА ВЕКА: NVIDIA ПОГЛОЩАЕТ HUGGING FACE ЗА $13 ",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-08-28T14:07:03.298897"
+  },
+  {
+    "event": "post_published",
+    "post_id": 4,
+    "title": "🦆 МИКРОУТКА ЗА $399: КАК МИЛАЯ ИГРУШКА СТАЛА РЕВОЛ",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-08-28T14:09:35.593550"
+  },
+  {
+    "event": "post_published",
+    "post_id": 5,
+    "title": "🤖 GOOGLE ТОЛЬКО ЧТО НАУЧИЛ ИИ СЛЫШАТЬ ТЕБЯ ЛУЧШЕ Ч",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-08-28T18:09:28.414392"
+  },
+  {
+    "event": "post_published",
+    "post_id": 6,
+    "title": "ДОКУМЕНТЫ БОЛЬШЕ НЕ ПОБЕДЯТ! 🚀🧠",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-08-28T21:34:03.405308"
+  },
+  {
+    "event": "post_published",
+    "post_id": 7,
+    "title": "ANDROID 17 ПРЯЧЕТ ВАШИ СЛЕДЫ В СЕТИ! 🕵️♂️🔐",
+    "has_image": true,
+    "image_source": "db_fallback",
+    "timestamp": "2026-08-28T22:43:13.777232"
+  },
+  {
+    "event": "post_published",
+    "post_id": 8,
+    "title": "GEMINI 3.7 FLASH: РАБОЧАЯ ЛОШАДКА, КОТОРАЯ УЖЕ НА ",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-08-29T15:55:44.460251"
+  },
+  {
+    "event": "post_published",
+    "post_id": 9,
+    "title": "ПИСАТЕЛЬ ИЗ «СИЛО» СОЗДАЛ ИДЕАЛЬНУЮ МАШИНУ ДЛЯ ЧЕР",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-08-29T17:04:57.945637"
+  },
+  {
+    "event": "post_published",
+    "post_id": 10,
+    "title": "🤖 ИИ-АГЕНТЫ СХОДЯТ С УМА? УТЕЧКА СКВОЗЬ СИСТЕМУ! 💥",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-08-29T19:12:14.444821"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 880,
+    "timestamp": "2026-08-29T21:38:54.192919"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 832,
+    "timestamp": "2026-08-29T21:39:01.956389"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 718,
+    "timestamp": "2026-08-29T21:39:09.850627"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 2,
+    "length": 787,
+    "timestamp": "2026-08-29T21:39:16.988106"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 921,
+    "timestamp": "2026-08-29T21:39:29.435897"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 883,
+    "timestamp": "2026-08-29T21:39:41.386482"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 3,
+    "length": 629,
+    "timestamp": "2026-08-29T21:39:49.620134"
+  },
+  {
+    "event": "post_published",
+    "post_id": 11,
+    "title": "БОЖЕСТВЕННЫЙ ВЗГЛЯД: ШПИОНАЖ ДЛЯ ВСЕХ? 🛰️👁️🔥",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-08-29T21:46:09.699974"
+  },
+  {
+    "event": "post_published",
+    "post_id": 12,
+    "title": "🤖 АНТРОПИК ПОКАЗАЛ, КАК ИИ УЛУЧШАЕТ САМ СЕБЯ. ЭТО ",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-08-29T22:10:11.060403"
+  },
+  {
+    "event": "post_published",
+    "post_id": 13,
+    "title": "КВАНТОВЫЙ КОМПАС ВМЕСТО GPS: ЗЕМЛЯ СТАЛА НАВИГАТОР",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-08-29T22:14:04.926165"
+  },
+  {
+    "event": "post_published",
+    "post_id": 14,
+    "title": "ТАИЛАНД ЗАПУСКАЕТ AI-РЕАКТОР! 🇹🇭⚡",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-08-29T22:53:56.152481"
+  },
+  {
+    "event": "post_published",
+    "post_id": 15,
+    "title": "ТВОЙ ТЕЛЕФОН СТАНОВИТСЯ ВТОРЫМ ЭКРАНОМ ПК! 🚀",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-08-29T23:15:42.092874"
+  },
+  {
+    "event": "post_published",
+    "post_id": 16,
+    "title": "ИИ-АНАЛИТИК ЗНАЕТ, ЧТО СКАЖУТ ИНВЕСТОРЫ 🤖💸",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-08-29T23:32:04.921156"
+  }
+]
