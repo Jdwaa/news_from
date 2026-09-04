@@ -4,6 +4,7 @@
 АГЕНТ-АНАЛИТИК
 Собирает статистику постов из Telegram.
 Анализирует, какие посты работают лучше.
+Определяет лучшее время для публикации.
 Сохраняет уроки в Memory Bank.
 """
 
@@ -27,12 +28,13 @@ class AnalyticsAgent(BaseAgent):
         1. Проверяет, есть ли посты без статистики
         2. Собирает статистику из Telegram
         3. Анализирует лучшие/худшие посты
-        4. Сохраняет уроки в Memory Bank
+        4. Определяет лучшее время для публикации
+        5. Сохраняет уроки в Memory Bank
         """
         self.log("📊 Начинаю сбор и анализ статистики...")
         
         # 1. Получаем последние посты
-        posts = get_all_posts_with_stats(limit=20)
+        posts = get_all_posts_with_stats(limit=50)
         
         if not posts:
             self.log("⚠️ Нет постов для анализа", is_error=True)
@@ -76,6 +78,11 @@ class AnalyticsAgent(BaseAgent):
         if best_posts:
             self.log(f"🏆 Лучший пост: {best_posts[0]['title'][:40]}... (оценка: {best_posts[0]['score']}/10)")
         
+        # 7. Определяем лучшее время для публикации
+        best_time = self.get_best_posting_time()
+        self.memory.set("analytics_report", best_time)
+        self.log(f"📊 Лучшее время: {best_time['hour']}:00 (день {best_time['day']})")
+        
         return context
     
     async def _collect_stats_from_telegram(self, post: dict) -> dict:
@@ -86,7 +93,7 @@ class AnalyticsAgent(BaseAgent):
             return self._generate_dummy_stats(post)
         
         try:
-            # Получаем ID сообщения из БД (нужно добавить поле message_id в posts)
+            # В реальном коде здесь нужно получать статистику из Telegram API
             # Пока используем заглушку
             return self._generate_dummy_stats(post)
         except Exception as e:
@@ -180,7 +187,7 @@ class AnalyticsAgent(BaseAgent):
     
     def get_summary(self) -> str:
         """Возвращает краткую сводку аналитики"""
-        posts = get_all_posts_with_stats(limit=20)
+        posts = get_all_posts_with_stats(limit=50)
         posts_with_stats = [p for p in posts if p.get('score', 0) > 0]
         
         if not posts_with_stats:
@@ -191,6 +198,9 @@ class AnalyticsAgent(BaseAgent):
         
         best = max(posts_with_stats, key=lambda x: x['score'])
         worst = min(posts_with_stats, key=lambda x: x['score'])
+        
+        # Получаем лучшее время
+        best_time = self.get_best_posting_time()
         
         summary = f"""
 📊 **Аналитика за последние {len(posts_with_stats)} постов**
@@ -204,6 +214,10 @@ class AnalyticsAgent(BaseAgent):
 📉 **Худший пост:**
 {worst['title'][:40]}... (оценка {worst['score']}/10)
 
+⏰ **Лучшее время публикации:**
+{best_time['hour']}:00 (день {self._day_name(best_time['day'])})
+Интервал: {best_time['interval_hours']} ч
+
 📚 **Лучшие практики:**
 {self.memory.get('best_practices', ['Нет данных'])[:3]}
         """
@@ -212,8 +226,13 @@ class AnalyticsAgent(BaseAgent):
     def get_best_posting_time(self) -> dict:
         """
         Анализирует историю постов и возвращает лучшее время для публикации.
+        Учитывает:
+        - Просмотры и оценки постов
+        - День недели
+        - Час публикации
+        - Не рекомендует ночное время (23:00 - 07:00)
         """
-        posts = get_all_posts_with_stats(limit=50)
+        posts = get_all_posts_with_stats(limit=100)
         posts_with_stats = [p for p in posts if p.get('score', 0) > 0]
         
         if not posts_with_stats:
@@ -224,6 +243,7 @@ class AnalyticsAgent(BaseAgent):
                 "reason": "Недостаточно данных, используется стандартное время"
             }
         
+        # Анализируем часы и дни
         hour_stats = {}
         day_stats = {}
         
@@ -252,9 +272,14 @@ class AnalyticsAgent(BaseAgent):
                 self.log(f"  ⚠️ Ошибка парсинга даты: {e}", is_error=True)
                 continue
         
-        best_hour = max(hour_stats, key=hour_stats.get) if hour_stats else 10
+        # Находим лучший час (с учётом ночного запрета 23:00 - 07:00)
+        valid_hours = {h: w for h, w in hour_stats.items() if 7 <= h <= 22}
+        best_hour = max(valid_hours, key=valid_hours.get) if valid_hours else 10
+        
+        # Находим лучший день недели
         best_day = max(day_stats, key=day_stats.get) if day_stats else 0
         
+        # Рассчитываем средний интервал между публикациями
         if len(posts_with_stats) > 1:
             intervals = []
             sorted_posts = sorted(posts_with_stats, key=lambda x: x.get('published_at', ''))
@@ -270,6 +295,9 @@ class AnalyticsAgent(BaseAgent):
         else:
             avg_interval = 4
         
+        # Ограничиваем интервал от 2 до 6 часов
+        avg_interval = max(2, min(6, avg_interval))
+        
         self.log(f"📊 Лучшее время: {best_hour}:00, день недели: {best_day}, интервал: {avg_interval:.1f} ч")
         
         return {
@@ -278,3 +306,8 @@ class AnalyticsAgent(BaseAgent):
             "interval_hours": round(avg_interval, 1),
             "reason": f"На основе {len(posts_with_stats)} постов"
         }
+    
+    def _day_name(self, day_num: int) -> str:
+        """Возвращает название дня недели"""
+        days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
+        return days[day_num] if 0 <= day_num <= 6 else "Неизвестно"

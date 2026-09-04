@@ -315,16 +315,6 @@ class RewriterAgent(BaseAgent):
             "Content-Type": "application/json"
         }
 
-              # ===== ЗАГРУЖАЕМ ПРАКТИКИ ИЗ MEMORY BANK =====
-    async def _call_deepseek(self, content: str, selected: dict, feedback: str, context) -> dict:
-        """Отправляет запрос в DeepSeek и парсит ответ"""
-        
-        url = "https://api.deepseek.com/v1/chat/completions"
-        headers = {
-            "Authorization": f"Bearer {Config.DEEPSEEK_API_KEY}",
-            "Content-Type": "application/json"
-        }
-
         # ===== ЗАГРУЖАЕМ ПРАКТИКИ ИЗ MEMORY BANK =====
         best_practices = self.memory.get("best_practices", [])
         worst_practices = self.memory.get("worst_practices", [])
@@ -349,10 +339,10 @@ class RewriterAgent(BaseAgent):
             feedback_text = f"\n\n⚠️ ЗАМЕЧАНИЯ РЕВИЗОРА (исправь их):\n{feedback}\n\nПерепиши пост, учитывая все замечания выше!"
         
         user_prompt = f"""Новость из {selected.get('source', 'неизвестного источника')}:
-    Заголовок: {selected.get('title', '')}
-    Текст: {content}
-    {feedback_text}
-    {practices_text}"""
+Заголовок: {selected.get('title', '')}
+Текст: {content}
+{feedback_text}
+{practices_text}"""
         
         payload = {
             "model": "deepseek-chat",
@@ -405,7 +395,7 @@ class RewriterAgent(BaseAgent):
             
         except Exception as e:
             self.log(f"❌ Ошибка рерайта: {e}", is_error=True)
-            return None    
+            return None
     
     def _build_post(self, post_data: dict) -> str:
         """Собирает пост из частей"""

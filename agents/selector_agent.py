@@ -113,6 +113,11 @@ class SelectorAgent(BaseAgent):
             match = re.search(r"НОМЕР:\s*(\d+)", content)
             if match:
                 selected_index = int(match.group(1)) - 1
+                # Проверяем, что индекс в допустимых пределах
+                news_list = context.get("news_list", [])
+                if selected_index < 0 or selected_index >= len(news_list):
+                    self.log(f"⚠️ AI вернул неверный номер: {selected_index + 1}, использую первую")
+                    return 0, "Выбрана как первая доступная"
             else:
                 self.log("⚠️ Не удалось найти номер в ответе AI", is_error=True)
                 return 0, "Выбрана как первая доступная"
