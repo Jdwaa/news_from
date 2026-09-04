@@ -1,12 +1,13 @@
 # telegram_bot.py
 
 import os
+import asyncio
 from datetime import datetime
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
 
 from orchestrator import Orchestrator
-from database import init_db, get_posts_by_status, clean_old_posts
+from database import get_posts_by_status, clean_old_posts
 
 
 class TelegramBot:
@@ -14,8 +15,10 @@ class TelegramBot:
         self.token = token
         self.app = None
         self.orchestrator = None
+        self.scheduler_task = None
     
     async def setup(self):
+        """Настраивает бота"""
         self.app = ApplicationBuilder().token(self.token).build()
         
         # 👇 Меню команд (кнопки внизу)
@@ -88,7 +91,7 @@ class TelegramBot:
     async def admin_menu(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         keyboard = [
             [InlineKeyboardButton("🧹 Очистить старые посты", callback_data="clean_posts")],
-            [InlineKeyboardButton("🔄 Перезапустить цикл", callback_data="restart_cycle")],
+            [InlineKeyboardButton("🔄 Перезапустить планировщик", callback_data="restart_scheduler")],
             [InlineKeyboardButton("🔙 Назад", callback_data="menu")],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -123,7 +126,7 @@ class TelegramBot:
         elif query.data == "admin_panel":
             keyboard = [
                 [InlineKeyboardButton("🧹 Очистить старые посты", callback_data="clean_posts")],
-                [InlineKeyboardButton("🔄 Перезапустить цикл", callback_data="restart_cycle")],
+                [InlineKeyboardButton("🔄 Перезапустить планировщик", callback_data="restart_scheduler")],
                 [InlineKeyboardButton("🔙 Назад", callback_data="menu")],
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -137,16 +140,30 @@ class TelegramBot:
             deleted = clean_old_posts(7)
             await query.message.reply_text(f"🧹 Удалено {deleted} старых постов (старше 7 дней)")
         
-        elif query.data == "restart_cycle":
-            await query.message.reply_text("🔄 Перезапускаю цикл...")
+        elif query.data == "restart_scheduler":
+            await query.message.reply_text("🔄 Перезапускаю планировщик...")
+            
+            # Останавливаем старый планировщик
+            if self.scheduler_task and not self.scheduler_task.done():
+                self.scheduler_task.cancel()
+            
+            # Создаём новый оркестратор и планировщик
             self.orchestrator = Orchestrator(bot=context.bot)
-            await self.orchestrator.run()
+            self.scheduler_task = asyncio.create_task(self.orchestrator.run_scheduler())
+            
+            await query.message.reply_text("✅ Планировщик перезапущен!")
     
     def run(self):
+        """Запускает бота (простая версия)"""
         import asyncio
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        loop.run_until_complete(self.setup())
-        print("🚀 Telegram-бот запущен!")
-        print("📌 Кнопки управления всегда в меню (/start) и внизу экрана")
-        self.app.run_polling()
+        try:
+            loop.run_until_complete(self.setup())
+            print("🚀 Telegram-бот запущен!")
+            print("📌 Кнопки управления всегда в меню (/start) и внизу экрана")
+            loop.run_until_complete(self.app.run_polling())
+        except KeyboardInterrupt:
+            print("\n👋 Бот остановлен")
+        finally:
+            loop.close()

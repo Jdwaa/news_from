@@ -146,7 +146,7 @@ def get_last_image_url():
     conn.close()
     return result[0] if result else None    
 
-    # ===== ФУНКЦИИ ДЛЯ СТАТИСТИКИ =====
+# ===== ФУНКЦИИ ДЛЯ СТАТИСТИКИ =====
 
 def init_stats_table():
     """Создаёт таблицу для статистики постов, если её нет"""
@@ -250,4 +250,4 @@ def update_post_message_id(post_id: int, message_id: int):
     c = conn.cursor()
     c.execute("UPDATE posts SET message_id = ? WHERE id = ?", (message_id, post_id))
     conn.commit()
-    conn.close()    
+    conn.close()

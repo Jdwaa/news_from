@@ -15,6 +15,7 @@ from agents.image_agent import ImageAgent
 from agents.publisher_agent import PublisherAgent
 from agents.analytics_agent import AnalyticsAgent
 from agents.editor_agent import EditorAgent
+from agents.scheduler_agent import SchedulerAgent
 from memory_bank import MemoryBank
 from database import save_log
 
@@ -34,6 +35,7 @@ class Orchestrator:
         self.reviewer = ReviewerAgent()
         self.image = ImageAgent()
         self.publisher = PublisherAgent(bot=bot)
+        self.scheduler = SchedulerAgent(orchestrator=self)
         self.memory = MemoryBank()
         
         # Флаг для принудительной публикации
@@ -46,9 +48,8 @@ class Orchestrator:
         2. Выбор лучшей
         3. Цикл Рерайтер → Редактор → Ревизор (до 7 попыток)
         4. Генерация картинки
-        5. Ожидание лучшего времени (на основе аналитики)
-        6. Публикация
-        7. Аналитика (в фоне)
+        5. Публикация
+        6. Аналитика (в фоне)
         """
         if context is None:
             context = {}
@@ -141,30 +142,11 @@ class Orchestrator:
             self._log("⚠️ Не удалось сгенерировать картинку, использую последнюю из БД", is_error=True)
         
         # ==========================================
-        # 5. ОЖИДАНИЕ ЛУЧШЕГО ВРЕМЕНИ (на основе аналитики)
-        # ==========================================
-        self._log("="*60)
-        self._log("⏳ ШАГ 5: ОЖИДАНИЕ ЛУЧШЕГО ВРЕМЕНИ")
-        self._log("="*60)
-        
-        # Загружаем аналитику из Memory Bank
-        analytics_report = self.memory.get("analytics_report")
-        if analytics_report:
-            self._log(f"📊 Лучшее время: {analytics_report.get('best_hour', 10)}:00")
-            self._log(f"📊 Лучший день: {analytics_report.get('best_day', 0)}")
-            self._log(f"📊 Интервал: {analytics_report.get('interval_hours', 4)} ч")
-            
-            # Ждём лучшее время
-            await self.publisher.wait_for_best_time()
-        else:
-            self._log("⚠️ Нет аналитики, публикую сейчас")
-        
-        # ==========================================
-        # 6. ПУБЛИКАЦИЯ
+        # 5. ПУБЛИКАЦИЯ
         # ==========================================
         if context.get("post_text"):
             self._log("="*60)
-            self._log("📤 ШАГ 6: ПУБЛИКАЦИЯ")
+            self._log("📤 ШАГ 5: ПУБЛИКАЦИЯ")
             self._log("="*60)
             
             context = await self.publisher.execute(context)
@@ -177,11 +159,11 @@ class Orchestrator:
             self._log("❌ Нет поста для публикации", is_error=True)
         
         # ==========================================
-        # 7. АНАЛИТИКА (запускается в фоне)
+        # 6. АНАЛИТИКА (запускается только если нет свежей)
         # ==========================================
         if context.get("published_post_id"):
             self._log("="*60)
-            self._log("📊 ШАГ 7: ЗАПУСК АНАЛИТИКИ")
+            self._log("📊 ШАГ 6: ЗАПУСК АНАЛИТИКИ")
             self._log("="*60)
             await self.run_analytics(context)
         
@@ -198,8 +180,12 @@ class Orchestrator:
         
         return context
     
+    async def run_scheduler(self):
+        """Запускает планировщик публикаций"""
+        await self.scheduler.execute({})
+    
     async def run_analytics(self, context: dict = None) -> dict:
-        """Запускает только аналитика"""
+        """Запускает только аналитику"""
         if context is None:
             context = {}
         
@@ -221,8 +207,11 @@ class Orchestrator:
         
         # Сохраняем отчёт в Memory Bank
         report = analytics.get_best_posting_time()
-        self.memory.set("analytics_report", report)
-        self._log(f"📊 Отчёт сохранён: лучшее время {report.get('hour')}:00")
+        if report:
+            self.memory.set("analytics_report", report)
+            self._log(f"📊 Отчёт сохранён: лучшее время {report.get('hour', '?')}:00")
+        else:
+            self._log("⚠️ Не удалось получить отчёт по лучшему времени")
         
         return context
     
