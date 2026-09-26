@@ -122,16 +122,28 @@ def acquire_single_instance_lock(verbose: bool = True):
     return lock_file
 
 
-async def shutdown(bot, scheduler_task):
-    """Аккуратно останавливает планировщик и бота."""
-    if scheduler_task and not scheduler_task.done():
-        print("\n⏹️ Останавливаю планировщик...")
-        scheduler_task.cancel()
-        try:
-            await scheduler_task
-        except asyncio.CancelledError:
-            pass
-    
+async def shutdown(bot, scheduler_tasks):
+    """
+    Аккуратно останавливает планировщики и бота.
+
+    Принимает СПИСОК задач: у бота их несколько (планировщики каналов,
+    мониторинг воронки, обслуживание). Раньше здесь была одна задача, и
+    после перехода на два канала остальные продолжали работать при выходе —
+    процесс не завершался, а блокировка оставалась занятой.
+    """
+    tasks = scheduler_tasks if isinstance(scheduler_tasks, (list, tuple)) else [scheduler_tasks]
+    active = [t for t in tasks if t and not getattr(t, "done", lambda: True)()]
+
+    if active:
+        print(f"\n⏹️ Останавливаю задачи ({len(active)})...")
+        for task in active:
+            task.cancel()
+        for task in active:
+            try:
+                await task
+            except (asyncio.CancelledError, Exception):
+                pass
+
     if bot and bot.app:
         print("⏹️ Останавливаю бота...")
         try:
@@ -147,7 +159,7 @@ async def shutdown(bot, scheduler_task):
 async def main_async():
     """Асинхронная основная функция"""
     bot = None
-    scheduler_task = None
+    scheduler_tasks = []
     
     try:
         # Проверяем конфигурацию: критичные переменные окружения + предупреждения
@@ -261,7 +273,7 @@ async def main_async():
         logging.error(f"Критическая ошибка: {e}", exc_info=True)
         return 1
     finally:
-        await shutdown(bot, scheduler_task)
+        await shutdown(bot, scheduler_tasks)
 
 
 def main():
