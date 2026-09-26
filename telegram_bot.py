@@ -72,6 +72,7 @@ class TelegramBot:
         self.app.add_handler(CommandHandler("status", self.status, admin_only))
         self.app.add_handler(CommandHandler("analytics", self.analytics_cmd, admin_only))
         self.app.add_handler(CommandHandler("growth", self.growth_cmd, admin_only))
+        self.app.add_handler(CommandHandler("pin", self.pin_cmd, admin_only))
         self.app.add_handler(CommandHandler("admin", self.admin_menu, filters=private & admin_only))
         
         self.app.add_handler(CallbackQueryHandler(self.button_handler, admin_only))
@@ -170,6 +171,38 @@ class TelegramBot:
         except Exception as e:
             report = f"⚠️ Не удалось собрать метрики: {e}"
         await self._send(update.message.reply_text, report)
+    
+    async def pin_cmd(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """
+        /pin [news|tips] — поставить или обновить закреп-навигацию канала.
+
+        Без аргумента — для всех активных каналов: это разовая настройка,
+        и удобнее сделать её одной командой, чем по каналу отдельно.
+        """
+        args = getattr(context, "args", None) or []
+        from agents.growth_agent import GrowthAgent
+
+        if args:
+            try:
+                profiles = [get_profile(args[0].strip().lower())]
+            except ValueError:
+                await update.message.reply_text(
+                    f"❓ Неизвестный канал: {args[0]}\n"
+                    f"Доступны: {', '.join(p.key for p in active_profiles())}"
+                )
+                return
+        else:
+            profiles = active_profiles()
+
+        agent = GrowthAgent(bot=self.app.bot)
+        results = []
+        for p in profiles:
+            ok = await agent.update_pin(p)
+            results.append(f"{'✅' if ok else '❌'} {p.title}")
+
+        await update.message.reply_text(
+            "📌 Закреп-навигация:\n" + "\n".join(results)
+        )
     
     async def _send_main_menu(self, chat_id: int):
         """Отправляет главное меню с кнопками."""

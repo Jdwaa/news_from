@@ -1,104 +1,5 @@
 [
   {
-    "event": "news_selected",
-    "title": "Microsoft’s Surface Mouse is back, now with haptic feedback – and I need it",
-    "source": "www.zdnet.com",
-    "justification": "Новость про возвращение мыши Microsoft Surface с тактильной отдачей — это конкретный, осязаемый продукт, который может быть полезен обычному человеку, а не абстрактные исследования или корпоративные анонсы. Тактильная отдача в мыши — необычная и интересная функция, которая может улучшить взаимодействие с компьютером. К тому же новость вызывает личный интерес («I need it»), что делает её живой и relatable для читателей.",
-    "timestamp": "2026-09-26T14:32:57.931460"
-  },
-  {
-    "event": "post_generated",
-    "title": "МЫШКА БУДУЩЕГО ВЕРНУЛАСЬ: ТЕПЕРЬ ОНА ТЕБЯ ЧУВСТВУЕТ 🤖🖱️⚡",
-    "length": 619,
-    "source": "www.zdnet.com",
-    "timestamp": "2026-09-26T14:33:01.463006"
-  },
-  {
-    "event": "news_selected",
-    "title": "Google’s Gemini Can Now Make Calls for You on Pixel Phones",
-    "source": "www.wired.com",
-    "justification": "Эта новость описывает конкретную и полезную функцию для обычных пользователей — Gemini теперь может совершать звонки за вас на смартфонах Pixel. Это наглядный пример практического применения AI в повседневной жизни, который экономит время и решает реальную задачу.",
-    "timestamp": "2026-09-26T14:33:11.783660"
-  },
-  {
-    "event": "news_selected",
-    "title": "Claude Code 2.1.283 получил аудит устаревших промптов и точную фиксацию моделей",
-    "source": "tproger.ru",
-    "justification": "Обновление Claude Code 2.1.283 — практичный инструмент для разработчиков и всех, кто работает с ИИ-ассистентами: аудит устаревших промптов и точная фиксация моделей упрощают поддержку проектов и снижают риск неожиданного поведения. Это полезная прикладная новость, которая сразу применима в работе, а не просто анонс или политическое заявление.",
-    "timestamp": "2026-09-26T14:33:21.938943"
-  },
-  {
-    "event": "post_generated",
-    "title": "🚨 CLAUDE CODE ВЫПУСТИЛ АУДИТ ПРОМПТОВ — ТВОЙ ИИ УСТАЛ ОТ СТАРЫХ ИНСТРУКЦИЙ",
-    "length": 755,
-    "source": "tproger.ru",
-    "timestamp": "2026-09-26T14:33:25.585650"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 2,
-    "length": 755,
-    "timestamp": "2026-09-26T14:33:25.612244"
-  },
-  {
-    "event": "post_published",
-    "post_id": 23,
-    "title": "🚨 CLAUDE CODE ВЫПУСТИЛ АУДИТ ПРОМПТОВ — ТВОЙ ИИ УС",
-    "has_image": true,
-    "image_source": "new",
-    "timestamp": "2026-09-26T14:35:13.425970"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 1,
-    "length": 514,
-    "timestamp": "2026-09-26T14:35:48.342708"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 4,
-    "length": 514,
-    "timestamp": "2026-09-26T14:35:48.372822"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 5,
-    "length": 956,
-    "timestamp": "2026-09-26T14:35:48.398685"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 1,
-    "length": 722,
-    "timestamp": "2026-09-26T14:35:57.289283"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 1,
-    "length": 315,
-    "timestamp": "2026-09-26T14:35:57.313280"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 722,
-    "timestamp": "2026-09-26T14:36:29.273049"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 315,
-    "timestamp": "2026-09-26T14:36:29.283042"
-  },
-  {
     "event": "review_completed",
     "status": "rejected",
     "issues_count": 1,
@@ -716,5 +617,106 @@
     "issues_count": 1,
     "length": 701,
     "timestamp": "2026-09-26T15:30:14.257510"
+  },
+  {
+    "event": "post_published",
+    "post_id": 41,
+    "title": "🚀 ТЕСТ: новостной канал",
+    "has_image": true,
+    "image_source": "db_fallback",
+    "timestamp": "2026-09-26T15:47:03.103209"
+  },
+  {
+    "event": "post_published",
+    "post_id": 42,
+    "title": "💡 ТЕСТ: канал лайфхаков",
+    "has_image": true,
+    "image_source": "db_fallback",
+    "timestamp": "2026-09-26T15:47:03.146318"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 498,
+    "timestamp": "2026-09-26T15:47:03.473979"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 6,
+    "length": 41,
+    "timestamp": "2026-09-26T15:47:03.505243"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 601,
+    "timestamp": "2026-09-26T15:47:03.518139"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 2,
+    "length": 254,
+    "timestamp": "2026-09-26T15:47:03.538157"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 4,
+    "length": 639,
+    "timestamp": "2026-09-26T15:47:03.562149"
+  },
+  {
+    "event": "news_selected",
+    "title": "Why Read a Research Paper When You Can Turn It Into an AI Agent?",
+    "source": "spectrum.ieee.org",
+    "justification": "Эта новость предлагает необычное и практичное применение AI — превращение научных статей в интерактивных агентов, что может radically упростить доступ к сложным исследованиям для обычных людей. Идея «читать не PDF, а общаться с агентом» — свежий лайфхак для студентов, разработчиков и всех, кто работает с научной литературой.",
+    "timestamp": "2026-09-26T15:47:13.851941"
+  },
+  {
+    "event": "post_generated",
+    "title": "НАУЧНЫЕ СТАТЬИ БОЛЬШЕ НЕ ЧИТАЮТ — С НИМИ РАЗГОВАРИВАЮТ 🧠⚡",
+    "length": 787,
+    "source": "spectrum.ieee.org",
+    "timestamp": "2026-09-26T15:47:17.743138"
+  },
+  {
+    "event": "news_selected",
+    "title": "Google Wallet got a lot of new tricks in 2026 – these 5 are my favorites",
+    "source": "www.zdnet.com",
+    "justification": "Новость о Google Wallet напрямую полезна обычному человеку — речь о новых практичных функциях приложения, которым пользуются миллионы людей для повседневных платежей. Это конкретный лайфхак-контент, а не абстрактные рыночные сделки или узкоспециализированные исследования. Читатель сразу понимает, что он получит от материала — новые способы использования знакомого инструмента.",
+    "timestamp": "2026-09-26T15:47:28.594360"
+  },
+  {
+    "event": "news_selected",
+    "title": "Why Read a Research Paper When You Can Turn It Into an AI Agent?",
+    "source": "spectrum.ieee.org",
+    "justification": "Эта новость предлагает необычное и практичное применение AI — превращение научных статей в интерактивных агентов, что делает сложные исследования доступными для обычных людей. Такой подход экономит время и упрощает понимание науки, а также демонстрирует творческое использование технологий.",
+    "timestamp": "2026-09-26T15:47:38.717700"
+  },
+  {
+    "event": "post_generated",
+    "title": "НАУЧНЫЕ СТАТЬИ ТЕПЕРЬ… РАЗГОВАРИВАЮТ С ТОБОЙ 🤖📄",
+    "length": 950,
+    "source": "spectrum.ieee.org",
+    "timestamp": "2026-09-26T15:47:47.208502"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 950,
+    "timestamp": "2026-09-26T15:47:47.230486"
+  },
+  {
+    "event": "post_published",
+    "post_id": 43,
+    "title": "НАУЧНЫЕ СТАТЬИ ТЕПЕРЬ… РАЗГОВАРИВАЮТ С ТОБОЙ 🤖📄",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-09-26T15:48:39.691903"
   }
 ]

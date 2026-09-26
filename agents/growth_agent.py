@@ -21,7 +21,7 @@
 from datetime import datetime
 
 from .base_agent import BaseAgent
-from channels import active_profiles
+from channels import active_profiles, build_post_keyboard, NEWS, TIPS
 from database import (
     save_subscriber_count,
     get_subscriber_growth,
@@ -160,3 +160,132 @@ class GrowthAgent(BaseAgent):
 
         hints.append("   • проверь, что под постами есть кнопки «Подписаться» и «Поделиться»")
         return hints
+
+    # =========================================================
+    # ЗАКРЕП-НАВИГАЦИЯ
+    # =========================================================
+
+    def build_pinned_text(self, profile) -> str:
+        """
+        Текст закреплённого сообщения — «визитка» канала.
+
+        Закреп видит каждый новый подписчик первым. Он должен за один экран
+        объяснить: о чём канал, что тут будет и что делать дальше. Без него
+        новый читатель листает ленту наугад и уходит.
+        """
+        partner = _partner_of(profile)
+        lines = [f"{profile.emoji} *{profile.title}*", ""]
+
+        if profile.key == TIPS:
+            lines += [
+                "Практичные ИИ-лайфхаки для обычных людей: без терминов и",
+                "теории — только то, что можно применить сегодня.",
+                "",
+                "📌 Здесь вы найдёте:",
+                "• готовые приёмы и промпты",
+                "• инструменты, которые реально экономят время",
+                "• разборы на бытовых задачах",
+                "",
+                "Начните с любого поста ниже — каждый решает конкретную задачу.",
+            ]
+        else:
+            lines += [
+                "Главное о мире искусственного интеллекта: прорывы, продукты,",
+                "идеи — простым языком и без воды.",
+                "",
+                "📌 Здесь вы найдёте:",
+                "• ключевые новости ИИ",
+                "• разборы, что это меняет для нас",
+                "• самое интересное за день",
+            ]
+
+        if partner and partner.username:
+            lines += [
+                "",
+                f"👉 Ещё больше пользы: @{partner.username}",
+            ]
+
+        return "\n".join(lines)
+
+    async def update_pin(self, profile) -> bool:
+        """
+        Ставит или обновляет закреплённое сообщение канала.
+
+        Логика: ищем в истории канала наше прежнее приветствие и правим его,
+        а не публикуем новое. Иначе при каждом запуске в канале копился бы
+        мусор из приветствий, и закреп пришлось бы искать вручную.
+
+        Возвращает True, если закреп установлен или обновлён.
+        """
+        if not self.bot:
+            self.log("⚠️ Бот не передан, закреп недоступен", is_error=True)
+            return False
+
+        text = self.build_pinned_text(profile)
+        keyboard = build_post_keyboard(profile, post_title=profile.title)
+
+        pinned_id = self.memory.get(f"pinned_message_id:{profile.key}")
+
+        # 1. Пробуем обновить уже существующее приветствие
+        if pinned_id:
+            try:
+                await self.bot.edit_message_text(
+                    chat_id=profile.chat_id,
+                    message_id=int(pinned_id),
+                    text=text,
+                    parse_mode="Markdown",
+                    reply_markup=keyboard,
+                    disable_web_page_preview=True,
+                )
+                self.log(f"📌 Закреп «{profile.title}» обновлён")
+                await self._ensure_pinned(profile, int(pinned_id))
+                return True
+            except Exception as e:
+                # «Message is not modified» — это НЕ ошибка: текст и кнопки уже
+                # такие же. Раньше мы считали это недоступностью сообщения и
+                # создавали новое, из-за чего в канале копились дубли закрепов.
+                if "not modified" in str(e).lower():
+                    self.log(f"📌 Закреп «{profile.title}» уже актуален")
+                    await self._ensure_pinned(profile, int(pinned_id))
+                    return True
+                # Сообщение могло быть удалено — тогда создаём новое
+                self.log(f"ℹ️ Прежний закреп недоступен ({e}), создаю новый")
+
+        # 2. Создаём новое приветствие
+        try:
+            msg = await self.bot.send_message(
+                chat_id=profile.chat_id,
+                text=text,
+                parse_mode="Markdown",
+                reply_markup=keyboard,
+                disable_web_page_preview=True,
+            )
+        except Exception as e:
+            self.log(f"❌ Не удалось отправить приветствие: {e}", is_error=True)
+            return False
+
+        self.memory.set(f"pinned_message_id:{profile.key}", msg.message_id)
+        await self._ensure_pinned(profile, msg.message_id)
+        return True
+
+    async def _ensure_pinned(self, profile, message_id: int) -> bool:
+        """Закрепляет сообщение, если оно ещё не закреплено."""
+        try:
+            await self.bot.pin_chat_message(
+                chat_id=profile.chat_id,
+                message_id=message_id,
+                disable_notification=True,
+            )
+            self.log(f"📌 Закреп «{profile.title}» установлен (message_id={message_id})")
+            return True
+        except Exception as e:
+            self.log(f"❌ Не удалось закрепить сообщение: {e}", is_error=True)
+            return False
+
+
+def _partner_of(profile):
+    """Профиль канала-партнёра для кросс-промо (или None)."""
+    from channels import PROFILES
+    if not profile.cross_promo:
+        return None
+    return PROFILES.get(profile.cross_promo)
