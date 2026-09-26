@@ -30,7 +30,46 @@ load_dotenv()
 _tasks = []
 
 
-def acquire_single_instance_lock():
+def _process_alive(pid: int) -> bool:
+    """
+    Проверяет, жив ли процесс с таким PID.
+
+    Нужно только для внятной диагностики: сама блокировка снимается ОС при
+    завершении процесса, поэтому «залипший» lock не мешает запуску. Но если
+    файл остался от убитого процесса, в нём лежит чужой PID — и без этой
+    проверки непонятно, запущен бот на самом деле или нет.
+
+    На Windows используем WinAPI через ctypes, а не tasklist: вывод tasklist
+    локализован, и на русской системе его невозможно разобрать надёжно.
+    """
+    if pid <= 0:
+        return False
+    try:
+        if os.name == "nt":
+            import ctypes
+            PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+            STILL_ACTIVE = 259
+            kernel32 = ctypes.windll.kernel32
+            handle = kernel32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, pid)
+            if not handle:
+                return False
+            try:
+                code = ctypes.c_ulong()
+                if kernel32.GetExitCodeProcess(handle, ctypes.byref(code)):
+                    return code.value == STILL_ACTIVE
+                return False
+            finally:
+                kernel32.CloseHandle(handle)
+        else:
+            os.kill(pid, 0)
+            return True
+    except Exception:
+        # Не смогли проверить — считаем, что жив: лучше пропустить старт,
+        # чем поднять второй экземпляр и получить дубли постов.
+        return True
+
+
+def acquire_single_instance_lock(verbose: bool = True):
     """
     Не даёт запустить второй экземпляр бота.
     
@@ -55,7 +94,24 @@ def acquire_single_instance_lock():
             import fcntl
             fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
     except OSError:
+        # Файл залочен по-настоящему: читаем PID для диагностики
+        owner = None
+        try:
+            lock_file.seek(0)
+            owner = (lock_file.read() or "").strip()
+        except Exception:
+            pass
         lock_file.close()
+        
+        if verbose:
+            if owner and owner.isdigit() and _process_alive(int(owner)):
+                print(f"❌ Бот уже запущен в другом процессе (PID {owner}). "
+                      f"Второй экземпляр не нужен: он даст дубли постов.")
+            else:
+                # Лок держит чужой процесс, но не наш бот: так бывает при
+                # запуске из-под отладчика или в контейнере.
+                print("❌ Файл .bot.lock занят другим процессом, хотя бот не запущен. "
+                      "Проверьте, не запущена ли копия бота, либо удалите .bot.lock.")
         return None
     
     lock_file.seek(0)

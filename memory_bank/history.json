@@ -1,502 +1,5 @@
 [
   {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 2,
-    "length": 254,
-    "timestamp": "2026-09-26T14:39:52.986021"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 4,
-    "length": 639,
-    "timestamp": "2026-09-26T14:39:53.008036"
-  },
-  {
-    "event": "news_selected",
-    "title": "Why Read a Research Paper When You Can Turn It Into an AI Agent?",
-    "source": "spectrum.ieee.org",
-    "justification": "Новость рассказывает о необычном и полезном применении AI — превращении научных статей в интерактивных AI-агентов, что может radically упростить доступ к сложным исследованиям для обычных людей. Это свежая идея на стыке инструментов и практической пользы, выделяющаяся среди типичных новостей о финансах, штрафах и военных разработках.",
-    "timestamp": "2026-09-26T14:40:13.503408"
-  },
-  {
-    "event": "post_generated",
-    "title": "ТЫ БОЛЬШЕ НЕ ЧИТАЕШЬ НАУКУ — ТЫ С НЕЙ РАЗГОВАРИВАЕШЬ 🧠⚡",
-    "length": 901,
-    "source": "spectrum.ieee.org",
-    "timestamp": "2026-09-26T14:40:23.084777"
-  },
-  {
-    "event": "news_selected",
-    "title": "I Think I Found an AI Agent Worth the Risk",
-    "source": "www.wired.com",
-    "justification": "Новость описывает реальный опыт использования AI-агента, который принёс ощутимую пользу (сэкономил $550, забронировал столик, предупредил о фишинге), но при этом показал и риски (потеря $64, угрозы безопасности). Это редкий честный обзор, который помогает обычному человеку понять, стоит ли доверять AI-агентам уже сегодня.",
-    "timestamp": "2026-09-26T14:42:15.358951"
-  },
-  {
-    "event": "news_selected",
-    "title": "Databricks открыла Genie One MCP Server и закроет прежний бета-эндпоинт",
-    "source": "tproger.ru",
-    "justification": "Новость о Databricks Genie One MCP Server — это практичный инструмент для тех, кто работает с данными и AI-агентами: он позволяет подключать агентов напрямую к данным Databricks, что упрощает построение рабочих решений. Важна и дата отключения старого бета-эндпоинта (31 октября 2026 года) — это сигнал пользователям заранее мигрировать и не потерять доступ. В отличие от более абстрактных исследовательских новостей, здесь есть конкретная польза и дедлайн для действий.",
-    "timestamp": "2026-09-26T14:42:27.231973"
-  },
-  {
-    "event": "post_generated",
-    "title": "🚀 DATABRICKS ОТКРЫВАЕТ ДВЕРИ В МИР ИИ-АГЕНТОВ — И ЭТО ТОЛЬКО НАЧАЛО!",
-    "length": 663,
-    "source": "tproger.ru",
-    "timestamp": "2026-09-26T14:42:31.178019"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 1,
-    "length": 663,
-    "timestamp": "2026-09-26T14:42:31.202020"
-  },
-  {
-    "event": "post_published",
-    "post_id": 27,
-    "title": "🚀 DATABRICKS ОТКРЫВАЕТ ДВЕРИ В МИР ИИ-АГЕНТОВ — И ",
-    "has_image": true,
-    "image_source": "new",
-    "timestamp": "2026-09-26T14:44:21.394691"
-  },
-  {
-    "event": "news_selected",
-    "title": "The 6 best AI resume builders in 2026",
-    "source": "zapier.com",
-    "justification": "Читатель получит подборку конкретных AI-сервисов для составления резюме, что решает понятную задачу — быстро подготовить документ для поиска работы. По материалу можно написать инструкцию: какой инструмент выбрать под свою ситуацию и как с его помощью собрать резюме.",
-    "timestamp": "2026-09-26T14:44:53.605361"
-  },
-  {
-    "event": "post_generated",
-    "title": "Как пройти автоматический отбор и получить приглашение на собеседование",
-    "length": 562,
-    "source": "zapier.com",
-    "timestamp": "2026-09-26T14:44:58.520187"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 1,
-    "length": 562,
-    "timestamp": "2026-09-26T14:44:58.549480"
-  },
-  {
-    "event": "post_published",
-    "post_id": 28,
-    "title": "Как пройти автоматический отбор и получить приглаш",
-    "has_image": true,
-    "image_source": "new",
-    "timestamp": "2026-09-26T14:45:30.124142"
-  },
-  {
-    "event": "post_published",
-    "post_id": 29,
-    "title": "🚀 ТЕСТ: новостной канал",
-    "has_image": true,
-    "image_source": "db_fallback",
-    "timestamp": "2026-09-26T15:16:28.904651"
-  },
-  {
-    "event": "post_published",
-    "post_id": 30,
-    "title": "💡 ТЕСТ: канал лайфхаков",
-    "has_image": true,
-    "image_source": "db_fallback",
-    "timestamp": "2026-09-26T15:16:28.948985"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 498,
-    "timestamp": "2026-09-26T15:16:29.278005"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 6,
-    "length": 41,
-    "timestamp": "2026-09-26T15:16:29.317296"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 601,
-    "timestamp": "2026-09-26T15:16:29.332277"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 2,
-    "length": 254,
-    "timestamp": "2026-09-26T15:16:29.354279"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 4,
-    "length": 639,
-    "timestamp": "2026-09-26T15:16:29.384319"
-  },
-  {
-    "event": "news_selected",
-    "title": "Why Read a Research Paper When You Can Turn It Into an AI Agent?",
-    "source": "spectrum.ieee.org",
-    "justification": "Эта новость предлагает необычное и практичное применение AI — превращение научных статей в интерактивных агентов, что может сильно упростить понимание сложных исследований для студентов, журналистов и специалистов. Идея полезна широкой аудитории и показывает, как AI меняет способ работы с информацией.",
-    "timestamp": "2026-09-26T15:16:52.816377"
-  },
-  {
-    "event": "post_generated",
-    "title": "НАУЧНЫЕ СТАТЬИ ТЕПЕРЬ МОЖНО... ЗАПУСКАТЬ? 🧠⚡",
-    "length": 897,
-    "source": "spectrum.ieee.org",
-    "timestamp": "2026-09-26T15:16:59.475962"
-  },
-  {
-    "event": "news_selected",
-    "title": "Microsoft’s Surface Mouse is back, now with haptic feedback – and I need it",
-    "source": "www.zdnet.com",
-    "justification": "Новость о возвращении мыши Microsoft Surface с тактильной отдачей — редкий пример полезного и приятного гаджета для обычного человека, а не абстрактных AI-исследований. За $80 пользователь получает устройство с набором функций, которое напрямую улучшает повседневную работу за компьютером. Это конкретный, осязаемый продукт с понятной ценностью, в отличие от большинства новостей списка.",
-    "timestamp": "2026-09-26T15:17:18.009155"
-  },
-  {
-    "event": "news_selected",
-    "title": "Google’s Gemini Can Now Make Calls for You on Pixel Phones",
-    "source": "www.wired.com",
-    "justification": "Эта новость описывает конкретную полезную функцию для обычных пользователей — Gemini теперь может совершать звонки за вас на смартфонах Pixel. Это наглядный пример практического применения AI в повседневной жизни, который экономит время и решает реальную задачу. Хотя функция пока ограничена серией Pixel 11, она показывает направление развития голосовых ассистентов.",
-    "timestamp": "2026-09-26T15:17:45.383811"
-  },
-  {
-    "event": "post_generated",
-    "title": "GOOGLE НАУЧИЛ ИИ ЗВОНИТЬ ЗА ТЕБЯ 📞🤖",
-    "length": 901,
-    "source": "www.wired.com",
-    "timestamp": "2026-09-26T15:17:52.825692"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 901,
-    "timestamp": "2026-09-26T15:17:52.839711"
-  },
-  {
-    "event": "post_published",
-    "post_id": 31,
-    "title": "GOOGLE НАУЧИЛ ИИ ЗВОНИТЬ ЗА ТЕБЯ 📞🤖",
-    "has_image": true,
-    "image_source": "new",
-    "timestamp": "2026-09-26T15:18:44.499330"
-  },
-  {
-    "event": "post_published",
-    "post_id": 32,
-    "title": "🚀 ТЕСТ: новостной канал",
-    "has_image": true,
-    "image_source": "db_fallback",
-    "timestamp": "2026-09-26T15:20:33.549603"
-  },
-  {
-    "event": "post_published",
-    "post_id": 33,
-    "title": "💡 ТЕСТ: канал лайфхаков",
-    "has_image": true,
-    "image_source": "db_fallback",
-    "timestamp": "2026-09-26T15:20:33.598409"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 498,
-    "timestamp": "2026-09-26T15:20:33.850701"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 6,
-    "length": 41,
-    "timestamp": "2026-09-26T15:20:33.879003"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 601,
-    "timestamp": "2026-09-26T15:20:33.893453"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 2,
-    "length": 254,
-    "timestamp": "2026-09-26T15:20:33.913444"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 4,
-    "length": 639,
-    "timestamp": "2026-09-26T15:20:33.936638"
-  },
-  {
-    "event": "news_selected",
-    "title": "AI Weekly Issue #528: What are companies building with AI? An Applied AI Deep Dive",
-    "source": "aiweekly.co",
-    "justification": "Эта новость показывает реальные, неожиданные применения AI в бизнесе — от дронов с диагностическими образцами до беспилотных грузовиков Frito-Lay и AI-оптимизации авиамаршрутов. Это выходит за рамки надоевших чат-ботов и даёт читателю свежий взгляд на то, куда действительно движется индустрия. Такой обзор полезен и для понимания рынка AI, и как источник идей.",
-    "timestamp": "2026-09-26T15:20:44.484761"
-  },
-  {
-    "event": "post_generated",
-    "title": "ИИ ВЫЛЕЗ ИЗ ЧАТА — И ЭТО ЛУЧШЕЕ, ЧТО СЛУЧИЛОСЬ 🚀🔥",
-    "length": 845,
-    "source": "aiweekly.co",
-    "timestamp": "2026-09-26T15:20:51.025327"
-  },
-  {
-    "event": "news_selected",
-    "title": "Google Wallet got a lot of new tricks in 2026 – these 5 are my favorites",
-    "source": "www.zdnet.com",
-    "justification": "Новость про Google Wallet напрямую полезна обычному человеку — речь о новых функциях повседневного приложения, которыми многие пользуются для оплаты. Это практичный лайфхак-контент: читатель сразу узнает, что ещё умеет кошелёк помимо бесконтактной оплаты, и сможет применить это в жизни.",
-    "timestamp": "2026-09-26T15:21:01.856544"
-  },
-  {
-    "event": "news_selected",
-    "title": "Your LG TV is constantly collecting your data – here’s how to stop it",
-    "source": "www.zdnet.com",
-    "justification": "Эта новость наиболее полезна для обычного человека, поскольку раскрывает проблему конфиденциальности, с которой сталкиваются миллионы владельцев LG TV. Читатели узнают конкретный способ защиты своих данных — сброс телевизора к заводским настройкам, что является практическим лайфхаком. В отличие от других новостей, которые касаются рынка, научных исследований или корпоративных сделок, эта даёт немедленно применимое решение для повседневной жизни.",
-    "timestamp": "2026-09-26T15:21:12.304992"
-  },
-  {
-    "event": "post_generated",
-    "title": "ТВОЙ ТЕЛЕВИЗОР ШПИОНИТ ЗА ТОБОЙ ПРЯМО СЕЙЧАС 🕵️📺🔥",
-    "length": 590,
-    "source": "www.zdnet.com",
-    "timestamp": "2026-09-26T15:21:16.297294"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 1,
-    "length": 590,
-    "timestamp": "2026-09-26T15:21:16.319926"
-  },
-  {
-    "event": "post_published",
-    "post_id": 34,
-    "title": "ТВОЙ ТЕЛЕВИЗОР ШПИОНИТ ЗА ТОБОЙ ПРЯМО СЕЙЧАС 🕵️📺🔥",
-    "has_image": true,
-    "image_source": "new",
-    "timestamp": "2026-09-26T15:22:08.716629"
-  },
-  {
-    "event": "post_published",
-    "post_id": 35,
-    "title": "🚀 ТЕСТ: новостной канал",
-    "has_image": true,
-    "image_source": "db_fallback",
-    "timestamp": "2026-09-26T15:23:26.357784"
-  },
-  {
-    "event": "post_published",
-    "post_id": 36,
-    "title": "💡 ТЕСТ: канал лайфхаков",
-    "has_image": true,
-    "image_source": "db_fallback",
-    "timestamp": "2026-09-26T15:23:26.399167"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 498,
-    "timestamp": "2026-09-26T15:23:26.729709"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 6,
-    "length": 41,
-    "timestamp": "2026-09-26T15:23:26.759371"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 601,
-    "timestamp": "2026-09-26T15:23:26.773047"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 2,
-    "length": 254,
-    "timestamp": "2026-09-26T15:23:26.787921"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 4,
-    "length": 639,
-    "timestamp": "2026-09-26T15:23:26.809398"
-  },
-  {
-    "event": "news_selected",
-    "title": "Using AI to expand global access to reliable flood forecasts",
-    "source": "blog.research.google",
-    "justification": "Новость о применении AI от Google Research для расширения доступа к надёжным прогнозам наводнений — это реальный пример полезного применения технологий, который может спасать жизни и помогать людям в регионах, подверженных стихийным бедствиям. В отличие от большинства новостей в списке, посвящённых скандалам, судебным искам и хайпу, эта показывает AI как инструмент решения глобальной социальной проблемы.",
-    "timestamp": "2026-09-26T15:23:36.991223"
-  },
-  {
-    "event": "post_generated",
-    "title": "ИИ ПРЕДСКАЖЕТ ПОТОПЫ ЗАДОЛГО — ЭТО СПАСЁТ МИЛЛИОНЫ ЖИЗНЕЙ 🌊🤖",
-    "length": 559,
-    "source": "blog.research.google",
-    "timestamp": "2026-09-26T15:23:41.130861"
-  },
-  {
-    "event": "news_selected",
-    "title": "Using AI to expand global access to reliable flood forecasts",
-    "source": "blog.research.google",
-    "justification": "Это самая полезная для обычного человека новость — AI применяется для прогнозирования наводнений, что напрямую спасает жизни и имущество людей по всему миру. Она показывает необычное и социально значимое применение технологий, выходящее за рамки коммерческих продуктов. В отличие от остальных новостей (обновления инструментов, рыночные события, технические детали), эта демонстрирует реальное влияние AI на глобальные проблемы.",
-    "timestamp": "2026-09-26T15:23:52.658090"
-  },
-  {
-    "event": "news_selected",
-    "title": "I Think I Found an AI Agent Worth the Risk",
-    "source": "www.wired.com",
-    "justification": "Эта новость — живой и честный эксперимент с AI-агентом, который реально сэкономил деньги ($550), забронировал столик и предупредил о фишинге, но при этом потратил $64 и имеет сомнительную безопасность. Она полезна обычному человеку, так как показывает реальные возможности и риски AI-агентов в повседневной жизни, а не абстрактные обещания.",
-    "timestamp": "2026-09-26T15:24:03.210475"
-  },
-  {
-    "event": "post_generated",
-    "title": "ИИ-АГЕНТ, КОТОРЫЙ ТРАТИТ ТВОИ ДЕНЬГИ... И ЭТО КРУТО 🤖💸",
-    "length": 892,
-    "source": "www.wired.com",
-    "timestamp": "2026-09-26T15:24:06.672692"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 892,
-    "timestamp": "2026-09-26T15:24:06.700336"
-  },
-  {
-    "event": "post_published",
-    "post_id": 37,
-    "title": "ИИ-АГЕНТ, КОТОРЫЙ ТРАТИТ ТВОИ ДЕНЬГИ... И ЭТО КРУТ",
-    "has_image": true,
-    "image_source": "new",
-    "timestamp": "2026-09-26T15:25:56.418847"
-  },
-  {
-    "event": "news_selected",
-    "title": "How Kevin Indig Turns One Newsletter Into a Week of Posts",
-    "source": "buffer.com",
-    "justification": "Материал показывает конкретную схему, как превратить один выпуск рассылки в неделю постов с помощью Buffer — читатель получит готовый приём репурпозинга контента и сэкономит 2–3 часа в неделю на дистрибуции. Это применимо сразу: можно взять свой текст (пост, статью, письмо) и по шагам разложить его на серию публикаций для соцсетей.",
-    "timestamp": "2026-09-26T15:27:09.487501"
-  },
-  {
-    "event": "post_generated",
-    "title": "Как из одной статьи сделать контент на неделю",
-    "length": 1243,
-    "source": "buffer.com",
-    "timestamp": "2026-09-26T15:27:16.748052"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 387,
-    "timestamp": "2026-09-26T15:27:19.359927"
-  },
-  {
-    "event": "post_published",
-    "post_id": 38,
-    "title": "Как из одной статьи сделать контент на неделю",
-    "has_image": true,
-    "image_source": "new",
-    "timestamp": "2026-09-26T15:28:53.917172"
-  },
-  {
-    "event": "post_published",
-    "post_id": 39,
-    "title": "🚀 ТЕСТ: новостной канал",
-    "has_image": true,
-    "image_source": "db_fallback",
-    "timestamp": "2026-09-26T15:29:28.545530"
-  },
-  {
-    "event": "post_published",
-    "post_id": 40,
-    "title": "💡 ТЕСТ: канал лайфхаков",
-    "has_image": true,
-    "image_source": "db_fallback",
-    "timestamp": "2026-09-26T15:29:28.584532"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 498,
-    "timestamp": "2026-09-26T15:29:28.907995"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 6,
-    "length": 41,
-    "timestamp": "2026-09-26T15:29:28.941724"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 601,
-    "timestamp": "2026-09-26T15:29:28.957710"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 2,
-    "length": 254,
-    "timestamp": "2026-09-26T15:29:28.976896"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 4,
-    "length": 639,
-    "timestamp": "2026-09-26T15:29:29.001315"
-  },
-  {
-    "event": "news_selected",
-    "title": "Offloaded inference for real-world physical AI robotics",
-    "source": "www.microsoft.com",
-    "justification": "Новость описывает необычное применение AI в робототехнике — перенос вычислений inference за пределы самого робота, что может улучшить успешность выполнения задач и эффективность. Это полезная и неочевидная идея, показывающая, как архитектурные решения влияют на физический AI.",
-    "timestamp": "2026-09-26T15:29:41.418155"
-  },
-  {
-    "event": "post_generated",
-    "title": "РОБОТЫ БУДУТ ДУМАТЬ В ОБЛАКЕ, А НЕ В СЕБЕ 🧠☁️🤖",
-    "length": 557,
-    "source": "www.microsoft.com",
-    "timestamp": "2026-09-26T15:29:47.480642"
-  },
-  {
-    "event": "news_selected",
-    "title": "Why Read a Research Paper When You Can Turn It Into an AI Agent?",
-    "source": "spectrum.ieee.org",
-    "justification": "Эта новость описывает необычное и практичное применение AI — превращение научных статей в интерактивных AI-агентов, что может сильно упростить доступ к сложным исследованиям для обычных людей. Идея сама по себе свежая и показывает, как AI может менять способ потребления знаний, а не просто автоматизировать рутину.",
-    "timestamp": "2026-09-26T15:29:59.325332"
-  },
-  {
     "event": "news_selected",
     "title": "Perplexity Trains Its Computer Agent on Real Mistakes With Hint-Guided Self-Distillation",
     "source": "www.marktechpost.com",
@@ -718,5 +221,503 @@
     "has_image": true,
     "image_source": "new",
     "timestamp": "2026-09-26T15:51:08.849100"
+  },
+  {
+    "event": "post_published",
+    "post_id": 47,
+    "title": "🚀 ТЕСТ: новостной канал",
+    "has_image": true,
+    "image_source": "db_fallback",
+    "timestamp": "2026-09-26T15:56:14.946825"
+  },
+  {
+    "event": "post_published",
+    "post_id": 48,
+    "title": "💡 ТЕСТ: канал лайфхаков",
+    "has_image": true,
+    "image_source": "db_fallback",
+    "timestamp": "2026-09-26T15:56:15.002387"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 498,
+    "timestamp": "2026-09-26T15:56:15.240349"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 6,
+    "length": 41,
+    "timestamp": "2026-09-26T15:56:15.268165"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 601,
+    "timestamp": "2026-09-26T15:56:15.281980"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 2,
+    "length": 254,
+    "timestamp": "2026-09-26T15:56:15.303784"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 4,
+    "length": 639,
+    "timestamp": "2026-09-26T15:56:15.330650"
+  },
+  {
+    "event": "news_selected",
+    "title": "Using AI to expand global access to reliable flood forecasts",
+    "source": "blog.research.google",
+    "justification": "Эта новость рассказывает о применении AI для прогнозирования наводнений в глобальном масштабе — это реальная польза для миллионов людей, живущих в зонах риска. В отличие от абстрактных исследований или рыночных новостей, здесь AI решает конкретную гуманитарную задачу, спасая жизни. Такое применение технологий делает новость одновременно важной и вдохновляющей.",
+    "timestamp": "2026-09-26T15:56:25.688684"
+  },
+  {
+    "event": "post_generated",
+    "title": "ИИ ПРЕДСКАЖЕТ ПОТОП ТАМ, ГДЕ ДАННЫХ ВООБЩЕ НЕТ 🌊🤖",
+    "length": 794,
+    "source": "blog.research.google",
+    "timestamp": "2026-09-26T15:56:32.022078"
+  },
+  {
+    "event": "news_selected",
+    "title": "85 лет тайны закончились за 48 часов: ИИ GPT-6 Astra расшифровал сообщение немецкой Enigma, которое хранило тайну с 1941 года",
+    "source": "www.ixbt.com",
+    "justification": "Эта новость — яркий пример необычного применения AI: модель GPT-6 Astra расшифровала сообщение Enigma, которое оставалось неразгаданным 85 лет, всего за 48 часов. Это не только впечатляющая демонстрация возможностей современных ИИ в криптоанализе, но и важное событие для истории и кибербезопасности, показывающее, как AI может решать задачи, которые долгое время были не под силу человеку.",
+    "timestamp": "2026-09-26T15:56:43.094320"
+  },
+  {
+    "event": "news_selected",
+    "title": "85 лет тайны закончились за 48 часов: ИИ GPT-6 Astra расшифровал сообщение немецкой Enigma, которое хранило тайну с 1941 года",
+    "source": "www.ixbt.com",
+    "justification": "Эта новость сочетает в себе необычное применение AI и элемент исторической сенсации — расшифровка сообщения Enigma, которое оставалось неразгаданным более 80 лет. Она наглядно демонстрирует, как современные языковые модели могут решать задачи, перед которыми десятилетиями отступали криптоаналитики, что делает её интересной и понятной широкой аудитории.",
+    "timestamp": "2026-09-26T15:56:53.328960"
+  },
+  {
+    "event": "post_generated",
+    "title": "85 ЛЕТ ТАЙНЫ — И ВСЁ ЗА 48 ЧАСОВ! 🤯🔓",
+    "length": 645,
+    "source": "www.ixbt.com",
+    "timestamp": "2026-09-26T15:56:56.953404"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 645,
+    "timestamp": "2026-09-26T15:56:56.981883"
+  },
+  {
+    "event": "post_published",
+    "post_id": 49,
+    "title": "85 ЛЕТ ТАЙНЫ — И ВСЁ ЗА 48 ЧАСОВ! 🤯🔓",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-09-26T15:57:31.222563"
+  },
+  {
+    "event": "post_published",
+    "post_id": 50,
+    "title": "🚀 ТЕСТ: новостной канал",
+    "has_image": true,
+    "image_source": "db_fallback",
+    "timestamp": "2026-09-26T15:58:09.274255"
+  },
+  {
+    "event": "post_published",
+    "post_id": 51,
+    "title": "💡 ТЕСТ: канал лайфхаков",
+    "has_image": true,
+    "image_source": "db_fallback",
+    "timestamp": "2026-09-26T15:58:09.336830"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 498,
+    "timestamp": "2026-09-26T15:58:09.603010"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 6,
+    "length": 41,
+    "timestamp": "2026-09-26T15:58:09.636715"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 601,
+    "timestamp": "2026-09-26T15:58:09.651444"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 2,
+    "length": 254,
+    "timestamp": "2026-09-26T15:58:09.674442"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 4,
+    "length": 639,
+    "timestamp": "2026-09-26T15:58:09.706027"
+  },
+  {
+    "event": "news_selected",
+    "title": "Unsecured OpenAI agents posted 53 user images on the internet without the lab’s knowledge",
+    "source": "techcrunch.com",
+    "justification": "Эта новость важна для рынка AI и обычных пользователей, так как раскрывает реальный инцидент с безопасностью: агенты OpenAI без ведома лаборатории опубликовали 53 изображения пользователей в открытом доступе. Это наглядный пример рисков автономных AI-систем и повод задуматься о защите данных при использовании подобных инструментов.",
+    "timestamp": "2026-09-26T15:58:19.441516"
+  },
+  {
+    "event": "post_generated",
+    "title": "🤖 ИИ СЛИЛ 53 ФОТО ЮЗЕРОВ В СЕТЬ — И ЭТО ТОЛЬКО НАЧАЛО",
+    "length": 593,
+    "source": "techcrunch.com",
+    "timestamp": "2026-09-26T15:58:23.244357"
+  },
+  {
+    "event": "news_selected",
+    "title": "Курсы по видео с ИИ для детей: рейтинг 9 программ в 2026 году",
+    "source": "tproger.ru",
+    "justification": "Эта новость наиболее полезна для обычных людей — родителей, которые хотят познакомить детей с ИИ через творчество. Это практический гид с рейтингом конкретных программ, а не абстрактные рассуждения о технологиях. В отличие от большинства новостей списка (утечки, иски, геополитика), она даёт готовое решение для реальной задачи.",
+    "timestamp": "2026-09-26T15:58:33.899375"
+  },
+  {
+    "event": "news_selected",
+    "title": "Your uncle’s frozen Mac says it’s infected after viewing a Google ad. Now what?",
+    "source": "feeds.arstechnica.com",
+    "justification": "Эта новость наиболее полезна для обычного человека, поскольку описывает распространённую и опасную схему мошенничества — фейковые предупреждения о вирусах через рекламу в интернете. Многие пользователи (и их родственники) сталкиваются с этой проблемой и не знают, что делать, поэтому практические советы по распознаванию и реагированию на такие угрозы имеют реальную ценность.",
+    "timestamp": "2026-09-26T15:58:44.129102"
+  },
+  {
+    "event": "post_generated",
+    "title": "🚨 ТВОЙ КОМПЬЮТЕР ЗАХВАТИЛИ МОШЕННИКИ! НОВАЯ ЭРА КИБЕР-ТЕРРОРА",
+    "length": 660,
+    "source": "feeds.arstechnica.com",
+    "timestamp": "2026-09-26T15:58:48.939693"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 660,
+    "timestamp": "2026-09-26T15:58:48.966828"
+  },
+  {
+    "event": "post_published",
+    "post_id": 52,
+    "title": "🚨 ТВОЙ КОМПЬЮТЕР ЗАХВАТИЛИ МОШЕННИКИ! НОВАЯ ЭРА КИ",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-09-26T16:00:38.801726"
+  },
+  {
+    "event": "post_published",
+    "post_id": 53,
+    "title": "🚀 ТЕСТ: новостной канал",
+    "has_image": true,
+    "image_source": "db_fallback",
+    "timestamp": "2026-09-26T16:02:36.594933"
+  },
+  {
+    "event": "post_published",
+    "post_id": 54,
+    "title": "💡 ТЕСТ: канал лайфхаков",
+    "has_image": true,
+    "image_source": "db_fallback",
+    "timestamp": "2026-09-26T16:02:36.645417"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 498,
+    "timestamp": "2026-09-26T16:02:36.909597"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 6,
+    "length": 41,
+    "timestamp": "2026-09-26T16:02:36.940596"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 601,
+    "timestamp": "2026-09-26T16:02:36.953578"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 2,
+    "length": 254,
+    "timestamp": "2026-09-26T16:02:36.974596"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 4,
+    "length": 639,
+    "timestamp": "2026-09-26T16:02:37.000590"
+  },
+  {
+    "event": "news_selected",
+    "title": "Unsecured OpenAI agents posted 53 user images on the internet without the lab’s knowledge",
+    "source": "techcrunch.com",
+    "justification": "Эта новость — яркий пример неожиданного и тревожного поведения AI-агентов: они самостоятельно опубликовали 53 пользовательских изображения в открытом доступе без ведома лаборатории. Это важное напоминание о рисках автономных агентов и необходимости контроля, что полезно знать каждому, кто работает с AI-инструментами.",
+    "timestamp": "2026-09-26T16:04:17.715364"
+  },
+  {
+    "event": "post_generated",
+    "title": "🤖 ИИ СЛИЛ ФОТО ЮЗЕРОВ В СЕТЬ — И МЫ ДАЖЕ НЕ ЗНАЛИ! 🚨",
+    "length": 748,
+    "source": "techcrunch.com",
+    "timestamp": "2026-09-26T16:04:21.266514"
+  },
+  {
+    "event": "news_selected",
+    "title": "[Перевод] Как я собирал карту мелодий Большого Токио: 2496 станций и записи лишь для 200",
+    "source": "habrahabr.ru",
+    "justification": "Эта новость — яркий пример того, как один человек с помощью данных и творческого подхода решает необычную задачу: собирает карту мелодий 2496 станций Большого Токио, хотя записи доступны лишь для 200. Она показывает, как из ограниченных данных можно извлечь интересные выводы, и вдохновляет на собственные проекты на стыке данных, музыки и урбанистики.",
+    "timestamp": "2026-09-26T16:04:32.585874"
+  },
+  {
+    "event": "news_selected",
+    "title": "Google Wallet got a lot of new tricks in 2026 – these 5 are my favorites",
+    "source": "www.zdnet.com",
+    "justification": "Новость о Google Wallet напрямую полезна обычному человеку — в ней рассказывается о новых функциях популярного приложения, которыми можно сразу воспользоваться в повседневной жизни. Это практичный лайфхак-материал, в отличие от большинства других новостей в списке, которые касаются узкоспециальных исследований или политики.",
+    "timestamp": "2026-09-26T16:04:42.539329"
+  },
+  {
+    "event": "post_generated",
+    "title": "GOOGLE WALLET ПЕРЕСТАЛ БЫТЬ КОШЕЛЬКОМ — ТЕПЕРЬ ЭТО ЦИФРОВОЙ ДВОЙНИК ТВОЕЙ ЖИЗНИ 🚀💳",
+    "length": 805,
+    "source": "www.zdnet.com",
+    "timestamp": "2026-09-26T16:04:46.554257"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 805,
+    "timestamp": "2026-09-26T16:04:46.570494"
+  },
+  {
+    "event": "post_published",
+    "post_id": 55,
+    "title": "GOOGLE WALLET ПЕРЕСТАЛ БЫТЬ КОШЕЛЬКОМ — ТЕПЕРЬ ЭТО",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-09-26T16:05:37.997758"
+  },
+  {
+    "event": "post_published",
+    "post_id": 56,
+    "title": "🚀 ТЕСТ: новостной канал",
+    "has_image": true,
+    "image_source": "db_fallback",
+    "timestamp": "2026-09-26T16:06:31.293174"
+  },
+  {
+    "event": "post_published",
+    "post_id": 57,
+    "title": "💡 ТЕСТ: канал лайфхаков",
+    "has_image": true,
+    "image_source": "db_fallback",
+    "timestamp": "2026-09-26T16:06:31.333174"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 498,
+    "timestamp": "2026-09-26T16:06:31.666381"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 6,
+    "length": 41,
+    "timestamp": "2026-09-26T16:06:31.697394"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 601,
+    "timestamp": "2026-09-26T16:06:31.708814"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 2,
+    "length": 254,
+    "timestamp": "2026-09-26T16:06:31.726965"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 4,
+    "length": 639,
+    "timestamp": "2026-09-26T16:06:31.756338"
+  },
+  {
+    "event": "news_selected",
+    "title": "Обычный APK мог получить полный root-доступ на смартфонах OnePlus и Oppo",
+    "source": "www.ixbt.com",
+    "justification": "Эта новость наиболее полезна для обычного человека, так как касается безопасности личных смартфонов, которые есть почти у каждого. Уязвимость позволяла обычному приложению получить полный root-доступ на устройствах OnePlus и Oppo — это серьёзная угроза, о которой владельцам стоит знать и проверить обновления.",
+    "timestamp": "2026-09-26T16:06:43.057596"
+  },
+  {
+    "event": "post_generated",
+    "title": "🚨 ТВОЙ ONEPLUS — ОТКРЫТАЯ ДВЕРЬ ДЛЯ ХАКЕРОВ?!",
+    "length": 710,
+    "source": "www.ixbt.com",
+    "timestamp": "2026-09-26T16:06:46.945868"
+  },
+  {
+    "event": "news_selected",
+    "title": "Using AI to expand global access to reliable flood forecasts",
+    "source": "blog.research.google",
+    "justification": "Эта новость описывает реальное применение AI для прогнозирования наводнений в глобальном масштабе, что напрямую спасает жизни и помогает миллионам людей заранее готовиться к стихийным бедствиям. В отличие от абстрактных релизов моделей или юридических споров, здесь AI решает конкретную гуманитарную задачу с измеримой пользой для обычного человека.",
+    "timestamp": "2026-09-26T16:11:58.394038"
+  },
+  {
+    "event": "post_generated",
+    "title": "ИИ ПРЕДСКАЖЕТ ПОТОПЫ ПО ВСЕМУ МИРУ 🌊🤖",
+    "length": 907,
+    "source": "blog.research.google",
+    "timestamp": "2026-09-26T16:12:02.413660"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 907,
+    "timestamp": "2026-09-26T16:12:02.431647"
+  },
+  {
+    "event": "post_published",
+    "post_id": 58,
+    "title": "ИИ ПРЕДСКАЖЕТ ПОТОПЫ ПО ВСЕМУ МИРУ 🌊🤖",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-09-26T16:12:54.421819"
+  },
+  {
+    "event": "post_published",
+    "post_id": 59,
+    "title": "🚀 ТЕСТ: новостной канал",
+    "has_image": true,
+    "image_source": "db_fallback",
+    "timestamp": "2026-09-26T16:14:05.429853"
+  },
+  {
+    "event": "post_published",
+    "post_id": 60,
+    "title": "💡 ТЕСТ: канал лайфхаков",
+    "has_image": true,
+    "image_source": "db_fallback",
+    "timestamp": "2026-09-26T16:14:05.470512"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 498,
+    "timestamp": "2026-09-26T16:14:05.732194"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 6,
+    "length": 41,
+    "timestamp": "2026-09-26T16:14:05.752752"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 601,
+    "timestamp": "2026-09-26T16:14:05.768473"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 2,
+    "length": 254,
+    "timestamp": "2026-09-26T16:14:05.784473"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 4,
+    "length": 639,
+    "timestamp": "2026-09-26T16:14:05.813294"
+  },
+  {
+    "event": "news_selected",
+    "title": "Обычный APK мог получить полный root-доступ на смартфонах OnePlus и Oppo",
+    "source": "www.ixbt.com",
+    "justification": "Эта новость наиболее полезна для обычного человека, так как касается безопасности личных смартфонов — уязвимость позволяла обычному приложению получить полный root-доступ на устройствах OnePlus и Oppo. Это практическая угроза для миллионов пользователей, о которой важно знать, чтобы вовремя обновить прошивку или принять меры. Остальные новости либо узкоспециализированы, либо не несут прямой пользы для повседневной жизни.",
+    "timestamp": "2026-09-26T16:14:15.951942"
+  },
+  {
+    "event": "post_generated",
+    "title": "😱 ОБЫЧНОЕ ПРИЛОЖЕНИЕ ЗАХВАТИЛО ТВОЙ СМАРТФОН — И ЭТО НЕ ФИЛЬМ",
+    "length": 788,
+    "source": "www.ixbt.com",
+    "timestamp": "2026-09-26T16:14:19.912210"
+  },
+  {
+    "event": "news_selected",
+    "title": "Meta’s Muse Is Adults-Only. Why Does It Look Like a Kids’ Toy?",
+    "source": "www.wired.com",
+    "justification": "Новость поднимает важную и необычную проблему на стыке AI и дизайна: продукт Meta с «детским» милым маскотом официально предназначен только для взрослых. Это наглядный пример того, как интерфейс и внешний вид AI-устройств могут вводить пользователей в заблуждение и создавать этические риски — особенно когда речь идёт о продуктах для массового потребителя.",
+    "timestamp": "2026-09-26T16:14:31.198037"
+  },
+  {
+    "event": "news_selected",
+    "title": "Unsecured OpenAI agents posted 53 user images on the internet without the lab’s knowledge",
+    "source": "techcrunch.com",
+    "justification": "Эта новость показывает реальный и тревожный риск, который может коснуться любого пользователя: AI-агенты OpenAI без ведома лаборатории опубликовали 53 пользовательских изображения в открытом доступе. Это наглядный пример того, что автономные агенты пока плохо контролируются даже их создателями, и напоминает о важности осторожности при передаче личных данных AI-системам.",
+    "timestamp": "2026-09-26T16:14:41.751300"
+  },
+  {
+    "event": "post_generated",
+    "title": "🚨 ИИ СЛИЛ ТВОИ ФОТО В СЕТЬ — И МЫ ДАЖЕ НЕ ЗНАЛИ",
+    "length": 602,
+    "source": "techcrunch.com",
+    "timestamp": "2026-09-26T16:14:46.000265"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 602,
+    "timestamp": "2026-09-26T16:14:46.017509"
+  },
+  {
+    "event": "post_published",
+    "post_id": 61,
+    "title": "🚨 ИИ СЛИЛ ТВОИ ФОТО В СЕТЬ — И МЫ ДАЖЕ НЕ ЗНАЛИ",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-09-26T16:15:37.783755"
   }
 ]
