@@ -25,6 +25,7 @@ from database import get_posts_by_status, clean_old_posts
 from memory_bank import MemoryBank
 from console_utils import setup_utf8_console
 from config import Config
+from channels import get_profile, active_profiles, NEWS
 
 # UI может использоваться и в отдельном процессе — консоль настраиваем и здесь
 setup_utf8_console()
@@ -40,6 +41,7 @@ class TelegramBot:
         self.app = None
         self.orchestrator = None
         self.scheduler_task = None
+        self.scheduler_tasks = []
         self.memory = MemoryBank()
         self._post_lock = asyncio.Lock()
         # Проверка связи с Telegram на старте: нужна, чтобы main.py отличил
@@ -137,13 +139,22 @@ class TelegramBot:
         await self._send_main_menu(update.effective_chat.id)
     
     def _main_menu_keyboard(self) -> InlineKeyboardMarkup:
-        """Клавиатура главного меню."""
-        return InlineKeyboardMarkup([
-            [InlineKeyboardButton("📰 Создать пост", callback_data="post_now")],
-            [InlineKeyboardButton("📊 Статус", callback_data="status")],
-            [InlineKeyboardButton("📈 Аналитика", callback_data="analytics")],
-            [InlineKeyboardButton("🔧 Админ-панель", callback_data="admin_panel")],
-        ])
+        """
+        Клавиатура главного меню.
+
+        Кнопки публикации строятся по активным каналам: если CHANNEL_TIPS_ID
+        не задан, кнопки лайфхаков не будет — интерфейс не должен предлагать
+        действие, которое заведомо не сработает.
+        """
+        rows = []
+        for p in active_profiles():
+            rows.append([InlineKeyboardButton(
+                f"{p.emoji} Пост: {p.title}", callback_data=f"post_now:{p.key}"
+            )])
+        rows.append([InlineKeyboardButton("📊 Статус", callback_data="status")])
+        rows.append([InlineKeyboardButton("📈 Аналитика", callback_data="analytics")])
+        rows.append([InlineKeyboardButton("🔧 Админ-панель", callback_data="admin_panel")])
+        return InlineKeyboardMarkup(rows)
     
     async def _send_main_menu(self, chat_id: int):
         """Отправляет главное меню с кнопками."""
@@ -170,7 +181,40 @@ class TelegramBot:
         )
     
     async def post_now(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        await self._run_manual_cycle(update.message.reply_text)
+        """
+        /post — принудительная публикация.
+
+        Без аргумента предлагает выбрать канал кнопками, если каналов несколько.
+        С аргументом (/post tips) публикует сразу в указанный канал.
+        """
+        args = getattr(context, "args", None) or []
+        if args:
+            key = args[0].strip().lower()
+            try:
+                profile = get_profile(key)
+            except ValueError:
+                await update.message.reply_text(
+                    f"❓ Неизвестный канал: {key}\n"
+                    f"Доступны: {', '.join(p.key for p in active_profiles())}"
+                )
+                return
+            await self._run_manual_cycle(update.message.reply_text, profile)
+            return
+        
+        profiles = active_profiles()
+        if len(profiles) == 1:
+            await self._run_manual_cycle(update.message.reply_text, profiles[0])
+            return
+        
+        # Каналов несколько — спрашиваем, куда публиковать
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton(f"{p.emoji} {p.title}", callback_data=f"post_now:{p.key}")]
+            for p in profiles
+        ])
+        await update.message.reply_text(
+            "📤 Куда публиковать принудительно?",
+            reply_markup=keyboard
+        )
     
     async def status(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         published = len(get_posts_by_status('published'))
@@ -215,17 +259,29 @@ class TelegramBot:
         query = update.callback_query
         await query.answer()
         
-        if query.data == "post_now":
-            await self._run_manual_cycle(query.message.reply_text)
+        data = query.data or ""
         
-        elif query.data == "status":
-            published = len(get_posts_by_status('published'))
-            pending = len(get_posts_by_status('pending'))
-            await query.message.reply_text(
-                f"📊 Опубликовано: {published}\n⏳ Ожидают: {pending}"
-            )
+        # Кнопки публикации несут канал в callback_data: "post_now:news" / "post_now:tips"
+        if data.startswith("post_now"):
+            key = data.split(":", 1)[1] if ":" in data else NEWS
+            try:
+                profile = get_profile(key)
+            except ValueError:
+                await query.message.reply_text(f"❓ Неизвестный канал: {key}")
+                return
+            await self._run_manual_cycle(query.message.reply_text, profile)
         
-        elif query.data == "analytics":
+        elif data == "status":
+            lines = ["📊 *Статистика по каналам*", ""]
+            for p in active_profiles():
+                published = len(get_posts_by_status('published', channel=p.key))
+                pending = len(get_posts_by_status('pending', channel=p.key))
+                lines.append(f"{p.emoji} *{p.title}*")
+                lines.append(f"   ✅ опубликовано: {published}")
+                lines.append(f"   ⏳ ожидают: {pending}")
+            await query.message.reply_text("\n".join(lines), parse_mode="Markdown")
+        
+        elif data == "analytics":
             await self._send(query.message.reply_text, "📊 Собираю аналитику...")
             await self._send(query.message.reply_text, await self._collect_analytics(context.bot))
         
@@ -250,13 +306,38 @@ class TelegramBot:
             await query.message.reply_text("✅ Планировщик перезапущен!")
     
     def restart_scheduler(self, bot):
-        """Перезапускает планировщик (общая логика для кнопки и внешних вызовов)."""
-        if self.scheduler_task and not self.scheduler_task.done():
-            self.scheduler_task.cancel()
+        """
+        Перезапускает планировщики (общая логика для кнопки и внешних вызовов).
+
+        Планировщик создаётся на КАЖДЫЙ активный канал: у них разные интервалы,
+        разные метки последней публикации и сдвиг расписания. Один общий
+        планировщик смешивал бы каналы и ломал расписание.
+        """
+        self.stop_schedulers()
         
-        self.orchestrator = Orchestrator(bot=bot)
-        self.scheduler_task = asyncio.create_task(self.orchestrator.run_scheduler())
-        return self.scheduler_task
+        self.scheduler_tasks = []
+        for profile in active_profiles():
+            orchestrator = Orchestrator(bot=bot, profile=profile)
+            if profile.key == NEWS:
+                # Основной оркестратор канала новостей — для команд и аналитики
+                self.orchestrator = orchestrator
+            task = asyncio.create_task(
+                orchestrator.run_scheduler(), name=f"scheduler-{profile.key}"
+            )
+            self.scheduler_tasks.append(task)
+        
+        if not self.scheduler_tasks:
+            # Каналов нет — создаём хотя бы новостной, чтобы команды работали
+            self.orchestrator = Orchestrator(bot=bot, profile=get_profile(NEWS))
+        
+        return self.scheduler_tasks
+    
+    def stop_schedulers(self):
+        """Останавливает все запущенные планировщики."""
+        for task in getattr(self, "scheduler_tasks", []):
+            if task and not task.done():
+                task.cancel()
+        self.scheduler_tasks = []
     
     # ==========================================
     # ВНУТРЕННЕЕ
@@ -276,47 +357,65 @@ class TelegramBot:
             return filters.User(user_id=admin_ids[0])
         return filters.User(user_id=admin_ids)
     
-    async def _run_manual_cycle(self, reply):
-        """Ручной запуск цикла из Telegram."""
+    async def _run_manual_cycle(self, reply, profile=None):
+        """
+        Ручной запуск цикла из Telegram.
+
+        Профиль определяет канал и его стиль. Кулдаун у каждого канала свой:
+        иначе запуск в новостной блокировал бы проверку лайфхаков.
+        """
+        profile = profile or get_profile(NEWS)
+        
         if self._post_lock.locked():
             await reply("⏳ Цикл уже выполняется, дождись окончания.")
             return
         
-        if not self._cooldown_passed():
+        if not self._cooldown_passed(profile):
             await reply(
-                f"⏳ Слишком часто: следующий ручной запуск возможен через "
-                f"{self._cooldown_left() // 60} мин."
+                f"⏳ Слишком часто для «{profile.title}»: следующий запуск через "
+                f"{self._cooldown_left(profile) // 60} мин."
             )
             return
         
         async with self._post_lock:
-            self.memory.set("last_manual_run_at", datetime.now().astimezone().isoformat())
-            await reply("📡 Запускаю цикл подготовки поста...")
+            self.memory.set(self._manual_run_key(profile),
+                            datetime.now().astimezone().isoformat())
+            await reply(f"📡 Запускаю цикл подготовки поста для «{profile.title}»...")
             
-            self.orchestrator = Orchestrator(bot=self.app.bot)
+            self.orchestrator = Orchestrator(bot=self.app.bot, profile=profile)
             # Картинку генерируем и здесь: раньше стоял skip_image_generation=True,
             # из-за чего ручной пост всегда уходил без картинки.
             # Бюджет времени страхует публикацию: если генерация не уложится,
             # ImageAgent пропустит картинку, но пост всё равно выйдет.
             context = {
                 "deadline": time.time() + self.MANUAL_CYCLE_TIMEOUT,
+                "channel_profile": profile,
             }
             result = await self.orchestrator.run(context)
             
             if result.get("published_post_id"):
-                # Планировщик отсчитывает интервал от этой метки, иначе он
-                # опубликует ещё один пост сразу после ручного
-                self.memory.set("last_publish_at", datetime.now().astimezone().isoformat())
-                await reply(f"✅ Пост опубликован! ID: {result['published_post_id']}")
+                # Планировщик этого канала отсчитывает интервал от своей метки,
+                # иначе он опубликует ещё один пост сразу после ручного.
+                self.memory.set(profile.memory_key("last_publish_at"),
+                                datetime.now().astimezone().isoformat())
+                await reply(
+                    f"✅ Пост опубликован в «{profile.title}»! ID: {result['published_post_id']}"
+                )
             elif result.get("duplicate_skipped"):
                 await reply("⚠️ Эта новость уже публиковалась за сутки. Попробуй позже.")
             else:
                 await reply("⚠️ Пост не опубликован. Проверь логи.")
     
-    def _cooldown_passed(self) -> bool:
+    @staticmethod
+    def _manual_run_key(profile) -> str:
+        """Ключ метки ручного запуска, изолированный по каналу."""
+        return profile.memory_key("last_manual_run_at")
+    
+    def _cooldown_passed(self, profile=None) -> bool:
+        profile = profile or get_profile(NEWS)
         if Config.POST_COOLDOWN <= 0:
             return True
-        last = self.memory.get("last_manual_run_at")
+        last = self.memory.get(self._manual_run_key(profile))
         if not last:
             return True
         last_dt = self._parse_last_run(last)
@@ -324,8 +423,9 @@ class TelegramBot:
             return True
         return (datetime.now().astimezone() - last_dt).total_seconds() >= Config.POST_COOLDOWN
     
-    def _cooldown_left(self) -> int:
-        last = self.memory.get("last_manual_run_at")
+    def _cooldown_left(self, profile=None) -> int:
+        profile = profile or get_profile(NEWS)
+        last = self.memory.get(self._manual_run_key(profile))
         last_dt = self._parse_last_run(last)
         if last_dt is None:
             return 0
@@ -353,7 +453,9 @@ class TelegramBot:
         return parsed
     
     def _scheduler_alive(self) -> bool:
-        return bool(self.scheduler_task and not self.scheduler_task.done())
+        return bool(self.scheduler_tasks) and any(
+            t for t in self.scheduler_tasks if not t.done()
+        )
     
     def _admin_keyboard(self) -> InlineKeyboardMarkup:
         return InlineKeyboardMarkup([

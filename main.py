@@ -12,6 +12,7 @@ from database import init_db, clean_old_posts
 from config import Config
 from orchestrator import Orchestrator
 from console_utils import setup_utf8_console
+from channels import active_profiles
 
 # Без этого первый же print с эмодзи падает на cp1251-консоли Windows
 setup_utf8_console()
@@ -144,15 +145,20 @@ async def main_async():
             print("   Проверьте доступ в интернет и правильность TELEGRAM_TOKEN.")
             return 1
         
-        # 8. Запускаем планировщик (автоматическая публикация).
+        # 8. Запускаем планировщики (автоматическая публикация) — по одному на канал.
         # Только после старта бота: планировщик публикует через него.
-        print("⏰ Запуск планировщика публикаций...")
-        scheduler_task = asyncio.create_task(orchestrator.run_scheduler())
-        _tasks.append(scheduler_task)
+        # Регистрируем их в самом боте, чтобы кнопка «Перезапустить планировщик»
+        # управляла теми же задачами, а не создавала вторые.
+        print("⏰ Запуск планировщиков публикаций...")
+        scheduler_tasks = bot.restart_scheduler(bot.app.bot)
+        _tasks.extend(scheduler_tasks)
+        for profile in active_profiles():
+            print(f"   • «{profile.title}» — интервал {profile.interval // 3600} ч, "
+                  f"сдвиг {profile.schedule_offset // 3600} ч")
         
         print("🚀 Telegram-бот готов к работе!")
         
-        # Держим бота в живых: ждём сигнала остановки или падения планировщика
+        # Держим бота в живых: ждём сигнала остановки или падения планировщиков
         stop = asyncio.Event()
         loop = asyncio.get_running_loop()
         
@@ -166,24 +172,28 @@ async def main_async():
                 # Windows: Ctrl+C всё равно поднимет KeyboardInterrupt
                 pass
         
-        async def watch_scheduler():
+        async def watch_scheduler(task, name):
             try:
-                await scheduler_task
+                await task
+                print(f"⚠️ Планировщик «{name}» завершился")
                 stop.set()
             except asyncio.CancelledError:
                 pass
             except Exception as e:
-                print(f"❌ Планировщик упал: {e}")
-                logging.error(f"Планировщик упал: {e}", exc_info=True)
+                print(f"❌ Планировщик «{name}» упал: {e}")
+                logging.error(f"Планировщик «{name}» упал: {e}", exc_info=True)
                 stop.set()
         
-        watcher = asyncio.create_task(watch_scheduler())
-        _tasks.append(watcher)
+        watchers = []
+        for task in scheduler_tasks:
+            watchers.append(asyncio.create_task(watch_scheduler(task, task.get_name())))
+        _tasks.extend(watchers)
         
         try:
             await stop.wait()
         finally:
-            watcher.cancel()
+            for w in watchers:
+                w.cancel()
         
         return 0
         

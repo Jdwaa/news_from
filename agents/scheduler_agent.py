@@ -14,19 +14,37 @@ from .base_agent import BaseAgent
 from .analytics_agent import normalize_analytics_report
 from config import Config
 from database import save_log
+from channels import get_profile, NEWS
 
 
 class SchedulerAgent(BaseAgent):
-    """Агент для умной автопубликации по расписанию"""
+    """
+    Агент для умной автопубликации по расписанию.
+
+    Один экземпляр обслуживает ОДИН канал: профиль передаётся при создании.
+    Два канала — два планировщика, каждый со своей меткой последней публикации
+    и своим сдвигом расписания. Общая метка приводила бы к тому, что публикация
+    в новостном канале сдвигала бы интервал канала лайфхаков.
+    """
     
-    def __init__(self, orchestrator=None):
+    def __init__(self, orchestrator=None, profile=None):
         super().__init__("Планировщик")
         self.orchestrator = orchestrator
+        self.profile = profile or get_profile(NEWS)
         self.is_running = False
         
         # Настройки времени
         self.min_hour = 7    # Не публиковать раньше 7:00
         self.max_hour = 22   # Не публиковать позже 22:00
+    
+    @property
+    def _last_publish_key(self) -> str:
+        """Ключ метки последней публикации, изолированный по каналу."""
+        return self.profile.memory_key("last_publish_at")
+    
+    def log(self, message: str, is_error: bool = False) -> str:
+        """Логи с именем канала: в общем потоке иначе не понять, чей это цикл."""
+        return super().log(f"[{self.profile.title}] {message}", is_error=is_error)
     
     async def execute(self, context: dict) -> dict:
         """
@@ -52,11 +70,16 @@ class SchedulerAgent(BaseAgent):
                     self.log("🚀 Время публикации! Запускаю цикл создания поста...")
                     
                     if self.orchestrator:
-                        result = await self.orchestrator.run()
+                        result = await self.orchestrator.run(
+                            {"channel_profile": self.profile}
+                        )
                         
                         if result.get("published_post_id"):
                             self.log(f"✅ Пост #{result['published_post_id']} опубликован!")
-                            self.memory.set("last_publish_at", datetime.now().isoformat())
+                            # Метка с таймзоной: наивное время роняло арифметику
+                            # интервалов с TypeError (aware минус naive).
+                            self.memory.set(self._last_publish_key,
+                                            datetime.now().astimezone().isoformat())
                             
                             # Обновляем аналитику после публикации
                             await self._update_analytics()
@@ -128,7 +151,8 @@ class SchedulerAgent(BaseAgent):
         Правила:
         1. Не публикуем ночью (23:00 - 07:00)
         2. Проверяем, прошло ли достаточно времени с последней публикации
-        3. Проверяем, наступило ли лучшее время
+           ЭТОГО канала
+        3. Проверяем, наступило ли лучшее время (со сдвигом канала)
         """
         now = datetime.now()
         current_hour = now.hour
@@ -139,8 +163,13 @@ class SchedulerAgent(BaseAgent):
             self.log(f"🌙 Сейчас {current_hour}:00 — ночь, пропускаю публикацию")
             return False
         
+        # Сдвиг расписания канала: у лайфхаков он на час позже новостного,
+        # чтобы два канала не публиковали одновременно.
+        offset_hours = self.profile.schedule_offset // 3600
+        effective_best_hour = min(best_hour + offset_hours, self.max_hour)
+        
         # 2. Проверяем время с последней публикации
-        last_publish = self.memory.get("last_publish_at")
+        last_publish = self.memory.get(self._last_publish_key)
         if last_publish:
             try:
                 last_time = self._parse_last_publish(last_publish)
@@ -148,8 +177,8 @@ class SchedulerAgent(BaseAgent):
                 # иначе вычитание падает с TypeError прямо в проверке интервала
                 time_diff = (datetime.now().astimezone() - last_time).total_seconds()
                 
-                # Минимальный интервал между публикациями (3 часа)
-                min_interval = Config.POST_INTERVAL  # 10800 секунд = 3 часа
+                # Минимальный интервал между публикациями — свой у каждого канала
+                min_interval = self.profile.interval
                 
                 # Отрицательный diff означает метку из будущего (сбились часы) —
                 # считаем её «только что», чтобы не публиковать вторым постом
@@ -166,21 +195,23 @@ class SchedulerAgent(BaseAgent):
                 # проверку интервала и выпускала второй пост сразу после первого.
                 # Битую метку трактуем как «публикация была только что» — лучше
                 # пропустить цикл, чем задублировать пост в канале.
-                self.log(f"⚠️ Не удалось прочитать метку last_publish_at ({e}) — "
+                self.log(f"⚠️ Не удалось прочитать метку публикации ({e}) — "
                          f"считаю, что публикация была только что", is_error=True)
                 return False
         
-        # 3. Если сегодня лучший день — проверяем лучшее время
+        # 3. Если сегодня лучший день — проверяем лучшее время со сдвигом канала
         if current_day == best_day:
-            if current_hour >= best_hour:
-                self.log(f"✅ Сегодня лучший день ({current_day}), время {current_hour}:00 >= {best_hour}:00")
+            if current_hour >= effective_best_hour:
+                self.log(f"✅ Лучший день ({current_day}), время {current_hour}:00 "
+                         f">= {effective_best_hour}:00 (сдвиг канала +{offset_hours} ч)")
                 return True
             else:
-                wait_minutes = (best_hour - current_hour) * 60
-                self.log(f"⏳ Жду до лучшего времени {best_hour}:00 (осталось {wait_minutes} мин)")
+                wait_minutes = (effective_best_hour - current_hour) * 60
+                self.log(f"⏳ Жду до {effective_best_hour}:00 "
+                         f"(сдвиг канала +{offset_hours} ч, осталось {wait_minutes} мин)")
                 return False
         
-        # 4. Если сегодня не лучший день, но прошло 3+ часа — публикуем
+        # 4. Если сегодня не лучший день, но прошёл интервал — публикуем
         # (в рабочее время, чтобы не было простоев)
         hours_since_last = 0
         if last_publish:
@@ -191,7 +222,7 @@ class SchedulerAgent(BaseAgent):
                 self.log(f"⚠️ Ошибка чтения метки публикации ({e}) — интервал не выдержан", is_error=True)
                 hours_since_last = 0
         
-        if hours_since_last >= Config.POST_INTERVAL / 3600:
+        if hours_since_last >= self.profile.interval / 3600:
             # Проверяем, что сейчас рабочее время
             if self.min_hour <= current_hour <= self.max_hour:
                 self.log(f"📊 Не лучший день, но прошло {hours_since_last:.1f} ч — публикую")

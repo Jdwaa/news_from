@@ -26,26 +26,30 @@ class ParserAgent(BaseAgent):
     async def execute(self, context: dict) -> dict:
         """
         Основной метод:
-        1. Парсит все RSS-ленты из Config.RSS_FEEDS
+        1. Парсит RSS-ленты из профиля канала
         2. Парсит NewsAPI (если есть ключ)
-        3. Проверяет дубликаты по ссылкам
+        3. Проверяет дубликаты по ссылкам (в пределах канала)
         4. Сохраняет список в context["news_list"]
         """
-        self.log("🔍 Начинаю парсинг новостей...")
+        from channels import get_profile, NEWS
+        profile = context.get("channel_profile") or get_profile(NEWS)
+        feeds = profile.feeds
         
-        # 24 ленты последовательно — это минуты ожидания при холодном старте.
+        self.log(f"🔍 Начинаю парсинг новостей для «{profile.title}» ({len(feeds)} лент)...")
+        
+        # 33 ленты последовательно — это минуты ожидания при холодном старте.
         # Ограничиваем конкурентность, чтобы не забанили за шквал запросов.
         semaphore = asyncio.Semaphore(max(1, Config.PARSER_CONCURRENCY))
         
         async def fetch_one(source: str):
             async with semaphore:
                 # to_thread: обход RSS — блокирующая сеть, в event loop ей нельзя
-                return await asyncio.to_thread(self._parse_feed, source)
+                return await asyncio.to_thread(self._parse_feed, source, profile.key)
         
-        results = await asyncio.gather(*(fetch_one(source) for source in Config.RSS_FEEDS))
+        results = await asyncio.gather(*(fetch_one(source) for source in feeds))
         
         all_news = []
-        for source, (items, error) in zip(Config.RSS_FEEDS, results):
+        for source, (items, error) in zip(feeds, results):
             if error:
                 self.log(f"  ❌ Ошибка {source}: {error}", is_error=True)
                 continue
@@ -71,10 +75,13 @@ class ParserAgent(BaseAgent):
         
         return context
     
-    def _parse_feed(self, source: str) -> tuple:
+    def _parse_feed(self, source: str, channel: str = None) -> tuple:
         """
         Парсит одну ленту. Возвращает (список новостей, ошибка) — блокирующий
         вызов, поэтому запускается через asyncio.to_thread.
+
+        `channel` ограничивает проверку дубликатов одним каналом: материал,
+        вышедший в новостном канале, должен остаться доступным для лайфхаков.
         """
         try:
             feed = feedparser.parse(source)
@@ -82,8 +89,8 @@ class ParserAgent(BaseAgent):
             for entry in feed.entries[:5]:  # Берём по 5 новостей из каждого источника
                 link = entry.link
                 
-                # Проверяем, не публиковали ли уже эту новость
-                if is_post_exists(link):
+                # Проверяем, не публиковали ли уже это в данном канале
+                if is_post_exists(link, channel=channel):
                     continue
                 
                 # Извлекаем краткое описание

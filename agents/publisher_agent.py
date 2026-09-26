@@ -21,6 +21,7 @@ from database import (
     get_last_image_url,
 )
 from config import Config
+from channels import get_profile, NEWS
 
 
 class PublisherAgent(BaseAgent):
@@ -33,11 +34,17 @@ class PublisherAgent(BaseAgent):
     async def execute(self, context: dict) -> dict:
         """
         1. Берёт пост из контекста
-        2. Сохраняет в БД
+        2. Сохраняет в БД (с указанием канала)
         3. Если картинка есть — использует её
         4. Если нет — берёт последнюю успешную из БД
-        5. Отправляет в Telegram
+        5. Отправляет в Telegram канал, заданный профилем
+
+        Канал берётся из context["channel_profile"] — один бот ведёт два канала,
+        и адрес нельзя брать из Config.CHANNEL_ID напрямую.
         """
+        profile = context.get("channel_profile") or get_profile(NEWS)
+        context["channel"] = profile.key
+
         post_text = context.get("post_text")
         post_title = context.get("post_title", "")
         new_image_url = context.get("image_url")  # Картинка от ImageAgent
@@ -51,28 +58,30 @@ class PublisherAgent(BaseAgent):
             self.log("❌ Нет текста для публикации", is_error=True)
             return context
         
-        self.log(f"📤 Сохранение и публикация поста...")
+        self.log(f"📤 Сохранение и публикация поста в «{profile.title}»...")
         
         # ==========================================
         # 1. СОХРАНЯЕМ ПОСТ В БД
         # ==========================================
         link = selected_news.get("link", "")
         
-        # Суточный дедуп по ссылке: парсер проверяет только всю таблицу целиком,
+        # Суточный дедуп по ссылке внутри канала: парсер проверяет всю таблицу,
         # а старые посты вычищаются из БД, поэтому одну и ту же новость можно
-        # было опубликовать повторно.
-        if link and link in get_recent_post_links(days=1):
-            self.log(f"⚠️ Эта новость уже публиковалась за сутки, пропускаю: {link[:60]}", is_error=True)
+        # было опубликовать повторно. Дедуп ограничен каналом: новость, ушедшая
+        # в новостной, не должна блокировать лайфхак по ней же.
+        if link and link in get_recent_post_links(days=1, channel=profile.key):
+            self.log(f"⚠️ Эта новость уже была в «{profile.title}» за сутки: {link[:60]}", is_error=True)
             context["duplicate_skipped"] = True
             return context
         
-        post_id = save_post(post_title, link, post_text, image_prompt, new_image_url)
+        post_id = save_post(post_title, link, post_text, image_prompt, new_image_url,
+                            channel=profile.key)
         
         if not post_id:
             self.log("⚠️ Пост не сохранён (возможно, дубликат)", is_error=True)
             return context
         
-        self.log(f"✅ Пост #{post_id} сохранён в БД")
+        self.log(f"✅ Пост #{post_id} сохранён в БД [{profile.key}]")
         
         # ==========================================
         # 2. ВЫБИРАЕМ КАРТИНКУ ДЛЯ ПУБЛИКАЦИИ
@@ -140,7 +149,7 @@ class PublisherAgent(BaseAgent):
     
     async def _publish_to_telegram(self, post_text: str, image_url: str, context: dict):
         """
-        Отправляет пост в Telegram.
+        Отправляет пост в Telegram-канал из профиля.
         Возвращает message_id опубликованного сообщения или None.
         """
         
@@ -148,28 +157,35 @@ class PublisherAgent(BaseAgent):
             self.log("⚠️ Бот не передан, публикация только в БД", is_error=True)
             return None
         
+        profile = context.get("channel_profile") or get_profile(NEWS)
+        chat_id = profile.chat_id
+        
+        if not chat_id:
+            self.log(f"❌ У канала «{profile.title}» не задан адрес — публиковать некуда", is_error=True)
+            return None
+        
         try:
             # Пробуем отправить с картинкой
             if image_url and image_url != get_placeholder_image():
-                message_id = await self._send_with_image(post_text, image_url)
+                message_id = await self._send_with_image(post_text, image_url, chat_id)
                 if message_id:
-                    self.log("✅ Пост опубликован с картинкой")
+                    self.log(f"✅ Пост опубликован с картинкой в «{profile.title}»")
                     return message_id
             
             result = await self.bot.send_message(
-                chat_id=Config.CHANNEL_ID,
+                chat_id=chat_id,
                 text=post_text
             )
-            self.log("✅ Пост опубликован без картинки")
+            self.log(f"✅ Пост опубликован без картинки в «{profile.title}»")
             return result.message_id if result else None
             
         except Exception as e:
-            self.log(f"❌ Ошибка публикации: {e}", is_error=True)
+            self.log(f"❌ Ошибка публикации в «{profile.title}»: {e}", is_error=True)
             return None
     
-    async def _send_with_image(self, post_text: str, image_url: str):
+    async def _send_with_image(self, post_text: str, image_url: str, chat_id: str):
         """
-        Отправляет пост с картинкой.
+        Отправляет пост с картинкой в указанный чат.
         `image_url` может быть локальным путём к уже скачанному файлу.
         Возвращает message_id опубликованного сообщения или None.
         """
@@ -178,7 +194,7 @@ class PublisherAgent(BaseAgent):
             try:
                 with open(image_url, "rb") as f:
                     result = await self.bot.send_photo(
-                        chat_id=Config.CHANNEL_ID,
+                        chat_id=chat_id,
                         photo=f,
                         caption=post_text
                     )
@@ -200,7 +216,7 @@ class PublisherAgent(BaseAgent):
             
             with open(image_path, "rb") as f:
                 result = await self.bot.send_photo(
-                    chat_id=Config.CHANNEL_ID,
+                    chat_id=chat_id,
                     photo=f,
                     caption=post_text
                 )

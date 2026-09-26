@@ -19,13 +19,18 @@ from agents.scheduler_agent import SchedulerAgent
 from memory_bank import MemoryBank
 from database import save_log
 from config import Config
+from channels import get_profile, NEWS
 
 
 class Orchestrator:
     """Главный оркестратор, управляющий всеми агентами"""
     
-    def __init__(self, bot=None):
+    def __init__(self, bot=None, profile=None):
         self.bot = bot
+        # Профиль канала: адрес, источники, стиль, интервал. Один оркестратор
+        # обслуживает один канал — так поток данных предсказуем, и не нужно
+        # протаскивать канал через каждый вызов агента вручную.
+        self.profile = profile or get_profile(NEWS)
         self.max_rewrite_attempts = Config.MAX_REWRITE_ATTEMPTS
         # Сколько придирок ревизора допустимо, чтобы принять пост и не жечь API дальше
         self.acceptable_issues_on_last_try = 2
@@ -38,7 +43,7 @@ class Orchestrator:
         self.reviewer = ReviewerAgent()
         self.image = ImageAgent()
         self.publisher = PublisherAgent(bot=bot)
-        self.scheduler = SchedulerAgent(orchestrator=self)
+        self.scheduler = SchedulerAgent(orchestrator=self, profile=self.profile)
         self.memory = MemoryBank()
         
         # Флаг для принудительной публикации
@@ -57,8 +62,15 @@ class Orchestrator:
         if context is None:
             context = {}
         
+        # Профиль канала кладём в контекст: его читают парсер (источники),
+        # селектор (критерии), рерайтер (стиль), публикатор (адрес) и дедуп.
+        # Пришедший извне профиль не перетираем — так принудительный запуск
+        # из Telegram может указать канал явно.
+        context.setdefault("channel_profile", self.profile)
+        profile = context["channel_profile"]
+        
         self._log("="*60)
-        self._log("🚀 ЗАПУСК ОРКЕСТРАТОРА")
+        self._log(f"🚀 ЗАПУСК ОРКЕСТРАТОРА [{profile.title}]")
         self._log("="*60)
         
         # Минимум попыток рерайта, чтобы шаги 1-2 не тратили API-квоту зря,
