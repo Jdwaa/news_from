@@ -389,5 +389,318 @@
     "has_image": true,
     "image_source": "new",
     "timestamp": "2026-09-26T14:00:59.504477"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 560,
+    "timestamp": "2026-09-26T14:31:59.444017"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 6,
+    "length": 41,
+    "timestamp": "2026-09-26T14:31:59.469179"
+  },
+  {
+    "event": "news_selected",
+    "title": "Google Wallet got a lot of new tricks in 2026 – these 5 are my favorites",
+    "source": "www.zdnet.com",
+    "justification": "Новость о Google Wallet напрямую полезна обычному человеку — в ней перечислены конкретные новые функции приложения, которыми можно пользоваться в повседневной жизни (помимо оплаты). Это практичный лайфхак-материал, который легко применить, в отличие от узкоспециализированных технических или научных новостей из списка.",
+    "timestamp": "2026-09-26T14:32:09.011328"
+  },
+  {
+    "event": "post_generated",
+    "title": "GOOGLE WALLET В 2026 — ЭТО УЖЕ НЕ КОШЕЛЁК, А КОМАНДНЫЙ ЦЕНТР ТВОЕЙ ЖИЗНИ 🚀💳",
+    "length": 797,
+    "source": "www.zdnet.com",
+    "timestamp": "2026-09-26T14:32:14.709992"
+  },
+  {
+    "event": "news_selected",
+    "title": "Как выбрать лучший хостинг для Telegram-бота в 2026–2027 году",
+    "source": "tproger.ru",
+    "justification": "Эта новость — практическое руководство для разработчиков и энтузиастов, которые хотят запустить собственного Telegram-бота: сравнение VPS, PaaS и serverless-хостингов с ценами и критериями выбора. В отличие от большинства пунктов списка (научные исследования, политика, катастрофы), она даёт конкретную пользу здесь и сейчас. Тема хостинга ботов остаётся актуальной и востребованной у широкой аудитории.",
+    "timestamp": "2026-09-26T14:32:25.002149"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 560,
+    "timestamp": "2026-09-26T14:32:47.854012"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 6,
+    "length": 41,
+    "timestamp": "2026-09-26T14:32:47.885388"
+  },
+  {
+    "event": "news_selected",
+    "title": "Microsoft’s Surface Mouse is back, now with haptic feedback – and I need it",
+    "source": "www.zdnet.com",
+    "justification": "Новость про возвращение мыши Microsoft Surface с тактильной отдачей — это конкретный, осязаемый продукт, который может быть полезен обычному человеку, а не абстрактные исследования или корпоративные анонсы. Тактильная отдача в мыши — необычная и интересная функция, которая может улучшить взаимодействие с компьютером. К тому же новость вызывает личный интерес («I need it»), что делает её живой и relatable для читателей.",
+    "timestamp": "2026-09-26T14:32:57.931460"
+  },
+  {
+    "event": "post_generated",
+    "title": "МЫШКА БУДУЩЕГО ВЕРНУЛАСЬ: ТЕПЕРЬ ОНА ТЕБЯ ЧУВСТВУЕТ 🤖🖱️⚡",
+    "length": 619,
+    "source": "www.zdnet.com",
+    "timestamp": "2026-09-26T14:33:01.463006"
+  },
+  {
+    "event": "news_selected",
+    "title": "Google’s Gemini Can Now Make Calls for You on Pixel Phones",
+    "source": "www.wired.com",
+    "justification": "Эта новость описывает конкретную и полезную функцию для обычных пользователей — Gemini теперь может совершать звонки за вас на смартфонах Pixel. Это наглядный пример практического применения AI в повседневной жизни, который экономит время и решает реальную задачу.",
+    "timestamp": "2026-09-26T14:33:11.783660"
+  },
+  {
+    "event": "news_selected",
+    "title": "Claude Code 2.1.283 получил аудит устаревших промптов и точную фиксацию моделей",
+    "source": "tproger.ru",
+    "justification": "Обновление Claude Code 2.1.283 — практичный инструмент для разработчиков и всех, кто работает с ИИ-ассистентами: аудит устаревших промптов и точная фиксация моделей упрощают поддержку проектов и снижают риск неожиданного поведения. Это полезная прикладная новость, которая сразу применима в работе, а не просто анонс или политическое заявление.",
+    "timestamp": "2026-09-26T14:33:21.938943"
+  },
+  {
+    "event": "post_generated",
+    "title": "🚨 CLAUDE CODE ВЫПУСТИЛ АУДИТ ПРОМПТОВ — ТВОЙ ИИ УСТАЛ ОТ СТАРЫХ ИНСТРУКЦИЙ",
+    "length": 755,
+    "source": "tproger.ru",
+    "timestamp": "2026-09-26T14:33:25.585650"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 2,
+    "length": 755,
+    "timestamp": "2026-09-26T14:33:25.612244"
+  },
+  {
+    "event": "post_published",
+    "post_id": 23,
+    "title": "🚨 CLAUDE CODE ВЫПУСТИЛ АУДИТ ПРОМПТОВ — ТВОЙ ИИ УС",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-09-26T14:35:13.425970"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 514,
+    "timestamp": "2026-09-26T14:35:48.342708"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 4,
+    "length": 514,
+    "timestamp": "2026-09-26T14:35:48.372822"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 5,
+    "length": 956,
+    "timestamp": "2026-09-26T14:35:48.398685"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 722,
+    "timestamp": "2026-09-26T14:35:57.289283"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 315,
+    "timestamp": "2026-09-26T14:35:57.313280"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 722,
+    "timestamp": "2026-09-26T14:36:29.273049"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 315,
+    "timestamp": "2026-09-26T14:36:29.283042"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 560,
+    "timestamp": "2026-09-26T14:36:47.717515"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 6,
+    "length": 41,
+    "timestamp": "2026-09-26T14:36:47.749131"
+  },
+  {
+    "event": "news_selected",
+    "title": "Google Wallet got a lot of new tricks in 2026 – these 5 are my favorites",
+    "source": "www.zdnet.com",
+    "justification": "Новость про Google Wallet — это практичный лайфхак для обычного пользователя: большинство людей воспринимают приложение только как «приложить телефон к терминалу», а там появились новые полезные функции. Такая новость сразу даёт читателю конкретную пользу в повседневной жизни, без сложных технических деталей.",
+    "timestamp": "2026-09-26T14:36:57.812880"
+  },
+  {
+    "event": "post_generated",
+    "title": "GOOGLE WALLET СТАЛ МОЗГОМ ТВОЕГО БУДУЩЕГО 🧠⚡",
+    "length": 570,
+    "source": "www.zdnet.com",
+    "timestamp": "2026-09-26T14:37:01.260556"
+  },
+  {
+    "event": "news_selected",
+    "title": "Больше REM-сна связали с меньшим риском 83 заболеваний",
+    "source": "naked-science.ru",
+    "justification": "Эта новость напрямую касается здоровья и полезна для любого человека — она показывает связь продолжительности REM-сна со снижением риска 83 заболеваний, что даёт практический стимул следить за качеством сна. В отличие от большинства технических новостей в списке, здесь есть простой и применимый в быту вывод.",
+    "timestamp": "2026-09-26T14:37:12.588222"
+  },
+  {
+    "event": "news_selected",
+    "title": "Больше REM-сна связали с меньшим риском 83 заболеваний",
+    "source": "naked-science.ru",
+    "justification": "Эта новость напрямую полезна для обычного человека, поскольку связывает привычный всем сон с риском развития 83 заболеваний — это практическая информация, которую можно применить в повседневной жизни. Исследование опирается на объективные данные о ночном сне, что повышает его достоверность и ценность для читателей.",
+    "timestamp": "2026-09-26T14:37:23.033278"
+  },
+  {
+    "event": "post_generated",
+    "title": "СОН — ЭТО НЕ РОСКОШЬ, А ВАКЦИНА ОТ 83 БОЛЕЗНЕЙ 🧠⚡",
+    "length": 891,
+    "source": "naked-science.ru",
+    "timestamp": "2026-09-26T14:37:27.065605"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 891,
+    "timestamp": "2026-09-26T14:37:27.090619"
+  },
+  {
+    "event": "post_published",
+    "post_id": 24,
+    "title": "СОН — ЭТО НЕ РОСКОШЬ, А ВАКЦИНА ОТ 83 БОЛЕЗНЕЙ 🧠⚡",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-09-26T14:38:52.297021"
+  },
+  {
+    "event": "post_published",
+    "post_id": 25,
+    "title": "🚀 ТЕСТ: новостной канал",
+    "has_image": true,
+    "image_source": "db_fallback",
+    "timestamp": "2026-09-26T14:39:52.642400"
+  },
+  {
+    "event": "post_published",
+    "post_id": 26,
+    "title": "💡 ТЕСТ: канал лайфхаков",
+    "has_image": true,
+    "image_source": "db_fallback",
+    "timestamp": "2026-09-26T14:39:52.680386"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 498,
+    "timestamp": "2026-09-26T14:39:52.936323"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 6,
+    "length": 41,
+    "timestamp": "2026-09-26T14:39:52.960414"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 601,
+    "timestamp": "2026-09-26T14:39:52.971021"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 2,
+    "length": 254,
+    "timestamp": "2026-09-26T14:39:52.986021"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 4,
+    "length": 639,
+    "timestamp": "2026-09-26T14:39:53.008036"
+  },
+  {
+    "event": "news_selected",
+    "title": "Why Read a Research Paper When You Can Turn It Into an AI Agent?",
+    "source": "spectrum.ieee.org",
+    "justification": "Новость рассказывает о необычном и полезном применении AI — превращении научных статей в интерактивных AI-агентов, что может radically упростить доступ к сложным исследованиям для обычных людей. Это свежая идея на стыке инструментов и практической пользы, выделяющаяся среди типичных новостей о финансах, штрафах и военных разработках.",
+    "timestamp": "2026-09-26T14:40:13.503408"
+  },
+  {
+    "event": "post_generated",
+    "title": "ТЫ БОЛЬШЕ НЕ ЧИТАЕШЬ НАУКУ — ТЫ С НЕЙ РАЗГОВАРИВАЕШЬ 🧠⚡",
+    "length": 901,
+    "source": "spectrum.ieee.org",
+    "timestamp": "2026-09-26T14:40:23.084777"
+  },
+  {
+    "event": "news_selected",
+    "title": "I Think I Found an AI Agent Worth the Risk",
+    "source": "www.wired.com",
+    "justification": "Новость описывает реальный опыт использования AI-агента, который принёс ощутимую пользу (сэкономил $550, забронировал столик, предупредил о фишинге), но при этом показал и риски (потеря $64, угрозы безопасности). Это редкий честный обзор, который помогает обычному человеку понять, стоит ли доверять AI-агентам уже сегодня.",
+    "timestamp": "2026-09-26T14:42:15.358951"
+  },
+  {
+    "event": "news_selected",
+    "title": "Databricks открыла Genie One MCP Server и закроет прежний бета-эндпоинт",
+    "source": "tproger.ru",
+    "justification": "Новость о Databricks Genie One MCP Server — это практичный инструмент для тех, кто работает с данными и AI-агентами: он позволяет подключать агентов напрямую к данным Databricks, что упрощает построение рабочих решений. Важна и дата отключения старого бета-эндпоинта (31 октября 2026 года) — это сигнал пользователям заранее мигрировать и не потерять доступ. В отличие от более абстрактных исследовательских новостей, здесь есть конкретная польза и дедлайн для действий.",
+    "timestamp": "2026-09-26T14:42:27.231973"
+  },
+  {
+    "event": "post_generated",
+    "title": "🚀 DATABRICKS ОТКРЫВАЕТ ДВЕРИ В МИР ИИ-АГЕНТОВ — И ЭТО ТОЛЬКО НАЧАЛО!",
+    "length": 663,
+    "source": "tproger.ru",
+    "timestamp": "2026-09-26T14:42:31.178019"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 663,
+    "timestamp": "2026-09-26T14:42:31.202020"
+  },
+  {
+    "event": "post_published",
+    "post_id": 27,
+    "title": "🚀 DATABRICKS ОТКРЫВАЕТ ДВЕРИ В МИР ИИ-АГЕНТОВ — И ",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-09-26T14:44:21.394691"
   }
 ]

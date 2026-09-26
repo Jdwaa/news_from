@@ -11,6 +11,24 @@ from .base_agent import BaseAgent
 from config import Config
 
 
+# Диапазон эмодзи. Изначально здесь был только \U0001F600-\U0001F9FF
+# (смайлики), из-за чего ревизор НЕ видел 🎧 💡 📌 ⚠️ 🔥 📰 📊 — то есть почти
+# все эмодзи, которые ставит рерайтер, — и браковал посты за «мало эмодзи»,
+# хотя они там были. Покрываем пиктограммы, символы, стрелки и вариации.
+EMOJI_PATTERN = re.compile(
+    r'[\U0001F300-\U0001FAFF'   # пиктограммы, транспорт, лица, предметы
+    r'\u2600-\u27BF'            # символы и дингбаты (☀ ✅ ➡)
+    r'\u2B00-\u2BFF'            # стрелки и фигуры (⬛ ⭐)
+    r'\u2190-\u21FF'            # стрелки (← →)
+    r'\uFE0F\u200D]'            # вариационный селектор и ZWJ
+)
+
+
+def count_emojis(text: str) -> int:
+    """Считает эмодзи в тексте с учётом реальных диапазонов Unicode."""
+    return len(EMOJI_PATTERN.findall(text or ""))
+
+
 class ReviewerAgent(BaseAgent):
     """Агент для проверки качества постов"""
     
@@ -20,10 +38,19 @@ class ReviewerAgent(BaseAgent):
     async def execute(self, context: dict) -> dict:
         """
         1. Берёт пост из context["post_text"]
-        2. Проверяет по чек-листу
+        2. Проверяет по чек-листу, зависящему от канала
         3. Если всё хорошо → ставит text_approved = True
         4. Если есть проблемы → возвращает замечания в context["reviewer_feedback"]
+
+        Чек-лист разный для каналов. Новостной канал требует КАПС, эмодзи и
+        прогноз; канал лайфхаков пишет инструкции, где КАПС и прогнозы прямо
+        запрещены промптом. Общий чек-лист отбраковывал бы каждый лайфхак,
+        и оркестратор впустую выжигал бы все попытки рерайта.
         """
+        from channels import get_profile, NEWS
+        profile = context.get("channel_profile") or get_profile(NEWS)
+        is_tips = profile.key == "tips"
+
         post_text = context.get("post_text", "")
         post_title = context.get("post_title", "")
         
@@ -34,7 +61,7 @@ class ReviewerAgent(BaseAgent):
             context["reviewer_issues_count"] = 1
             return context
         
-        self.log("📋 Проверка поста...")
+        self.log(f"📋 Проверка поста для «{profile.title}»...")
         
         # Список замечаний
         issues = []
@@ -49,26 +76,37 @@ class ReviewerAgent(BaseAgent):
             issues.append(f"🔴 Пост слишком длинный: {length} символов (максимум {Config.MAX_POST_LENGTH})")
         
         # ==========================================
-        # 2. ПРОВЕРКА ЗАГОЛОВКА (капс + эмодзи)
+        # 2. ПРОВЕРКА ЗАГОЛОВКА
         # ==========================================
         if post_title:
-            # Проверяем, есть ли в заголовке капс (минимум 2 слова в верхнем регистре)
-            words = post_title.split()
-            caps_count = sum(1 for w in words if w.isupper() and len(w) > 2)
-            if caps_count < 2:
-                issues.append("🔴 Заголовок должен содержать минимум 2 слова КАПСОМ")
-            
-            # Проверяем наличие эмодзи в заголовке
-            emoji_in_title = len(re.findall(r'[\U0001F600-\U0001F9FF]', post_title))
-            if emoji_in_title < 1:
-                issues.append("🔴 Заголовок должен содержать хотя бы 1 эмодзи")
+            if is_tips:
+                # Заголовок лайфхака должен обещать пользу, а не кричать КАПСОМ.
+                # Слишком длинный заголовок не помещается в превью Telegram.
+                if len(post_title) > 90:
+                    issues.append(f"🔴 Заголовок слишком длинный: {len(post_title)} символов (максимум 90)")
+                if not re.search(r'[а-яА-ЯёЁ]', post_title):
+                    issues.append("🔴 Заголовок должен быть на русском языке")
+            else:
+                # Проверяем, есть ли в заголовке капс (минимум 2 слова в верхнем регистре)
+                words = post_title.split()
+                caps_count = sum(1 for w in words if w.isupper() and len(w) > 2)
+                if caps_count < 2:
+                    issues.append("🔴 Заголовок должен содержать минимум 2 слова КАПСОМ")
+                
+                # Проверяем наличие эмодзи в заголовке
+                emoji_in_title = count_emojis(post_title)
+                if emoji_in_title < 1:
+                    issues.append("🔴 Заголовок должен содержать хотя бы 1 эмодзи")
         
         # ==========================================
         # 3. ПРОВЕРКА ЭМОДЗИ В ПОСТЕ
         # ==========================================
-        emoji_count = len(re.findall(r'[\U0001F600-\U0001F9FF]', post_text))
-        if emoji_count < 3:
-            issues.append(f"🔴 Мало эмодзи в посте: {emoji_count} (минимум 3)")
+        emoji_count = count_emojis(post_text)
+        # У лайфхаков порог ниже: промпт просит 3-5 эмодзи для структуры,
+        # а не «минимум 5» для эмоционального усиления
+        min_emoji = 2 if is_tips else 3
+        if emoji_count < min_emoji:
+            issues.append(f"🔴 Мало эмодзи в посте: {emoji_count} (минимум {min_emoji})")
         
         # ==========================================
         # 4. ПРОВЕРКА ЛИЧНОГО МНЕНИЯ
@@ -82,20 +120,43 @@ class ReviewerAgent(BaseAgent):
         #   issues.append("🔴 Нет личного мнения. Добавь 'мне кажется', 'я считаю' или аналоги")
         
         # ==========================================
-        # 5. ПРОВЕРКА ПРОГНОЗА
+        # 5. ПРОВЕРКА ПРОГНОЗА (только для новостного канала)
         # ==========================================
-        forecast_keywords = [
-            "через", "скоро", "в будущем", "в ближайшие", 
-            "предстоит", "изменится", "станет", "будет"
-        ]
-        has_forecast = any(keyword in post_text.lower() for keyword in forecast_keywords)
-        if not has_forecast:
-            issues.append("🔴 Нет прогноза. Добавь 'в будущем', 'через 5 лет' или аналоги")
+        # Лайфхак — это инструкция, прогнозы в ней запрещены промптом,
+        # поэтому требовать их бессмысленно.
+        if not is_tips:
+            forecast_keywords = [
+                "через", "скоро", "в будущем", "в ближайшие", 
+                "предстоит", "изменится", "станет", "будет"
+            ]
+            has_forecast = any(keyword in post_text.lower() for keyword in forecast_keywords)
+            if not has_forecast:
+                issues.append("🔴 Нет прогноза. Добавь 'в будущем', 'через 5 лет' или аналоги")
+        else:
+            # Вместо прогноза у лайфхака требуем практическую ценность:
+            # конкретное действие, инструмент или результат.
+            actionable = [
+                "шаг", "промпт", "попробуй", "открой", "напиши", "загрузи",
+                "сервис", "инструмент", "бесплатн", "подписк", "настрой",
+                "можно", "как ", "способ", "пример"
+            ]
+            if not any(word in post_text.lower() for word in actionable):
+                issues.append(
+                    "🔴 Нет практической части: опиши, что именно делать "
+                    "(шаги, промпт, инструмент или пример)"
+                )
         
         # ==========================================
         # 6. ПРОВЕРКА ЗАПРЕЩЁННЫХ СЛОВ
         # ==========================================
         forbidden_words = ["согласно", "как сообщает", "по данным", "источник сообщает"]
+        if is_tips:
+            # Для лайфхаков дополнительно запрещены новостные штампы:
+            # они превращают инструкцию обратно в новость
+            forbidden_words = forbidden_words + [
+                "инновационный", "революционный", "прорывной",
+                "в этом году компания", "рынок", "инвестиц"
+            ]
         forbidden_found = [word for word in forbidden_words if word in post_text.lower()]
         if forbidden_found:
             issues.append(f"🔴 Найдены запрещённые слова: {', '.join(forbidden_found)}. Переформулируй.")
@@ -106,6 +167,21 @@ class ReviewerAgent(BaseAgent):
         paragraphs = post_text.split('\n\n')
         if len(paragraphs) < 2:
             issues.append("🔴 Пост должен содержать минимум 2 абзаца")
+        
+        # ==========================================
+        # 8. ПРОВЕРКА ЯЗЫКА (для обоих каналов)
+        # ==========================================
+        # Иностранные источники должны пересказываться по-русски.
+        # Считаем долю латиницы: отдельные названия продуктов нормальны,
+        # но текст, написанный в основном латиницей, — это не пересказ.
+        letters = re.findall(r'[A-Za-zА-Яа-яЁё]', post_text)
+        if letters:
+            latin_share = len(re.findall(r'[A-Za-z]', post_text)) / len(letters)
+            if latin_share > 0.5:
+                issues.append(
+                    f"🔴 Пост написан не по-русски (латиницы {latin_share:.0%}). "
+                    f"Переведи и переработай текст на русский"
+                )
         
         # ==========================================
         # ИТОГОВЫЙ ВЕРДИКТ

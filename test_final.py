@@ -262,8 +262,24 @@ async def main():
     )
     check("нет вызовов несуществующих методов", unknown, [])
 
-    # Клавиатуры действительно собираются
-    check("меню главного экрана собирается", len(bot_ui._main_menu_keyboard().inline_keyboard), 4)
+    # Клавиатуры действительно собираются.
+    # Кнопок публикации столько, сколько активных каналов (news + tips),
+    # плюс Статус, Аналитика и Админ-панель.
+    from channels import active_profiles as _active_profiles
+    _expected_menu_rows = len(_active_profiles()) + 3
+    check("меню главного экрана собирается",
+          len(bot_ui._main_menu_keyboard().inline_keyboard), _expected_menu_rows)
+
+    # Каждый активный канал должен иметь свою кнопку публикации
+    _callbacks = [
+        btn.callback_data
+        for row in bot_ui._main_menu_keyboard().inline_keyboard
+        for btn in row
+    ]
+    _missing_channels = [
+        p.key for p in _active_profiles() if f"post_now:{p.key}" not in _callbacks
+    ]
+    check("на каждый канал есть кнопка публикации", _missing_channels, [])
 
     # ==========================================
     # 5.2. /start РЕАЛЬНО ОТПРАВЛЯЕТ МЕНЮ
@@ -379,15 +395,23 @@ async def main():
         ignore = shutil.ignore_patterns(
             ".env", "__pycache__", "*.pyc", "*.db", ".tmp_*", "*.log", "memory_bank"
         )
+        # .bot.lock и .git — рантайм-артефакты: lock залочен запущенным ботом
+        # и копирование падало с PermissionError, а .git не нужен песочнице.
+        skip = {".env", "__pycache__", "memory_bank", ".bot.lock", ".git", ".dsh_tmp", ".dsh_tools"}
         for entry in os.listdir(project_dir):
-            if entry == ".env" or entry.startswith(".tmp_") or entry in ("__pycache__", "memory_bank"):
+            if entry in skip or entry.startswith(".tmp_"):
                 continue
             src = os.path.join(project_dir, entry)
             dst = os.path.join(sandbox_proj, entry)
-            if os.path.isdir(src):
-                shutil.copytree(src, dst, ignore=ignore)
-            else:
-                shutil.copy2(src, dst)
+            try:
+                if os.path.isdir(src):
+                    shutil.copytree(src, dst, ignore=ignore)
+                else:
+                    shutil.copy2(src, dst)
+            except (PermissionError, OSError) as e:
+                # Залоченный файл не должен ронять весь тест: он не участвует
+                # в подпроцессных проверках конфигурации.
+                print(f"⚠️ Не скопировано в песочницу: {entry} ({e})")
 
     env = {k: v for k, v in os.environ.items()
            if k not in ("TELEGRAM_TOKEN", "CHANNEL_ID", "ADMIN_ID", "DEEPSEEK_API_KEY",
