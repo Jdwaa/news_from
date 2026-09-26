@@ -28,43 +28,49 @@ from config import Config
 
 def cleanup_images(days: int = 14, dry_run: bool = False) -> dict:
     """
-    Удаляет сгенерированные картинки старше N дней.
+    Убирает лишние файлы картинок.
 
-    Файлы нужны только на момент публикации: пост в БД хранит ссылку на CDN
-    и локальный путь, но для истории важен текст, а не мегабайты картинок.
-    Возвращает {'deleted': n, 'freed_mb': float, 'kept': n}.
+    Основную работу делает image_store: после публикации файл удаляется сразу,
+    и на диске остаётся только последний резерв. Здесь страхуемся от файлов,
+    оставшихся после сбоев (процесс упал между сохранением и публикацией)
+    и от прежних версий, которые копили историю.
+
+    Резерв никогда не удаляем: без него пост выйдет без картинки, если
+    генерация откажет.
     """
-    image_dir = Config.IMAGE_DIR
-    if not os.path.isdir(image_dir):
-        return {"deleted": 0, "freed_mb": 0.0, "kept": 0}
+    import image_store
 
-    cutoff = time.time() - days * 86400
-    deleted = 0
+    keep = image_store.latest_image()
+    orphaned = 0
     freed = 0
     kept = 0
 
-    for name in os.listdir(image_dir):
-        path = os.path.join(image_dir, name)
-        if not os.path.isfile(path):
-            continue
-        try:
-            if os.path.getmtime(path) >= cutoff:
+    removed_temp = image_store.cleanup_temp()
+
+    directory = Config.IMAGE_DIR
+    if os.path.isdir(directory):
+        for name in os.listdir(directory):
+            path = os.path.join(directory, name)
+            if not os.path.isfile(path):
+                continue
+            if path == keep:
                 kept += 1
                 continue
-            size = os.path.getsize(path)
-            if not dry_run:
-                os.remove(path)
-            deleted += 1
-            freed += size
-        except OSError:
-            # Файл занят или уже удалён — не повод ронять обслуживание
-            continue
+            try:
+                size = os.path.getsize(path)
+                if not dry_run:
+                    os.remove(path)
+                orphaned += 1
+                freed += size
+            except OSError:
+                continue
 
     return {
-        "deleted": deleted,
+        "deleted": orphaned,
         "freed_mb": round(freed / (1024 * 1024), 2),
         "freed_bytes": freed,
         "kept": kept,
+        "temp_removed": removed_temp,
     }
 
 

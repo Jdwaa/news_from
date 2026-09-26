@@ -185,6 +185,16 @@ async def main():
     publisher_text.bot = bot_text
     publisher_module.get_last_image_url = lambda: None
 
+    # Изолируем папку картинок: публикатор берёт оттуда резерв, когда своей
+    # картинки нет. Без изоляции тест подхватил бы реальный резерв и пошёл
+    # бы фотографией, а ожидается текстовый путь.
+    import tempfile
+    from config import Config as _Config
+    import image_store as _image_store
+    _old_dir = _Config.IMAGE_DIR
+    _Config.IMAGE_DIR = os.path.join(tempfile.mkdtemp(), "images")
+    os.makedirs(_Config.IMAGE_DIR, exist_ok=True)
+
     context2 = {
         "post_title": "ТЕСТ БЕЗ КАРТИНКИ",
         "post_text": "Текст поста без картинки 🚀",
@@ -198,6 +208,9 @@ async def main():
     # 3.3. Третий пост — чтобы аналитике хватило данных для выводов
     context3 = dict(context2, selected_news={"link": "https://test.local/3", "source": "test"})
     await publisher_text.execute(context3)
+
+    # Возвращаем реальную папку картинок
+    _Config.IMAGE_DIR = _old_dir
 
     # ==========================================
     # 4. АНАЛИТИК ЗАБИРАЕТ РЕАЛЬНЫЕ МЕТРИКИ ПО message_id

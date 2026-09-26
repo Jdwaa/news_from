@@ -22,6 +22,8 @@ from database import (
 )
 from config import Config
 from channels import get_profile, NEWS, build_post_keyboard
+from net_utils import retry_sync
+import image_store
 
 
 class PublisherAgent(BaseAgent):
@@ -87,32 +89,40 @@ class PublisherAgent(BaseAgent):
         # 2. ВЫБИРАЕМ КАРТИНКУ ДЛЯ ПУБЛИКАЦИИ
         # ==========================================
         image_url_to_use = None
+        # Файл, который удалим после успешной отправки: он больше не нужен,
+        # картинка уже в Telegram, а место занимает.
+        temp_file_to_remove = None
         
         # 2.1. Свежая картинка: локальный файл в приоритете, URL — запасной путь
         if local_image_path and os.path.exists(local_image_path):
             image_url_to_use = local_image_path
+            temp_file_to_remove = local_image_path
             update_post_image(post_id, new_image_url or local_image_path)
-            self.log(f"📸 Использую новую картинку (локальный файл)")
+            self.log("📸 Использую новую картинку")
         elif new_image_url:
             image_url_to_use = new_image_url
             update_post_image(post_id, new_image_url)
-            self.log(f"📸 Использую новую картинку")
+            self.log("📸 Использую новую картинку (по ссылке)")
         
-        # 2.2. Если нет — берём последнюю успешную из БД
-        else:
-            self.log("🔄 Нет новой картинки, ищу последнюю успешную из БД...")
-            last_image_url = get_last_image_url()
-            
-            if last_image_url and last_image_url != get_placeholder_image():
-                image_url_to_use = last_image_url
-                update_post_image(post_id, last_image_url)
-                self.log(f"📸 Использую последнюю картинку из БД: {last_image_url[:60]}...")
+        # 2.2. Если генерация не дала картинку — берём последний сохранённый
+        # резерв. Именно для этого один файл и хранится: пост выйдет
+        # с иллюстрацией, а не текстом, даже когда OdiRouter недоступен.
+        if not image_url_to_use:
+            self.log("🔄 Своей картинки нет, беру последнюю сохранённую...")
+            reserved = image_store.latest_image()
+            if reserved:
+                image_url_to_use = reserved
+                temp_file_to_remove = reserved
+                # В БД пишем ссылку прошлого поста, чтобы Аналитик и статистика
+                # не считали картинку отсутствующей
+                previous_url = get_last_image_url()
+                if previous_url and previous_url != get_placeholder_image():
+                    update_post_image(post_id, previous_url)
+                self.log(f"📸 Использую резервную картинку: {os.path.basename(reserved)}")
             else:
-                # 2.3. Картинки нет — публикуем текстом.
-                # Ссылку на via.placeholder.com Telegram скачать не может, поэтому
-                # отправка с ней заведомо проваливается и пост уходил текстом —
-                # лучше сразу не тратить попытку.
-                self.log("🔄 Картинок в БД нет — публикую текстом")
+                # Резерва нет — публикуем текстом. Ссылку via.placeholder.com
+                # Telegram скачать не может, поэтому лучше сразу без картинки.
+                self.log("🔄 Резервной картинки нет — публикую текстом")
         
         # ==========================================
         # 3. ПУБЛИКАЦИЯ В TELEGRAM
@@ -123,6 +133,20 @@ class PublisherAgent(BaseAgent):
         post_text = self._maybe_add_cta(post_text, profile, post_id)
         
         message_id = await self._publish_to_telegram(post_text, image_url_to_use, context)
+        
+        # ==========================================
+        # 3.1. УБИРАЕМ ЛОКАЛЬНУЮ КОПИЮ ПОСЛЕ ОТПРАВКИ
+        # ==========================================
+        # Картинка уже в Telegram, локальный файл больше не нужен. Удаляем
+        # только при УСПЕШНОЙ отправке: если пост не ушёл, резерв должен
+        # остаться, иначе следующий пост выйдет без картинки.
+        if message_id and temp_file_to_remove:
+            if image_store.remove(temp_file_to_remove):
+                self.log("🗑️ Локальная копия картинки удалена после публикации")
+            else:
+                self.log("⚠️ Не удалось удалить локальную копию картинки", is_error=True)
+        elif not message_id:
+            self.log("ℹ️ Пост не ушёл — оставляю картинку как резерв")
         
         # ==========================================
         # 4. ОБНОВЛЯЕМ СТАТУС
@@ -255,11 +279,14 @@ class PublisherAgent(BaseAgent):
         
         image_path = os.path.join("memory_bank", "temp_publish.jpg")
         try:
-            # to_thread: скачивание картинки блокирующее
-            response = await asyncio.to_thread(requests.get, image_url, timeout=30)
-            if response.status_code != 200:
-                self.log(f"⚠️ Не удалось скачать картинку (статус {response.status_code})", is_error=True)
-                return None
+            # to_thread: скачивание картинки блокирующее; retry_sync повторяет
+            # временные сбои — ссылка на CDN живёт ограниченное время
+            def _fetch():
+                resp = requests.get(image_url, timeout=30)
+                resp.raise_for_status()
+                return resp
+
+            response = await asyncio.to_thread(retry_sync, _fetch, attempts=3)
             
             with open(image_path, "wb") as f:
                 f.write(response.content)
@@ -278,5 +305,6 @@ class PublisherAgent(BaseAgent):
             self.log(f"⚠️ Ошибка отправки картинки: {e}", is_error=True)
             return None
         finally:
+            # Временный файл удаляем всегда: он не резерв, а промежуточная копия
             if os.path.exists(image_path):
                 os.remove(image_path)

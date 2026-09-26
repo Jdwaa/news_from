@@ -42,6 +42,15 @@ async def main():
     agent = PublisherAgent()
     link = f"https://test.local/publisher-{uuid.uuid4().hex[:10]}"
 
+    # Изолируем папку картинок: публикатор берёт оттуда резерв, если своей
+    # картинки нет, и тест иначе зависел бы от содержимого реальной папки.
+    import tempfile
+    from config import Config as _Config
+    _old_dir = _Config.IMAGE_DIR
+    _tmp_dir = tempfile.mkdtemp()
+    _Config.IMAGE_DIR = os.path.join(_tmp_dir, "images")
+    os.makedirs(_Config.IMAGE_DIR, exist_ok=True)
+
     async def publish(profile, title):
         ctx = {
             "post_title": title,
@@ -72,6 +81,9 @@ async def main():
     # 3. Повтор в том же канале: должен быть отсечён дедупом
     res_dup = await publish(PROFILES[TIPS], "💡 ТЕСТ: повтор в лайфхаках")
     check("повтор в том же канале отсечён", res_dup.get("duplicate_skipped"), True)
+
+    # Возвращаем реальную папку картинок
+    _Config.IMAGE_DIR = _old_dir
 
     print("\n" + "=" * 60)
     if all(_checks):

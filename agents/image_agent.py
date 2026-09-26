@@ -12,6 +12,7 @@ import uuid
 import requests
 from .base_agent import BaseAgent
 from config import Config
+import image_store
 from net_utils import post_json, get_json, retry_sync
 
 
@@ -99,18 +100,19 @@ class ImageAgent(BaseAgent):
             if not response.content:
                 self.log("⚠️ Картинка пустая", is_error=True)
                 return None
-            
-            dest = Config.IMAGE_DIR
-            os.makedirs(dest, exist_ok=True)
-            filename = f"post_{int(time.time() * 1000)}_{uuid.uuid4().hex[:8]}.jpg"
-            path = os.path.join(dest, filename)
-            
-            with open(path, "wb") as f:
-                f.write(response.content)
-            
-            self.log(f"💾 Картинка сохранена локально: {filename} ({len(response.content)//1024} КБ)")
+
+            # image_store хранит РОВНО ОДИН файл: он нужен для публикации и
+            # как резерв на случай отказа генерации. История не копится —
+            # каждая картинка ~1.5 МБ, а после поста она уже в Telegram.
+            path = image_store.save_new(response.content)
+            if not path:
+                self.log("⚠️ Не удалось сохранить картинку на диск", is_error=True)
+                return None
+
+            self.log(f"💾 Картинка сохранена: {os.path.basename(path)} "
+                     f"({len(response.content)//1024} КБ)")
             return path
-            
+
         except Exception as e:
             self.log(f"⚠️ Ошибка скачивания картинки: {e}", is_error=True)
             return None

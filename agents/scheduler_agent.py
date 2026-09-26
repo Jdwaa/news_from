@@ -163,11 +163,13 @@ class SchedulerAgent(BaseAgent):
                 else:
                     self.log(f"⚠️ Бэкап не сделан: {res.get('error')}", is_error=True)
 
-                # 2. Чистка старых картинок
-                clean = maintenance.cleanup_images(days=Config.IMAGE_KEEP_DAYS)
-                if clean["deleted"]:
-                    self.log(f"🧹 Удалено картинок: {clean['deleted']} "
-                             f"({clean['freed_mb']} МБ), оставлено {clean['kept']}")
+                # 2. Чистка лишних файлов картинок (после публикации они
+                # удаляются сразу, здесь — страховка от сиротских файлов)
+                clean = maintenance.cleanup_images()
+                if clean["deleted"] or clean.get("temp_removed"):
+                    self.log(f"🧹 Убрано лишних картинок: {clean['deleted']} "
+                             f"({clean['freed_mb']} МБ), временных: {clean.get('temp_removed')}, "
+                             f"резерв оставлен: {clean['kept']}")
 
                 # 3. Суточная сводка по росту
                 if Config.DAILY_REPORT_HOUR >= 0 and self.orchestrator.bot:

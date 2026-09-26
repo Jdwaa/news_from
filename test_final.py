@@ -129,12 +129,45 @@ async def main():
     check("ссылка видна в get_recent_post_links", "https://test.local/news-1" in get_recent_post_links(days=1), True)
 
     # ==========================================
-    # 2. ПУБЛИКАЦИЯ ТЕКСТОМ БЕЗ АРТЕФАКТОВ
+    # 2. КАРТИНКА: ПУБЛИКАЦИЯ И РЕЗЕРВ
     # ==========================================
-    check("пост ушёл текстом, а не с картинкой", publisher.bot.sent[-1][0], "message")
+    # Картинок на диске может не быть (или лежать резерв) — от этого зависит,
+    # уйдёт пост текстом или с фото. Изолируем папку картинок ДО публикаций,
+    # чтобы тест не зависел от содержимого реальной memory_bank/images.
+    from image_store import save_new as _save_image
+    from config import Config as _Config
 
-    # Сигнатура повторяет реальный метод: публикатор передаёт и chat_id,
-    # и клавиатуру кнопок воронки.
+    _old_image_dir = _Config.IMAGE_DIR
+    _test_image_dir = os.path.join(TMP_MEMORY, "images")
+    os.makedirs(_test_image_dir, exist_ok=True)
+    _Config.IMAGE_DIR = _test_image_dir
+    # Пустая папка -> резерва нет -> пост уходит текстом
+    for _f in os.listdir(_test_image_dir):
+        _p = os.path.join(_test_image_dir, _f)
+        if os.path.isfile(_p):
+            os.remove(_p)
+
+    _before = len(publisher.bot.sent)
+    _norez = {"link": "https://test.local/news-norez", "source": "test"}
+    _res_norez = await publisher.execute(dict(context, selected_news=_norez))
+    check("публикация без резерва прошла", bool(_res_norez.get("published_post_id")), True)
+    try:
+        # Именно последнюю отправку проверяем: без резерва картинки нет,
+        # значит пост должен уйти текстом
+        check("без резерва пост ушёл текстом", publisher.bot.sent[-1][0], "message")
+
+        # Теперь кладём резерв: пост при отсутствии новой картинки должен
+        # уйти С ФОТО — именно для этого последний файл и хранится.
+        _save_image(b"fake-jpeg-bytes" * 100, ".jpg")
+        _news3 = {"link": "https://test.local/news-3", "source": "test"}
+        _res3 = await publisher.execute(dict(context, selected_news=_news3))
+        check("с резервом пост ушёл с картинкой", publisher.bot.sent[-1][0], "photo")
+        check("резервная публикация прошла", bool(_res3.get("published_post_id")), True)
+    finally:
+        _Config.IMAGE_DIR = _old_image_dir
+
+    # Битая картинка по ссылке: пост всё равно должен уйти (текстом, если
+    # резерва нет) и временный файл не должен остаться
     async def failing_image(post_text, image_url, chat_id=None, keyboard=None):
         return None
 
@@ -142,7 +175,7 @@ async def main():
     context_bad_image = dict(context, image_url="https://test.local/broken.jpg",
                              selected_news={"link": "https://test.local/news-2", "source": "test"})
     result_bad = await publisher.execute(context_bad_image)
-    check("битая картинка -> пост всё равно ушёл текстом", bool(result_bad.get("published_post_id")), True)
+    check("битая картинка -> пост всё равно ушёл", bool(result_bad.get("published_post_id")), True)
     check("временный файл картинки удалён", os.path.exists(os.path.join("memory_bank", "temp_publish.jpg")), False)
 
     # ==========================================
