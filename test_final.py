@@ -56,16 +56,28 @@ class FakeMessage:
 
 
 class FakeBot:
+    """
+    Заглушка бота.
+
+    Сигнатуры повторяют реальный python-telegram-bot: публикатор передаёт
+    reply_markup (кнопки воронки) и disable_web_page_preview. Заглушка со
+    старой сигнатурой падала с TypeError и роняла публикацию в тесте.
+    """
+
     def __init__(self, message_id=1234):
         self.message_id = message_id
         self.sent = []
+        self.keyboards = []
 
-    async def send_message(self, chat_id, text):
+    async def send_message(self, chat_id, text, reply_markup=None,
+                           disable_web_page_preview=None, parse_mode=None):
         self.sent.append(("message", text))
+        self.keyboards.append(reply_markup)
         return FakeMessage(self.message_id)
 
-    async def send_photo(self, chat_id, photo, caption):
+    async def send_photo(self, chat_id, photo, caption=None, reply_markup=None):
         self.sent.append(("photo", caption))
+        self.keyboards.append(reply_markup)
         return FakeMessage(self.message_id)
 
 
@@ -121,7 +133,9 @@ async def main():
     # ==========================================
     check("пост ушёл текстом, а не с картинкой", publisher.bot.sent[-1][0], "message")
 
-    async def failing_image(post_text, image_url):
+    # Сигнатура повторяет реальный метод: публикатор передаёт и chat_id,
+    # и клавиатуру кнопок воронки.
+    async def failing_image(post_text, image_url, chat_id=None, keyboard=None):
         return None
 
     publisher._send_with_image = failing_image
@@ -263,19 +277,19 @@ async def main():
     check("нет вызовов несуществующих методов", unknown, [])
 
     # Клавиатуры действительно собираются.
-    # Кнопок публикации столько, сколько активных каналов (news + tips),
-    # плюс Статус, Аналитика и Админ-панель.
+    # Строк в меню: по одной на активный канал (публикация) + Статус,
+    # Воронка, Аналитика и Админ-панель. Проверяем по фактическому составу,
+    # а не по «магическому» числу: меню расширяется, и тест не должен
+    # падать от каждой новой кнопки.
     from channels import active_profiles as _active_profiles
-    _expected_menu_rows = len(_active_profiles()) + 3
-    check("меню главного экрана собирается",
-          len(bot_ui._main_menu_keyboard().inline_keyboard), _expected_menu_rows)
-
-    # Каждый активный канал должен иметь свою кнопку публикации
-    _callbacks = [
-        btn.callback_data
-        for row in bot_ui._main_menu_keyboard().inline_keyboard
-        for btn in row
-    ]
+    _fixed_rows = {"status", "growth", "analytics", "admin_panel"}
+    _menu = bot_ui._main_menu_keyboard().inline_keyboard
+    _callbacks = [btn.callback_data for row in _menu for btn in row]
+    _expected_rows = len(_active_profiles()) + len(_fixed_rows)
+    check("меню главного экрана собирается", len(_menu), _expected_rows)
+    check("в меню есть отчёт по воронке", "growth" in _callbacks, True)
+    check("все обязательные кнопки на месте",
+          sorted(_fixed_rows - set(_callbacks)), [])
     _missing_channels = [
         p.key for p in _active_profiles() if f"post_now:{p.key}" not in _callbacks
     ]

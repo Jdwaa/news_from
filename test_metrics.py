@@ -76,13 +76,17 @@ class FakeBot:
         self.message_id = message_id
         self.username = username
         self.sent = []
+        self.keyboards = []
 
-    async def send_message(self, chat_id, text):
+    async def send_message(self, chat_id, text, reply_markup=None,
+                           disable_web_page_preview=None, parse_mode=None):
         self.sent.append(("message", text))
+        self.keyboards.append(reply_markup)
         return FakeMessage(self.message_id)
 
-    async def send_photo(self, chat_id, photo, caption):
+    async def send_photo(self, chat_id, photo, caption=None, reply_markup=None):
         self.sent.append(("photo", caption))
+        self.keyboards.append(reply_markup)
         return FakeMessage(self.message_id)
 
     async def get_chat(self, chat_id):

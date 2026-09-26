@@ -202,6 +202,9 @@ class ChannelProfile:
     interval: int = 10800         # минимальный интервал между постами, сек
     schedule_offset: int = 0      # сдвиг от «лучшего часа», сек (у tips = +1 ч)
     emoji: str = "📰"             # для меню и логов
+    username: str = ""            # @username для публичных ссылок
+    cross_promo: str = ""         # ключ канала-партнёра для кросс-промо
+    cta: str = ""                 # строка-призыв в конце поста (выборочно)
 
     def memory_key(self, name: str) -> str:
         """
@@ -211,6 +214,85 @@ class ChannelProfile:
         канале сдвигал бы интервал канала лайфхаков, и расписание «разъезжалось».
         """
         return f"{name}:{self.key}"
+
+    @property
+    def public_url(self) -> str:
+        """
+        Публичная ссылка на канал.
+
+        Нужна для кнопок «Подписаться»: по ссылке вида t.me/xxx читатель из
+        пересланного поста попадает в канал. Приватный канал без username
+        такой ссылки не даёт — возвращаем пустую строку, и кнопка не строится.
+        """
+        return f"https://t.me/{self.username}" if self.username else ""
+
+    def share_url(self, text: str = "") -> str:
+        """
+        Ссылка «поделиться в Telegram».
+
+        Прямо стимулирует пересылку — главный органический источник роста:
+        читатель делится постом в своём чате, и его видят новые люди.
+        """
+        from urllib.parse import quote
+        base = "https://t.me/share/url"
+        if self.public_url:
+            return f"{base}?url={quote(self.public_url)}&text={quote(text[:200])}"
+        return ""
+
+    def cta_text(self, profiles: dict = None) -> str:
+        """
+        Строка-призыв к действию для конца поста.
+
+        Подставляет @username канала-партнёра. Пустая строка означает
+        «призыв не нужен» — например, у профиля он не задан.
+        """
+        if not self.cta:
+            return ""
+        profiles = profiles or PROFILES
+        partner = profiles.get(self.cross_promo)
+        if not partner or not partner.username:
+            return ""
+        return self.cta.format(tips=partner.username, news=partner.username)
+
+
+def build_post_keyboard(profile: ChannelProfile, post_title: str = "",
+                        source_url: str = ""):
+    """
+    Инлайн-клавиатура под постом — главный инструмент воронки.
+
+    Три кнопки, каждая закрывает своё узкое место:
+      • ПОДПИСАТЬСЯ — читатель пришёл по пересылке и не знает, куда идти.
+        Это основной путь превратить случайного читателя в подписчика.
+      • ПОДЕЛИТЬСЯ — прямая стимулирующая пересылку кнопка: делиться в один
+        тап проще, чем копировать ссылку. Пересылки — главный органический
+        источник роста.
+      • ИСТОЧНИК — повышает доверие к материалу (особенно в новостном канале).
+
+    Возвращает InlineKeyboardMarkup или None, если ни одной кнопки собрать
+    нельзя (например, у канала нет username). Telegram не принимает пустую
+    клавиатуру, поэтому отсутствие кнопок — это отсутствие reply_markup.
+    """
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+
+    rows = []
+
+    subscribe_url = profile.public_url
+    share_url = profile.share_url(post_title)
+
+    if subscribe_url or share_url:
+        row = []
+        if subscribe_url:
+            row.append(InlineKeyboardButton("📢 Подписаться", url=subscribe_url))
+        if share_url:
+            row.append(InlineKeyboardButton("↗️ Поделиться", url=share_url))
+        rows.append(row)
+
+    if source_url:
+        rows.append([InlineKeyboardButton("📎 Источник", url=source_url)])
+
+    if not rows:
+        return None
+    return InlineKeyboardMarkup(rows)
 
 
 def _env_int(name: str, default: int) -> int:
@@ -252,6 +334,11 @@ def build_profiles() -> "dict[str, ChannelProfile]":
             interval=news_interval,
             schedule_offset=0,
             emoji="📰",
+            username=os.getenv("CHANNEL_USERNAME", "Aioneway"),
+            # Из новостного канала ведём в канал практики: у него 648 подписчиков,
+            # которым полезна применимая часть
+            cross_promo=TIPS,
+            cta="Больше практичных разборов — в @{tips}",
         ),
         TIPS: ChannelProfile(
             key=TIPS,
@@ -262,6 +349,10 @@ def build_profiles() -> "dict[str, ChannelProfile]":
             interval=tips_interval,
             schedule_offset=tips_offset,
             emoji="💡",
+            username=os.getenv("CHANNEL_TIPS_USERNAME", "aipolza_ii"),
+            # Из лайфхаков — в новостной: тем, кто хочет быть в курсе
+            cross_promo=NEWS,
+            cta="Главные новости ИИ каждый день — в @{news}",
         ),
     }
     return profiles

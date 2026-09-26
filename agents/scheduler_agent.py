@@ -108,6 +108,32 @@ class SchedulerAgent(BaseAgent):
         
         return context
     
+    async def run_growth_monitor(self):
+        """
+        Отдельный цикл: снимает метрики подписчиков раз в GROWTH_INTERVAL.
+
+        Метрики снимает только планировщик НОВОСТНОГО канала: иначе два
+        планировщика писали бы одни и те же замеры дважды, и прирост за сутки
+        считался бы неверно.
+        """
+        from channels import NEWS
+        if self.profile.key != NEWS:
+            return
+        if not self.orchestrator:
+            return
+
+        from .growth_agent import GrowthAgent
+        interval = max(300, Config.GROWTH_INTERVAL)
+        self.log(f"📈 Мониторинг воронки запущен (каждые {interval // 60} мин)")
+        agent = GrowthAgent(bot=self.orchestrator.bot)
+
+        while self.is_running:
+            try:
+                await agent.execute({})
+            except Exception as e:
+                self.log(f"⚠️ Ошибка сбора метрик: {e}", is_error=True)
+            await asyncio.sleep(interval)
+    
     def _load_best_time(self) -> tuple:
         """
         Читает отчёт аналитики из Memory Bank и возвращает (лучший час, лучший день).

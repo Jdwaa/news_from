@@ -220,8 +220,20 @@ class Orchestrator:
         return context
     
     async def run_scheduler(self):
-        """Запускает планировщик публикаций"""
-        await self.scheduler.execute({})
+        """Запускает планировщик публикаций и мониторинг воронки."""
+        # Мониторинг метрик идёт отдельной задачей: он не должен ждать
+        # интервала публикации, иначе замеры будут раз в 3 часа, а не в час.
+        monitor = asyncio.create_task(self.scheduler.run_growth_monitor())
+        try:
+            await self.scheduler.execute({})
+        finally:
+            monitor.cancel()
+    
+    async def run_growth(self, context: dict = None) -> dict:
+        """Разовый сбор метрик подписчиков (для команды /growth)."""
+        from agents.growth_agent import GrowthAgent
+        agent = GrowthAgent(bot=self.bot)
+        return await agent.execute(context or {})
     
     async def run_analytics(self, context: dict = None) -> dict:
         """Запускает только аналитику"""

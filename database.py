@@ -41,6 +41,7 @@ def init_db():
     migrate_schema()
     print("✅ База данных инициализирована")
     init_stats_table()
+    init_subscribers_table()
 
 def migrate_schema():
     """
@@ -248,8 +249,7 @@ def get_last_publish_at(channel: str):
     Время последней публикации в конкретном канале (ISO-строка) или None.
 
     Планировщику нужна своя метка на каждый канал: если оба будут смотреть на
-    общий счётчик, публикация в одном сдвинет интервал другого и каналы
-    начнут «съезжать» относительно заданного расписания.
+    общий счётчик, публикация в одном сдвинет интервал другого и каналыначнут «съезжать» относительно заданного расписания.
     """
     conn = get_connection()
     c = conn.cursor()
@@ -378,19 +378,30 @@ def get_post_stats(post_id: int):
         }
     return None
 
-def get_all_posts_with_stats(limit: int = 30):
-    """Возвращает последние посты с их статистикой"""
+def get_all_posts_with_stats(limit: int = 30, channel: str = None):
+    """
+    Возвращает последние посты с их статистикой.
+
+    `channel` ограничивает выборку одним каналом: без него метрики каналов
+    смешиваются (просмотры лайфхаков попадали в отчёт новостного канала).
+    """
     conn = get_connection()
     c = conn.cursor()
-    c.execute("""
+    sql = """
         SELECT p.id, p.title, p.content, p.published_at, p.message_id,
-               ps.views, ps.reactions, ps.clicks, ps.shares, ps.read_ratio, ps.score
+               ps.views, ps.reactions, ps.clicks, ps.shares, ps.read_ratio, ps.score,
+               p.channel
         FROM posts p
         LEFT JOIN post_stats ps ON p.id = ps.post_id
         WHERE p.status = 'published'
-        ORDER BY p.id DESC
-        LIMIT ?
-    """, (limit,))
+    """
+    params = []
+    if channel:
+        sql += " AND p.channel = ?"
+        params.append(channel)
+    sql += " ORDER BY p.id DESC LIMIT ?"
+    params.append(limit)
+    c.execute(sql, tuple(params))
     rows = c.fetchall()
     conn.close()
     
@@ -407,7 +418,8 @@ def get_all_posts_with_stats(limit: int = 30):
             'clicks': row[7] or 0,
             'shares': row[8] or 0,
             'read_ratio': row[9] or 0,
-            'score': row[10] or 0
+            'score': row[10] or 0,
+            'channel': row[11] or DEFAULT_CHANNEL,
         })
     return posts
 
@@ -417,3 +429,93 @@ def update_post_message_id(post_id: int, message_id: int):
     c.execute("UPDATE posts SET message_id = ? WHERE id = ?", (message_id, post_id))
     conn.commit()
     conn.close()
+
+
+# ===== МОНИТОРИНГ ПОДПИСЧИКОВ (воронка) =====
+
+def init_subscribers_table():
+    """
+    Таблица истории подписчиков.
+
+    Без неё видно только текущее число: нельзя понять, растёт канал или
+    стоит на месте, и невозможно проверить, дала ли что-то конкретная
+    правка (кнопки, призывы, кросс-промо).
+    """
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS subscribers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        channel TEXT NOT NULL,
+        count INTEGER NOT NULL,
+        recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )''')
+    c.execute('''CREATE INDEX IF NOT EXISTS idx_subscribers_channel_time
+                 ON subscribers(channel, recorded_at)''')
+    conn.commit()
+    conn.close()
+
+
+def save_subscriber_count(channel: str, count: int):
+    """Записывает текущее число подписчиков канала."""
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute("INSERT INTO subscribers (channel, count) VALUES (?, ?)", (channel, count))
+    conn.commit()
+    conn.close()
+
+
+def get_subscriber_history(channel: str, days: int = 30):
+    """История подписчиков канала за N дней: [(дата, число), ...]."""
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute(
+        "SELECT recorded_at, count FROM subscribers "
+        "WHERE channel = ? AND recorded_at >= datetime('now', '-' || ? || ' days') "
+        "ORDER BY recorded_at",
+        (channel, days)
+    )
+    rows = c.fetchall()
+    conn.close()
+    return rows
+
+
+def get_subscriber_growth(channel: str, hours: int = 24) -> dict:
+    """
+    Прирост подписчиков за период.
+
+    Возвращает {
+        'current': последнее известное число,
+        'previous': число на начало периода,
+        'delta': прирост (может быть отрицательным),
+        'hours': фактический интервал между замерами, часы
+    }
+    Пустые значения — None, если данных мало.
+    """
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute(
+        "SELECT count, recorded_at FROM subscribers WHERE channel = ? "
+        "ORDER BY id DESC LIMIT 1", (channel,)
+    )
+    last = c.fetchone()
+
+    c.execute(
+        "SELECT count, recorded_at FROM subscribers "
+        "WHERE channel = ? AND recorded_at <= datetime('now', '-' || ? || ' hours') "
+        "ORDER BY id DESC LIMIT 1",
+        (channel, hours)
+    )
+    old = c.fetchone()
+    conn.close()
+
+    if not last:
+        return {'current': None, 'previous': None, 'delta': None, 'hours': hours}
+
+    current = last[0]
+    previous = old[0] if old else None
+    return {
+        'current': current,
+        'previous': previous,
+        'delta': (current - previous) if previous is not None else None,
+        'hours': hours,
+    }

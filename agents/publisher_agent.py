@@ -21,7 +21,7 @@ from database import (
     get_last_image_url,
 )
 from config import Config
-from channels import get_profile, NEWS
+from channels import get_profile, NEWS, build_post_keyboard
 
 
 class PublisherAgent(BaseAgent):
@@ -117,6 +117,11 @@ class PublisherAgent(BaseAgent):
         # ==========================================
         # 3. ПУБЛИКАЦИЯ В TELEGRAM
         # ==========================================
+        # Призыв к действию добавляем по вероятностной схеме, а не в каждый пост:
+        # постоянный «подпишись» в конце читается как реклама и снижает доверие.
+        # Целевой процент задаётся CTA_EVERY_N_POSTS (по умолчанию каждый третий).
+        post_text = self._maybe_add_cta(post_text, profile, post_id)
+        
         message_id = await self._publish_to_telegram(post_text, image_url_to_use, context)
         
         # ==========================================
@@ -147,6 +152,34 @@ class PublisherAgent(BaseAgent):
         self.log(f"✅ Пост #{post_id} опубликован!")
         return context
     
+    def _maybe_add_cta(self, post_text: str, profile, post_id: int) -> str:
+        """
+        Иногда добавляет в конец поста призыв перейти в канал-партнёр.
+
+        Не в каждый пост: постоянный призыв выглядит как реклама и снижает
+        доверие. Частота задаётся Config.CTA_EVERY_N_POSTS (0 — выключено).
+        Считаем по post_id, а не случайно: так поведение воспроизводимо и
+        его можно проверить тестом.
+        """
+        every = getattr(Config, "CTA_EVERY_N_POSTS", 3)
+        if not every or every <= 0:
+            return post_text
+        if post_id % every != 0:
+            return post_text
+
+        cta = profile.cta_text()
+        if not cta:
+            return post_text
+
+        # Проверяем, нет ли уже упоминания канала-партнёра: рерайтер мог
+        # добавить его сам, и второй раз это будет выглядеть навязчиво.
+        partner = profile.cross_promo
+        if partner and f"@{partner}" in post_text:
+            return post_text
+
+        self.log(f"📣 Добавляю призыв к действию (в каждом {every}-м посте)")
+        return f"{post_text}\n\n{cta}"
+
     async def _publish_to_telegram(self, post_text: str, image_url: str, context: dict):
         """
         Отправляет пост в Telegram-канал из профиля.
@@ -164,17 +197,32 @@ class PublisherAgent(BaseAgent):
             self.log(f"❌ У канала «{profile.title}» не задан адрес — публиковать некуда", is_error=True)
             return None
         
+        # Кнопки воронки: «Подписаться», «Поделиться», «Источник».
+        # Ссылка на источник берётся из выбранной новости.
+        source_url = (context.get("selected_news") or {}).get("link", "")
+        keyboard = build_post_keyboard(
+            profile,
+            post_title=context.get("post_title", ""),
+            source_url=source_url,
+        )
+        if keyboard:
+            self.log(f"🔗 Кнопки под постом: {len(keyboard.inline_keyboard)} ряд(ов)")
+        else:
+            self.log("ℹ️ Кнопки не добавлены (нет username канала или источника)")
+        
         try:
             # Пробуем отправить с картинкой
             if image_url and image_url != get_placeholder_image():
-                message_id = await self._send_with_image(post_text, image_url, chat_id)
+                message_id = await self._send_with_image(post_text, image_url, chat_id, keyboard)
                 if message_id:
                     self.log(f"✅ Пост опубликован с картинкой в «{profile.title}»")
                     return message_id
             
             result = await self.bot.send_message(
                 chat_id=chat_id,
-                text=post_text
+                text=post_text,
+                reply_markup=keyboard,
+                disable_web_page_preview=True,
             )
             self.log(f"✅ Пост опубликован без картинки в «{profile.title}»")
             return result.message_id if result else None
@@ -183,7 +231,8 @@ class PublisherAgent(BaseAgent):
             self.log(f"❌ Ошибка публикации в «{profile.title}»: {e}", is_error=True)
             return None
     
-    async def _send_with_image(self, post_text: str, image_url: str, chat_id: str):
+    async def _send_with_image(self, post_text: str, image_url: str, chat_id: str,
+                               keyboard=None):
         """
         Отправляет пост с картинкой в указанный чат.
         `image_url` может быть локальным путём к уже скачанному файлу.
@@ -196,7 +245,8 @@ class PublisherAgent(BaseAgent):
                     result = await self.bot.send_photo(
                         chat_id=chat_id,
                         photo=f,
-                        caption=post_text
+                        caption=post_text,
+                        reply_markup=keyboard,
                     )
                 return result.message_id if result else None
             except Exception as e:
@@ -218,7 +268,8 @@ class PublisherAgent(BaseAgent):
                 result = await self.bot.send_photo(
                     chat_id=chat_id,
                     photo=f,
-                    caption=post_text
+                    caption=post_text,
+                    reply_markup=keyboard,
                 )
             
             return result.message_id if result else None

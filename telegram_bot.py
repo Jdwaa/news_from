@@ -71,6 +71,7 @@ class TelegramBot:
         self.app.add_handler(CommandHandler("post", self.post_now, admin_only))
         self.app.add_handler(CommandHandler("status", self.status, admin_only))
         self.app.add_handler(CommandHandler("analytics", self.analytics_cmd, admin_only))
+        self.app.add_handler(CommandHandler("growth", self.growth_cmd, admin_only))
         self.app.add_handler(CommandHandler("admin", self.admin_menu, filters=private & admin_only))
         
         self.app.add_handler(CallbackQueryHandler(self.button_handler, admin_only))
@@ -152,9 +153,23 @@ class TelegramBot:
                 f"{p.emoji} Пост: {p.title}", callback_data=f"post_now:{p.key}"
             )])
         rows.append([InlineKeyboardButton("📊 Статус", callback_data="status")])
+        rows.append([InlineKeyboardButton("📈 Воронка", callback_data="growth")])
         rows.append([InlineKeyboardButton("📈 Аналитика", callback_data="analytics")])
         rows.append([InlineKeyboardButton("🔧 Админ-панель", callback_data="admin_panel")])
         return InlineKeyboardMarkup(rows)
+    
+    async def growth_cmd(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Показывает отчёт по воронке: подписчики, прирост, конверсия."""
+        await self._send(update.message.reply_text, "📈 Собираю метрики воронки...")
+        # Сначала снимаем свежий замер, потом строим отчёт
+        try:
+            orchestrator = Orchestrator(bot=self.app.bot)
+            await orchestrator.run_growth({})
+            from agents.growth_agent import GrowthAgent
+            report = GrowthAgent(bot=self.app.bot).build_report(hours=24)
+        except Exception as e:
+            report = f"⚠️ Не удалось собрать метрики: {e}"
+        await self._send(update.message.reply_text, report)
     
     async def _send_main_menu(self, chat_id: int):
         """Отправляет главное меню с кнопками."""
@@ -171,7 +186,8 @@ class TelegramBot:
             "Бот сам собирает новости из RSS, выбирает лучшую, пишет по ней пост, "
             "рисует картинку и публикует в канал по расписанию.\n\n"
             "*Команды:*\n"
-            "• /post — собрать и опубликовать пост прямо сейчас\n"
+            "• /post — собрать и опубликовать пост (выбор канала)\n"
+            "• /growth — рост подписчиков и конверсия воронки\n"
             "• /status — сколько постов опубликовано и ждёт отправки\n"
             "• /analytics — статистика и лучшее время публикации\n"
             "• /admin — очистка базы и перезапуск планировщика\n\n"
@@ -280,6 +296,17 @@ class TelegramBot:
                 lines.append(f"   ✅ опубликовано: {published}")
                 lines.append(f"   ⏳ ожидают: {pending}")
             await query.message.reply_text("\n".join(lines), parse_mode="Markdown")
+        
+        elif data == "growth":
+            await self._send(query.message.reply_text, "📈 Собираю метрики воронки...")
+            try:
+                orchestrator = Orchestrator(bot=self.app.bot)
+                await orchestrator.run_growth({})
+                from agents.growth_agent import GrowthAgent
+                report = GrowthAgent(bot=self.app.bot).build_report(hours=24)
+            except Exception as e:
+                report = f"⚠️ Не удалось собрать метрики: {e}"
+            await self._send(query.message.reply_text, report)
         
         elif data == "analytics":
             await self._send(query.message.reply_text, "📊 Собираю аналитику...")
