@@ -184,4 +184,28 @@ class Config:
                 "канал быстро заспамится"
             )
         
+        # Каналы: проверяем, что профили собрались и адреса не конфликтуют.
+        # Оба канала указывают на один чат — это почти всегда опечатка в .env,
+        # и тогда «два канала» превратятся в дубли постов в одном месте.
+        try:
+            from channels import PROFILES, active_profiles
+            active = active_profiles()
+            if not active:
+                warnings.append(
+                    "Ни один канал не настроен (CHANNEL_ID пуст) — публиковать некуда"
+                )
+            chats = [p.chat_id for p in active]
+            if len(chats) != len(set(chats)):
+                warnings.append(
+                    "CHANNEL_ID и CHANNEL_TIPS_ID указывают на один канал — "
+                    "посты будут дублироваться, проверьте .env"
+                )
+            if "tips" in PROFILES and not PROFILES["tips"].chat_id:
+                warnings.append(
+                    "CHANNEL_TIPS_ID не задан — канал лайфхаков выключен, "
+                    "бот работает только с новостным"
+                )
+        except Exception as e:
+            warnings.append(f"Не удалось собрать профили каналов: {e}")
+        
         return warnings

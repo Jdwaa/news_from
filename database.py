@@ -4,6 +4,10 @@ import sqlite3
 from config import Config
 from datetime import datetime
 
+# Канал по умолчанию: исторически бот публиковал только в новостной канал,
+# поэтому он же — значение для старых записей и для вызовов без явного канала.
+DEFAULT_CHANNEL = "news"
+
 def get_connection():
     return sqlite3.connect(Config.DB_PATH)
 
@@ -54,7 +58,78 @@ def migrate_schema():
         conn.commit()
         print("🔧 Миграция: добавлена колонка posts.message_id")
     
+    # channel нужен, чтобы один бот вёл два канала: дедуп и статистика считаются
+    # отдельно по каждому. Без него новость, ушедшая в новостной канал,
+    # блокировала бы такую же публикацию в канале лайфхаков.
+    if columns and "channel" not in columns:
+        c.execute("ALTER TABLE posts ADD COLUMN channel TEXT DEFAULT 'news'")
+        # Старые записи публиковались только в новостной канал
+        c.execute("UPDATE posts SET channel = 'news' WHERE channel IS NULL")
+        conn.commit()
+        print("🔧 Миграция: добавлена колонка posts.channel (старые посты -> 'news')")
+    
+    # link был UNIQUE в одиночку — это мешает публиковать одну новость в два канала
+    _migrate_link_unique_to_composite(conn)
+    
     conn.close()
+
+
+def _migrate_link_unique_to_composite(conn):
+    """
+    Снимает UNIQUE с posts.link и заменяет его составным (link, channel).
+
+    В исходной схеме link был UNIQUE в одиночку: одну и ту же новость нельзя
+    было сохранить дважды. Теперь каналов два, и новость вправе уйти и в
+    новостной канал, и в канал лайфхаков — блокировать должен только повтор
+    в пределах ОДНОГО канала.
+
+    SQLite не умеет удалять UNIQUE-ограничение через ALTER TABLE, поэтому
+    таблица пересоздаётся: данные переносятся как есть, затем меняются местами.
+    """
+    c = conn.cursor()
+
+    # Уже мигрировано (есть составной индекс) — выходим
+    indexes = [row[0] for row in c.execute("SELECT name FROM sqlite_master "
+                                           "WHERE type='index' AND tbl_name='posts'")]
+    if "idx_posts_link_channel" in indexes:
+        return
+
+    table_sql = c.execute("SELECT sql FROM sqlite_master WHERE name='posts'").fetchone()
+    if not table_sql or "link TEXT UNIQUE" not in (table_sql[0] or ""):
+        return  # схема уже без одиночного UNIQUE
+
+    print("🔧 Миграция: link UNIQUE -> составной UNIQUE (link, channel)")
+
+    # Колонки берём из фактической схемы: набор полей мог расшириться
+    existing = [row[1] for row in c.execute("PRAGMA table_info(posts)")]
+    has_channel = "channel" in existing
+
+    c.execute("PRAGMA foreign_keys=off")
+    c.execute("ALTER TABLE posts RENAME TO posts_old")
+
+    cols_new = ("id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, link TEXT, "
+                "content TEXT, image_prompt TEXT, image_url TEXT, "
+                "published_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
+                "status TEXT DEFAULT 'pending', message_id INTEGER, "
+                "channel TEXT DEFAULT 'news', "
+                "UNIQUE(link, channel)")
+    c.execute(f"CREATE TABLE posts ({cols_new})")
+
+    # Переносим данные; channel у старых записей = 'news'
+    target_cols = ["id", "title", "link", "content", "image_prompt", "image_url",
+                   "published_at", "status", "message_id"]
+    if has_channel:
+        target_cols.append("channel")
+    col_list = ", ".join(target_cols)
+    c.execute(f"INSERT INTO posts ({col_list}) SELECT {col_list} FROM posts_old")
+
+    c.execute("DROP TABLE posts_old")
+    c.execute("CREATE INDEX IF NOT EXISTS idx_posts_link_channel ON posts(link, channel)")
+    c.execute("PRAGMA foreign_keys=on")
+    conn.commit()
+
+    moved = c.execute("SELECT COUNT(*) FROM posts").fetchone()[0]
+    print(f"🔧 Миграция завершена: перенесено постов — {moved}")
 
 def save_log(message, log_type="info"):
     conn = get_connection()
@@ -65,19 +140,26 @@ def save_log(message, log_type="info"):
 
 # ===== ФУНКЦИИ ДЛЯ ПОСТОВ =====
 
-def save_post(title, link, content, image_prompt=None, image_url=None):
-    """Сохраняет пост в БД"""
+def save_post(title, link, content, image_prompt=None, image_url=None,
+              channel=DEFAULT_CHANNEL):
+    """
+    Сохраняет пост в БД.
+
+    `channel` определяет, в какой канал уходит пост. Одна и та же новость
+    может быть опубликована в оба канала (новости и лайфхаки) — это разные
+    продукты, поэтому дедуп считается отдельно по каналам.
+    """
     conn = get_connection()
     c = conn.cursor()
     try:
         c.execute("""
-            INSERT INTO posts (title, link, content, image_prompt, image_url, status) 
-            VALUES (?, ?, ?, ?, ?, 'pending')
-        """, (title, link, content, image_prompt, image_url))
+            INSERT INTO posts (title, link, content, image_prompt, image_url, status, channel) 
+            VALUES (?, ?, ?, ?, ?, 'pending', ?)
+        """, (title, link, content, image_prompt, image_url, channel))
         conn.commit()
         post_id = c.lastrowid
         conn.close()
-        print(f"✅ Пост #{post_id} сохранён: {title[:40]}...")
+        print(f"✅ Пост #{post_id} сохранён [{channel}]: {title[:40]}...")
         return post_id
     except sqlite3.IntegrityError:
         conn.close()
@@ -114,19 +196,26 @@ def get_pending_post():
     conn.close()
     return result
 
-def get_recent_post_links(days: int = 1):
+def get_recent_post_links(days: int = 1, channel: str = None):
     """
     Возвращает ссылки постов за последние N дней.
+
     Нужно для дедупа: парсер проверяет всю таблицу, а старые посты удаляются,
     поэтому без этой проверки новость можно было опубликовать повторно.
+
+    `channel` ограничивает выборку одним каналом: новостной канал и канал
+    лайфхаков — разные продукты, и новость, вышедшая в одном, не должна
+    блокировать публикацию в другом. Без аргумента проверяются все каналы.
     """
     conn = get_connection()
     c = conn.cursor()
-    c.execute(
-        "SELECT link FROM posts WHERE link IS NOT NULL AND link != '' "
-        "AND published_at >= datetime('now', '-' || ? || ' days')",
-        (days,)
-    )
+    sql = ("SELECT link FROM posts WHERE link IS NOT NULL AND link != '' "
+           "AND published_at >= datetime('now', '-' || ? || ' days')")
+    params = [days]
+    if channel:
+        sql += " AND channel = ?"
+        params.append(channel)
+    c.execute(sql, tuple(params))
     links = {row[0] for row in c.fetchall()}
     conn.close()
     return links
@@ -139,18 +228,45 @@ def get_last_post():
     conn.close()
     return result
 
-def get_posts_by_status(status):
+def get_posts_by_status(status, channel: str = None):
+    """Посты по статусу. С `channel` — только этого канала (для раздельной статистики)."""
     conn = get_connection()
     c = conn.cursor()
-    c.execute("SELECT id, title, content, published_at FROM posts WHERE status = ? ORDER BY id DESC", (status,))
+    if channel:
+        c.execute("SELECT id, title, content, published_at FROM posts "
+                  "WHERE status = ? AND channel = ? ORDER BY id DESC", (status, channel))
+    else:
+        c.execute("SELECT id, title, content, published_at FROM posts "
+                  "WHERE status = ? ORDER BY id DESC", (status,))
     result = c.fetchall()
     conn.close()
     return result
 
-def is_post_exists(link):
+
+def get_last_publish_at(channel: str):
+    """
+    Время последней публикации в конкретном канале (ISO-строка) или None.
+
+    Планировщику нужна своя метка на каждый канал: если оба будут смотреть на
+    общий счётчик, публикация в одном сдвинет интервал другого и каналы
+    начнут «съезжать» относительно заданного расписания.
+    """
     conn = get_connection()
     c = conn.cursor()
-    c.execute("SELECT id FROM posts WHERE link = ?", (link,))
+    c.execute("SELECT published_at FROM posts WHERE channel = ? AND status = 'published' "
+              "ORDER BY id DESC LIMIT 1", (channel,))
+    row = c.fetchone()
+    conn.close()
+    return row[0] if row else None
+
+def is_post_exists(link, channel: str = None):
+    """Проверяет, публиковалась ли ссылка. С `channel` — только в этом канале."""
+    conn = get_connection()
+    c = conn.cursor()
+    if channel:
+        c.execute("SELECT id FROM posts WHERE link = ? AND channel = ?", (link, channel))
+    else:
+        c.execute("SELECT id FROM posts WHERE link = ?", (link,))
     result = c.fetchone()
     conn.close()
     return result is not None
