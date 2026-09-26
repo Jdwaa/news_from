@@ -175,7 +175,6 @@ class GrowthAgent(BaseAgent):
         """
         partner = _partner_of(profile)
         lines = [f"{profile.emoji} *{profile.title}*", ""]
-
         if profile.key == TIPS:
             lines += [
                 "Практичные ИИ-лайфхаки для обычных людей: без терминов и",
@@ -200,9 +199,12 @@ class GrowthAgent(BaseAgent):
             ]
 
         if partner and partner.username:
+            # Экранируем подчёркивание: в Markdown «_» открывает курсив, и
+            # @aipolza_ii ломает разбор всего сообщения Telegram.
+            uname = partner.username.replace("_", r"\_")
             lines += [
                 "",
-                f"👉 Ещё больше пользы: @{partner.username}",
+                f"👉 Ещё больше пользы: @{uname}",
             ]
 
         return "\n".join(lines)
@@ -251,9 +253,22 @@ class GrowthAgent(BaseAgent):
                 # Сообщение могло быть удалено — тогда создаём новое
                 self.log(f"ℹ️ Прежний закреп недоступен ({e}), создаю новый")
 
-        # 2. Создаём новое приветствие
+        # 2. Создаём новое приветствие.
+        # Markdown может не распарситься: @username с подчёркиванием (_)
+        # Telegram принимает за начало курсива. Тогда отправляем без разметки —
+        # текст приветствия важнее звёздочек, а падение здесь ломало закреп.
+        msg = await self._send_pinned_text(profile, text, keyboard)
+        if msg is None:
+            return False
+
+        self.memory.set(f"pinned_message_id:{profile.key}", msg.message_id)
+        await self._ensure_pinned(profile, msg.message_id)
+        return True
+
+    async def _send_pinned_text(self, profile, text: str, keyboard):
+        """Отправляет текст закрепа, откатываясь на plain text при ошибке разметки."""
         try:
-            msg = await self.bot.send_message(
+            return await self.bot.send_message(
                 chat_id=profile.chat_id,
                 text=text,
                 parse_mode="Markdown",
@@ -261,12 +276,22 @@ class GrowthAgent(BaseAgent):
                 disable_web_page_preview=True,
             )
         except Exception as e:
-            self.log(f"❌ Не удалось отправить приветствие: {e}", is_error=True)
-            return False
-
-        self.memory.set(f"pinned_message_id:{profile.key}", msg.message_id)
-        await self._ensure_pinned(profile, msg.message_id)
-        return True
+            if "parse entities" not in str(e).lower() and "can't parse" not in str(e).lower():
+                self.log(f"❌ Не удалось отправить приветствие: {e}", is_error=True)
+                return None
+            self.log("⚠️ Markdown не распарсился — отправляю текст без разметки", is_error=True)
+            try:
+                # Убираем символы разметки, чтобы они не попали в текст как есть
+                plain = text.replace("*", "").replace("_", " ")
+                return await self.bot.send_message(
+                    chat_id=profile.chat_id,
+                    text=plain,
+                    reply_markup=keyboard,
+                    disable_web_page_preview=True,
+                )
+            except Exception as e2:
+                self.log(f"❌ Не удалось отправить приветствие: {e2}", is_error=True)
+                return None
 
     async def _ensure_pinned(self, profile, message_id: int) -> bool:
         """Закрепляет сообщение, если оно ещё не закреплено."""

@@ -2,107 +2,6 @@
   {
     "event": "review_completed",
     "status": "rejected",
-    "issues_count": 1,
-    "length": 560,
-    "timestamp": "2026-09-26T14:36:47.717515"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 6,
-    "length": 41,
-    "timestamp": "2026-09-26T14:36:47.749131"
-  },
-  {
-    "event": "news_selected",
-    "title": "Google Wallet got a lot of new tricks in 2026 – these 5 are my favorites",
-    "source": "www.zdnet.com",
-    "justification": "Новость про Google Wallet — это практичный лайфхак для обычного пользователя: большинство людей воспринимают приложение только как «приложить телефон к терминалу», а там появились новые полезные функции. Такая новость сразу даёт читателю конкретную пользу в повседневной жизни, без сложных технических деталей.",
-    "timestamp": "2026-09-26T14:36:57.812880"
-  },
-  {
-    "event": "post_generated",
-    "title": "GOOGLE WALLET СТАЛ МОЗГОМ ТВОЕГО БУДУЩЕГО 🧠⚡",
-    "length": 570,
-    "source": "www.zdnet.com",
-    "timestamp": "2026-09-26T14:37:01.260556"
-  },
-  {
-    "event": "news_selected",
-    "title": "Больше REM-сна связали с меньшим риском 83 заболеваний",
-    "source": "naked-science.ru",
-    "justification": "Эта новость напрямую касается здоровья и полезна для любого человека — она показывает связь продолжительности REM-сна со снижением риска 83 заболеваний, что даёт практический стимул следить за качеством сна. В отличие от большинства технических новостей в списке, здесь есть простой и применимый в быту вывод.",
-    "timestamp": "2026-09-26T14:37:12.588222"
-  },
-  {
-    "event": "news_selected",
-    "title": "Больше REM-сна связали с меньшим риском 83 заболеваний",
-    "source": "naked-science.ru",
-    "justification": "Эта новость напрямую полезна для обычного человека, поскольку связывает привычный всем сон с риском развития 83 заболеваний — это практическая информация, которую можно применить в повседневной жизни. Исследование опирается на объективные данные о ночном сне, что повышает его достоверность и ценность для читателей.",
-    "timestamp": "2026-09-26T14:37:23.033278"
-  },
-  {
-    "event": "post_generated",
-    "title": "СОН — ЭТО НЕ РОСКОШЬ, А ВАКЦИНА ОТ 83 БОЛЕЗНЕЙ 🧠⚡",
-    "length": 891,
-    "source": "naked-science.ru",
-    "timestamp": "2026-09-26T14:37:27.065605"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 891,
-    "timestamp": "2026-09-26T14:37:27.090619"
-  },
-  {
-    "event": "post_published",
-    "post_id": 24,
-    "title": "СОН — ЭТО НЕ РОСКОШЬ, А ВАКЦИНА ОТ 83 БОЛЕЗНЕЙ 🧠⚡",
-    "has_image": true,
-    "image_source": "new",
-    "timestamp": "2026-09-26T14:38:52.297021"
-  },
-  {
-    "event": "post_published",
-    "post_id": 25,
-    "title": "🚀 ТЕСТ: новостной канал",
-    "has_image": true,
-    "image_source": "db_fallback",
-    "timestamp": "2026-09-26T14:39:52.642400"
-  },
-  {
-    "event": "post_published",
-    "post_id": 26,
-    "title": "💡 ТЕСТ: канал лайфхаков",
-    "has_image": true,
-    "image_source": "db_fallback",
-    "timestamp": "2026-09-26T14:39:52.680386"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 498,
-    "timestamp": "2026-09-26T14:39:52.936323"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 6,
-    "length": 41,
-    "timestamp": "2026-09-26T14:39:52.960414"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 601,
-    "timestamp": "2026-09-26T14:39:52.971021"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
     "issues_count": 2,
     "length": 254,
     "timestamp": "2026-09-26T14:39:52.986021"
@@ -718,5 +617,106 @@
     "has_image": true,
     "image_source": "new",
     "timestamp": "2026-09-26T15:48:39.691903"
+  },
+  {
+    "event": "post_published",
+    "post_id": 44,
+    "title": "🚀 ТЕСТ: новостной канал",
+    "has_image": true,
+    "image_source": "db_fallback",
+    "timestamp": "2026-09-26T15:49:53.364003"
+  },
+  {
+    "event": "post_published",
+    "post_id": 45,
+    "title": "💡 ТЕСТ: канал лайфхаков",
+    "has_image": true,
+    "image_source": "db_fallback",
+    "timestamp": "2026-09-26T15:49:53.406661"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 498,
+    "timestamp": "2026-09-26T15:49:53.638465"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 6,
+    "length": 41,
+    "timestamp": "2026-09-26T15:49:53.658908"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 601,
+    "timestamp": "2026-09-26T15:49:53.668904"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 2,
+    "length": 254,
+    "timestamp": "2026-09-26T15:49:53.687905"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 4,
+    "length": 639,
+    "timestamp": "2026-09-26T15:49:53.715038"
+  },
+  {
+    "event": "news_selected",
+    "title": "Using AI to expand global access to reliable flood forecasts",
+    "source": "blog.research.google",
+    "justification": "Новость рассказывает о применении AI для прогнозирования наводнений в глобальном масштабе, что напрямую помогает спасать жизни и имущество обычных людей. Это пример полезного и социально значимого использования технологий, а не абстрактных экспериментов.",
+    "timestamp": "2026-09-26T15:50:03.466423"
+  },
+  {
+    "event": "post_generated",
+    "title": "ИИ ПРЕДСКАЖЕТ НАВОДНЕНИЯ ПО ВСЕЙ ПЛАНЕТЕ 🌊🤖",
+    "length": 461,
+    "source": "blog.research.google",
+    "timestamp": "2026-09-26T15:50:07.885680"
+  },
+  {
+    "event": "news_selected",
+    "title": "Как выбрать лучший хостинг для Telegram-бота в 2026–2027 году",
+    "source": "tproger.ru",
+    "justification": "Эта новость — практическое руководство по выбору хостинга для Telegram-бота, что напрямую полезно разработчикам и предпринимателям, создающим ботов. В отличие от большинства новостей в списке, она даёт конкретные рекомендации и сравнение вариантов (VPS, PaaS, Serverless) с ценами и критериями выбора. Это редкий пример прикладного материала, который читатель может сразу применить.",
+    "timestamp": "2026-09-26T15:50:19.339297"
+  },
+  {
+    "event": "news_selected",
+    "title": "Thieves Stole ‘Nvidia’ Trailers. They Got 20 Tons of Sand",
+    "source": "www.wired.com",
+    "justification": "Это самая яркая и необычная новость в списке — курьёзная история о ворах, которые украли трейлеры с логотипом Nvidia в надежде на дорогие чипы, а получили 20 тонн песка. Она наглядно и с юмором иллюстрирует, насколько перегрет спрос на AI-железо, и отлично запоминается читателями.",
+    "timestamp": "2026-09-26T15:50:29.580408"
+  },
+  {
+    "event": "post_generated",
+    "title": "🚨 УГНАЛИ ФУРЫ NVIDIA... А ВНУТРИ — 20 ТОНН ПЕСКА! 😱",
+    "length": 559,
+    "source": "www.wired.com",
+    "timestamp": "2026-09-26T15:50:33.584615"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 559,
+    "timestamp": "2026-09-26T15:50:33.615612"
+  },
+  {
+    "event": "post_published",
+    "post_id": 46,
+    "title": "🚨 УГНАЛИ ФУРЫ NVIDIA... А ВНУТРИ — 20 ТОНН ПЕСКА! ",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-09-26T15:51:08.849100"
   }
 ]
