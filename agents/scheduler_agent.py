@@ -9,6 +9,7 @@
 """
 
 import asyncio
+import os
 from datetime import datetime
 from .base_agent import BaseAgent
 from .analytics_agent import normalize_analytics_report
@@ -92,6 +93,21 @@ class SchedulerAgent(BaseAgent):
                                 best_day = report["day"]
                         else:
                             self.log("⚠️ Пост не опубликован, пробую снова через час...")
+                            # Дубликат — штатная ситуация, о ней не сообщаем;
+                            # остальные причины публикации не состоялись, и
+                            # админ должен узнать об этом сразу.
+                            if not result.get("duplicate_skipped") and self.orchestrator.bot:
+                                try:
+                                    from alerts import notify_admin
+                                    reason = result.get("error") or "причина в логе"
+                                    await notify_admin(
+                                        self.orchestrator.bot,
+                                        f"Пост не опубликован в «{self.profile.title}».\n"
+                                        f"Причина: {reason}",
+                                        kind=f"publish-failed:{self.profile.key}",
+                                    )
+                                except Exception:
+                                    pass
                             await asyncio.sleep(3600)
                             continue
                     else:
@@ -104,10 +120,70 @@ class SchedulerAgent(BaseAgent):
             except Exception as e:
                 self.log(f"❌ Ошибка в цикле публикации: {e}", is_error=True)
                 save_log(f"Ошибка планировщика: {e}", "error")
+                # Сообщаем админу: сбой цикла иначе заметен только по пустому каналу
+                if self.orchestrator and self.orchestrator.bot:
+                    try:
+                        from alerts import notify_admin
+                        await notify_admin(
+                            self.orchestrator.bot,
+                            f"Сбой цикла публикации в «{self.profile.title}»:\n{e}",
+                            kind=f"scheduler-error:{self.profile.key}",
+                        )
+                    except Exception:
+                        pass
                 await asyncio.sleep(3600)  # Ждём час перед повторной попыткой
         
         return context
     
+    async def run_maintenance(self):
+        """
+        Ежедневное обслуживание: бэкап БД, чистка картинок, сводка админу.
+
+        Запускает только планировщик новостного канала: работа одна на весь
+        бот, и дублировать её вторым планировщиком нельзя (два бэкапа, две
+        сводки, двойная чистка).
+        """
+        from channels import NEWS
+        if self.profile.key != NEWS:
+            return
+        if not self.orchestrator:
+            return
+
+        import maintenance
+        from alerts import notify_admin
+
+        self.log("🧰 Обслуживание запущено (раз в сутки)")
+        while self.is_running:
+            try:
+                # 1. Бэкап базы
+                res = maintenance.backup_database(keep=Config.BACKUP_KEEP)
+                if res.get("path"):
+                    self.log(f"💾 Бэкап БД: {os.path.basename(res['path'])} "
+                             f"({res['size_kb']} КБ, удалено старых: {res['removed']})")
+                else:
+                    self.log(f"⚠️ Бэкап не сделан: {res.get('error')}", is_error=True)
+
+                # 2. Чистка старых картинок
+                clean = maintenance.cleanup_images(days=Config.IMAGE_KEEP_DAYS)
+                if clean["deleted"]:
+                    self.log(f"🧹 Удалено картинок: {clean['deleted']} "
+                             f"({clean['freed_mb']} МБ), оставлено {clean['kept']}")
+
+                # 3. Суточная сводка по росту
+                if Config.DAILY_REPORT_HOUR >= 0 and self.orchestrator.bot:
+                    hour_now = datetime.now().hour
+                    if hour_now == Config.DAILY_REPORT_HOUR:
+                        await notify_admin(
+                            self.orchestrator.bot,
+                            maintenance.daily_growth_text(),
+                            kind="daily-report",
+                            critical=True,   # сводка важна, окно тишины не мешает
+                        )
+            except Exception as e:
+                self.log(f"⚠️ Ошибка обслуживания: {e}", is_error=True)
+
+            await asyncio.sleep(max(600, Config.BACKUP_INTERVAL))
+
     async def run_growth_monitor(self):
         """
         Отдельный цикл: снимает метрики подписчиков раз в GROWTH_INTERVAL.
@@ -188,6 +264,19 @@ class SchedulerAgent(BaseAgent):
         if not self.min_hour <= current_hour <= self.max_hour:
             self.log(f"🌙 Сейчас {current_hour}:00 — ночь, пропускаю публикацию")
             return False
+        
+        # 1.1. Дневной лимит: защита от «выгорания» канала, если интервал
+        # сбит или ручные запуски идут слишком часто
+        if Config.MAX_POSTS_PER_DAY > 0:
+            try:
+                from database import count_posts_today
+                posted_today = count_posts_today(self.profile.key)
+                if posted_today >= Config.MAX_POSTS_PER_DAY:
+                    self.log(f"🛑 Дневной лимит достигнут: {posted_today} постов "
+                             f"за сутки (максимум {Config.MAX_POSTS_PER_DAY})")
+                    return False
+            except Exception as e:
+                self.log(f"⚠️ Не удалось проверить дневной лимит ({e})", is_error=True)
         
         # Сдвиг расписания канала: у лайфхаков он на час позже новостного,
         # чтобы два канала не публиковали одновременно.

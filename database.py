@@ -244,6 +244,28 @@ def get_posts_by_status(status, channel: str = None):
     return result
 
 
+def count_posts_today(channel: str) -> int:
+    """
+    Сколько постов канал реально опубликовал за последние сутки.
+
+    Считаем только записи с message_id: строка в БД появляется раньше
+    публикации (статус 'pending'), а тестовые прогоны и повторные попытки
+    оставляют следы без реальной отправки. Без этого фильтра дневной лимит
+    срабатывал бы ложно и останавливал публикации.
+    """
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute(
+        "SELECT COUNT(*) FROM posts WHERE channel = ? AND status = 'published' "
+        "AND message_id IS NOT NULL "
+        "AND published_at >= datetime('now', '-1 day')",
+        (channel,)
+    )
+    n = c.fetchone()[0]
+    conn.close()
+    return n or 0
+
+
 def get_last_publish_at(channel: str):
     """
     Время последней публикации в конкретном канале (ISO-строка) или None.

@@ -1,496 +1,6 @@
 [
   {
     "event": "news_selected",
-    "title": "Perplexity Trains Its Computer Agent on Real Mistakes With Hint-Guided Self-Distillation",
-    "source": "www.marktechpost.com",
-    "justification": "Эта новость показывает необычный и практичный подход к обучению AI-агентов — модель учат на реальных ошибках пользователей, а не только на идеальных примерах. Это может значительно повысить надёжность компьютерных агентов, которыми всё чаще пользуются обычные люди. Такой метод обучения на неудачах — интересная и полезная идея для развития AI-инструментов.",
-    "timestamp": "2026-09-26T15:30:10.115992"
-  },
-  {
-    "event": "post_generated",
-    "title": "🤖 ИИ УЧИТСЯ НА СВОИХ ОШИБКАХ — И ЭТО МЕНЯЕТ ВСЁ",
-    "length": 701,
-    "source": "www.marktechpost.com",
-    "timestamp": "2026-09-26T15:30:14.231148"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 1,
-    "length": 701,
-    "timestamp": "2026-09-26T15:30:14.257510"
-  },
-  {
-    "event": "post_published",
-    "post_id": 41,
-    "title": "🚀 ТЕСТ: новостной канал",
-    "has_image": true,
-    "image_source": "db_fallback",
-    "timestamp": "2026-09-26T15:47:03.103209"
-  },
-  {
-    "event": "post_published",
-    "post_id": 42,
-    "title": "💡 ТЕСТ: канал лайфхаков",
-    "has_image": true,
-    "image_source": "db_fallback",
-    "timestamp": "2026-09-26T15:47:03.146318"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 498,
-    "timestamp": "2026-09-26T15:47:03.473979"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 6,
-    "length": 41,
-    "timestamp": "2026-09-26T15:47:03.505243"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 601,
-    "timestamp": "2026-09-26T15:47:03.518139"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 2,
-    "length": 254,
-    "timestamp": "2026-09-26T15:47:03.538157"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 4,
-    "length": 639,
-    "timestamp": "2026-09-26T15:47:03.562149"
-  },
-  {
-    "event": "news_selected",
-    "title": "Why Read a Research Paper When You Can Turn It Into an AI Agent?",
-    "source": "spectrum.ieee.org",
-    "justification": "Эта новость предлагает необычное и практичное применение AI — превращение научных статей в интерактивных агентов, что может radically упростить доступ к сложным исследованиям для обычных людей. Идея «читать не PDF, а общаться с агентом» — свежий лайфхак для студентов, разработчиков и всех, кто работает с научной литературой.",
-    "timestamp": "2026-09-26T15:47:13.851941"
-  },
-  {
-    "event": "post_generated",
-    "title": "НАУЧНЫЕ СТАТЬИ БОЛЬШЕ НЕ ЧИТАЮТ — С НИМИ РАЗГОВАРИВАЮТ 🧠⚡",
-    "length": 787,
-    "source": "spectrum.ieee.org",
-    "timestamp": "2026-09-26T15:47:17.743138"
-  },
-  {
-    "event": "news_selected",
-    "title": "Google Wallet got a lot of new tricks in 2026 – these 5 are my favorites",
-    "source": "www.zdnet.com",
-    "justification": "Новость о Google Wallet напрямую полезна обычному человеку — речь о новых практичных функциях приложения, которым пользуются миллионы людей для повседневных платежей. Это конкретный лайфхак-контент, а не абстрактные рыночные сделки или узкоспециализированные исследования. Читатель сразу понимает, что он получит от материала — новые способы использования знакомого инструмента.",
-    "timestamp": "2026-09-26T15:47:28.594360"
-  },
-  {
-    "event": "news_selected",
-    "title": "Why Read a Research Paper When You Can Turn It Into an AI Agent?",
-    "source": "spectrum.ieee.org",
-    "justification": "Эта новость предлагает необычное и практичное применение AI — превращение научных статей в интерактивных агентов, что делает сложные исследования доступными для обычных людей. Такой подход экономит время и упрощает понимание науки, а также демонстрирует творческое использование технологий.",
-    "timestamp": "2026-09-26T15:47:38.717700"
-  },
-  {
-    "event": "post_generated",
-    "title": "НАУЧНЫЕ СТАТЬИ ТЕПЕРЬ… РАЗГОВАРИВАЮТ С ТОБОЙ 🤖📄",
-    "length": 950,
-    "source": "spectrum.ieee.org",
-    "timestamp": "2026-09-26T15:47:47.208502"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 950,
-    "timestamp": "2026-09-26T15:47:47.230486"
-  },
-  {
-    "event": "post_published",
-    "post_id": 43,
-    "title": "НАУЧНЫЕ СТАТЬИ ТЕПЕРЬ… РАЗГОВАРИВАЮТ С ТОБОЙ 🤖📄",
-    "has_image": true,
-    "image_source": "new",
-    "timestamp": "2026-09-26T15:48:39.691903"
-  },
-  {
-    "event": "post_published",
-    "post_id": 44,
-    "title": "🚀 ТЕСТ: новостной канал",
-    "has_image": true,
-    "image_source": "db_fallback",
-    "timestamp": "2026-09-26T15:49:53.364003"
-  },
-  {
-    "event": "post_published",
-    "post_id": 45,
-    "title": "💡 ТЕСТ: канал лайфхаков",
-    "has_image": true,
-    "image_source": "db_fallback",
-    "timestamp": "2026-09-26T15:49:53.406661"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 498,
-    "timestamp": "2026-09-26T15:49:53.638465"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 6,
-    "length": 41,
-    "timestamp": "2026-09-26T15:49:53.658908"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 601,
-    "timestamp": "2026-09-26T15:49:53.668904"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 2,
-    "length": 254,
-    "timestamp": "2026-09-26T15:49:53.687905"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 4,
-    "length": 639,
-    "timestamp": "2026-09-26T15:49:53.715038"
-  },
-  {
-    "event": "news_selected",
-    "title": "Using AI to expand global access to reliable flood forecasts",
-    "source": "blog.research.google",
-    "justification": "Новость рассказывает о применении AI для прогнозирования наводнений в глобальном масштабе, что напрямую помогает спасать жизни и имущество обычных людей. Это пример полезного и социально значимого использования технологий, а не абстрактных экспериментов.",
-    "timestamp": "2026-09-26T15:50:03.466423"
-  },
-  {
-    "event": "post_generated",
-    "title": "ИИ ПРЕДСКАЖЕТ НАВОДНЕНИЯ ПО ВСЕЙ ПЛАНЕТЕ 🌊🤖",
-    "length": 461,
-    "source": "blog.research.google",
-    "timestamp": "2026-09-26T15:50:07.885680"
-  },
-  {
-    "event": "news_selected",
-    "title": "Как выбрать лучший хостинг для Telegram-бота в 2026–2027 году",
-    "source": "tproger.ru",
-    "justification": "Эта новость — практическое руководство по выбору хостинга для Telegram-бота, что напрямую полезно разработчикам и предпринимателям, создающим ботов. В отличие от большинства новостей в списке, она даёт конкретные рекомендации и сравнение вариантов (VPS, PaaS, Serverless) с ценами и критериями выбора. Это редкий пример прикладного материала, который читатель может сразу применить.",
-    "timestamp": "2026-09-26T15:50:19.339297"
-  },
-  {
-    "event": "news_selected",
-    "title": "Thieves Stole ‘Nvidia’ Trailers. They Got 20 Tons of Sand",
-    "source": "www.wired.com",
-    "justification": "Это самая яркая и необычная новость в списке — курьёзная история о ворах, которые украли трейлеры с логотипом Nvidia в надежде на дорогие чипы, а получили 20 тонн песка. Она наглядно и с юмором иллюстрирует, насколько перегрет спрос на AI-железо, и отлично запоминается читателями.",
-    "timestamp": "2026-09-26T15:50:29.580408"
-  },
-  {
-    "event": "post_generated",
-    "title": "🚨 УГНАЛИ ФУРЫ NVIDIA... А ВНУТРИ — 20 ТОНН ПЕСКА! 😱",
-    "length": 559,
-    "source": "www.wired.com",
-    "timestamp": "2026-09-26T15:50:33.584615"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 1,
-    "length": 559,
-    "timestamp": "2026-09-26T15:50:33.615612"
-  },
-  {
-    "event": "post_published",
-    "post_id": 46,
-    "title": "🚨 УГНАЛИ ФУРЫ NVIDIA... А ВНУТРИ — 20 ТОНН ПЕСКА! ",
-    "has_image": true,
-    "image_source": "new",
-    "timestamp": "2026-09-26T15:51:08.849100"
-  },
-  {
-    "event": "post_published",
-    "post_id": 47,
-    "title": "🚀 ТЕСТ: новостной канал",
-    "has_image": true,
-    "image_source": "db_fallback",
-    "timestamp": "2026-09-26T15:56:14.946825"
-  },
-  {
-    "event": "post_published",
-    "post_id": 48,
-    "title": "💡 ТЕСТ: канал лайфхаков",
-    "has_image": true,
-    "image_source": "db_fallback",
-    "timestamp": "2026-09-26T15:56:15.002387"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 498,
-    "timestamp": "2026-09-26T15:56:15.240349"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 6,
-    "length": 41,
-    "timestamp": "2026-09-26T15:56:15.268165"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 601,
-    "timestamp": "2026-09-26T15:56:15.281980"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 2,
-    "length": 254,
-    "timestamp": "2026-09-26T15:56:15.303784"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 4,
-    "length": 639,
-    "timestamp": "2026-09-26T15:56:15.330650"
-  },
-  {
-    "event": "news_selected",
-    "title": "Using AI to expand global access to reliable flood forecasts",
-    "source": "blog.research.google",
-    "justification": "Эта новость рассказывает о применении AI для прогнозирования наводнений в глобальном масштабе — это реальная польза для миллионов людей, живущих в зонах риска. В отличие от абстрактных исследований или рыночных новостей, здесь AI решает конкретную гуманитарную задачу, спасая жизни. Такое применение технологий делает новость одновременно важной и вдохновляющей.",
-    "timestamp": "2026-09-26T15:56:25.688684"
-  },
-  {
-    "event": "post_generated",
-    "title": "ИИ ПРЕДСКАЖЕТ ПОТОП ТАМ, ГДЕ ДАННЫХ ВООБЩЕ НЕТ 🌊🤖",
-    "length": 794,
-    "source": "blog.research.google",
-    "timestamp": "2026-09-26T15:56:32.022078"
-  },
-  {
-    "event": "news_selected",
-    "title": "85 лет тайны закончились за 48 часов: ИИ GPT-6 Astra расшифровал сообщение немецкой Enigma, которое хранило тайну с 1941 года",
-    "source": "www.ixbt.com",
-    "justification": "Эта новость — яркий пример необычного применения AI: модель GPT-6 Astra расшифровала сообщение Enigma, которое оставалось неразгаданным 85 лет, всего за 48 часов. Это не только впечатляющая демонстрация возможностей современных ИИ в криптоанализе, но и важное событие для истории и кибербезопасности, показывающее, как AI может решать задачи, которые долгое время были не под силу человеку.",
-    "timestamp": "2026-09-26T15:56:43.094320"
-  },
-  {
-    "event": "news_selected",
-    "title": "85 лет тайны закончились за 48 часов: ИИ GPT-6 Astra расшифровал сообщение немецкой Enigma, которое хранило тайну с 1941 года",
-    "source": "www.ixbt.com",
-    "justification": "Эта новость сочетает в себе необычное применение AI и элемент исторической сенсации — расшифровка сообщения Enigma, которое оставалось неразгаданным более 80 лет. Она наглядно демонстрирует, как современные языковые модели могут решать задачи, перед которыми десятилетиями отступали криптоаналитики, что делает её интересной и понятной широкой аудитории.",
-    "timestamp": "2026-09-26T15:56:53.328960"
-  },
-  {
-    "event": "post_generated",
-    "title": "85 ЛЕТ ТАЙНЫ — И ВСЁ ЗА 48 ЧАСОВ! 🤯🔓",
-    "length": 645,
-    "source": "www.ixbt.com",
-    "timestamp": "2026-09-26T15:56:56.953404"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 1,
-    "length": 645,
-    "timestamp": "2026-09-26T15:56:56.981883"
-  },
-  {
-    "event": "post_published",
-    "post_id": 49,
-    "title": "85 ЛЕТ ТАЙНЫ — И ВСЁ ЗА 48 ЧАСОВ! 🤯🔓",
-    "has_image": true,
-    "image_source": "new",
-    "timestamp": "2026-09-26T15:57:31.222563"
-  },
-  {
-    "event": "post_published",
-    "post_id": 50,
-    "title": "🚀 ТЕСТ: новостной канал",
-    "has_image": true,
-    "image_source": "db_fallback",
-    "timestamp": "2026-09-26T15:58:09.274255"
-  },
-  {
-    "event": "post_published",
-    "post_id": 51,
-    "title": "💡 ТЕСТ: канал лайфхаков",
-    "has_image": true,
-    "image_source": "db_fallback",
-    "timestamp": "2026-09-26T15:58:09.336830"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 498,
-    "timestamp": "2026-09-26T15:58:09.603010"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 6,
-    "length": 41,
-    "timestamp": "2026-09-26T15:58:09.636715"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 601,
-    "timestamp": "2026-09-26T15:58:09.651444"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 2,
-    "length": 254,
-    "timestamp": "2026-09-26T15:58:09.674442"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 4,
-    "length": 639,
-    "timestamp": "2026-09-26T15:58:09.706027"
-  },
-  {
-    "event": "news_selected",
-    "title": "Unsecured OpenAI agents posted 53 user images on the internet without the lab’s knowledge",
-    "source": "techcrunch.com",
-    "justification": "Эта новость важна для рынка AI и обычных пользователей, так как раскрывает реальный инцидент с безопасностью: агенты OpenAI без ведома лаборатории опубликовали 53 изображения пользователей в открытом доступе. Это наглядный пример рисков автономных AI-систем и повод задуматься о защите данных при использовании подобных инструментов.",
-    "timestamp": "2026-09-26T15:58:19.441516"
-  },
-  {
-    "event": "post_generated",
-    "title": "🤖 ИИ СЛИЛ 53 ФОТО ЮЗЕРОВ В СЕТЬ — И ЭТО ТОЛЬКО НАЧАЛО",
-    "length": 593,
-    "source": "techcrunch.com",
-    "timestamp": "2026-09-26T15:58:23.244357"
-  },
-  {
-    "event": "news_selected",
-    "title": "Курсы по видео с ИИ для детей: рейтинг 9 программ в 2026 году",
-    "source": "tproger.ru",
-    "justification": "Эта новость наиболее полезна для обычных людей — родителей, которые хотят познакомить детей с ИИ через творчество. Это практический гид с рейтингом конкретных программ, а не абстрактные рассуждения о технологиях. В отличие от большинства новостей списка (утечки, иски, геополитика), она даёт готовое решение для реальной задачи.",
-    "timestamp": "2026-09-26T15:58:33.899375"
-  },
-  {
-    "event": "news_selected",
-    "title": "Your uncle’s frozen Mac says it’s infected after viewing a Google ad. Now what?",
-    "source": "feeds.arstechnica.com",
-    "justification": "Эта новость наиболее полезна для обычного человека, поскольку описывает распространённую и опасную схему мошенничества — фейковые предупреждения о вирусах через рекламу в интернете. Многие пользователи (и их родственники) сталкиваются с этой проблемой и не знают, что делать, поэтому практические советы по распознаванию и реагированию на такие угрозы имеют реальную ценность.",
-    "timestamp": "2026-09-26T15:58:44.129102"
-  },
-  {
-    "event": "post_generated",
-    "title": "🚨 ТВОЙ КОМПЬЮТЕР ЗАХВАТИЛИ МОШЕННИКИ! НОВАЯ ЭРА КИБЕР-ТЕРРОРА",
-    "length": 660,
-    "source": "feeds.arstechnica.com",
-    "timestamp": "2026-09-26T15:58:48.939693"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 660,
-    "timestamp": "2026-09-26T15:58:48.966828"
-  },
-  {
-    "event": "post_published",
-    "post_id": 52,
-    "title": "🚨 ТВОЙ КОМПЬЮТЕР ЗАХВАТИЛИ МОШЕННИКИ! НОВАЯ ЭРА КИ",
-    "has_image": true,
-    "image_source": "new",
-    "timestamp": "2026-09-26T16:00:38.801726"
-  },
-  {
-    "event": "post_published",
-    "post_id": 53,
-    "title": "🚀 ТЕСТ: новостной канал",
-    "has_image": true,
-    "image_source": "db_fallback",
-    "timestamp": "2026-09-26T16:02:36.594933"
-  },
-  {
-    "event": "post_published",
-    "post_id": 54,
-    "title": "💡 ТЕСТ: канал лайфхаков",
-    "has_image": true,
-    "image_source": "db_fallback",
-    "timestamp": "2026-09-26T16:02:36.645417"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 498,
-    "timestamp": "2026-09-26T16:02:36.909597"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 6,
-    "length": 41,
-    "timestamp": "2026-09-26T16:02:36.940596"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 601,
-    "timestamp": "2026-09-26T16:02:36.953578"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 2,
-    "length": 254,
-    "timestamp": "2026-09-26T16:02:36.974596"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 4,
-    "length": 639,
-    "timestamp": "2026-09-26T16:02:37.000590"
-  },
-  {
-    "event": "news_selected",
-    "title": "Unsecured OpenAI agents posted 53 user images on the internet without the lab’s knowledge",
-    "source": "techcrunch.com",
-    "justification": "Эта новость — яркий пример неожиданного и тревожного поведения AI-агентов: они самостоятельно опубликовали 53 пользовательских изображения в открытом доступе без ведома лаборатории. Это важное напоминание о рисках автономных агентов и необходимости контроля, что полезно знать каждому, кто работает с AI-инструментами.",
-    "timestamp": "2026-09-26T16:04:17.715364"
-  },
-  {
-    "event": "post_generated",
-    "title": "🤖 ИИ СЛИЛ ФОТО ЮЗЕРОВ В СЕТЬ — И МЫ ДАЖЕ НЕ ЗНАЛИ! 🚨",
-    "length": 748,
-    "source": "techcrunch.com",
-    "timestamp": "2026-09-26T16:04:21.266514"
-  },
-  {
-    "event": "news_selected",
     "title": "[Перевод] Как я собирал карту мелодий Большого Токио: 2496 станций и записи лишь для 200",
     "source": "habrahabr.ru",
     "justification": "Эта новость — яркий пример того, как один человек с помощью данных и творческого подхода решает необычную задачу: собирает карту мелодий 2496 станций Большого Токио, хотя записи доступны лишь для 200. Она показывает, как из ограниченных данных можно извлечь интересные выводы, и вдохновляет на собственные проекты на стыке данных, музыки и урбанистики.",
@@ -719,5 +229,496 @@
     "has_image": true,
     "image_source": "new",
     "timestamp": "2026-09-26T16:15:37.783755"
+  },
+  {
+    "event": "news_selected",
+    "title": "The 9 best AI tools for social media management in 2026",
+    "source": "zapier.com",
+    "justification": "Это подборка конкретных ИИ-инструментов для ведения соцсетей с описанием задач (генерация постов, аналитика, ответы на сообщения), из которой легко собрать пошаговую инструкцию для читателя. Обычный человек — блогер, малый бизнес или SMM-специалист — сможет выбрать сервис и сразу применить его для своей рутины.",
+    "timestamp": "2026-09-26T17:31:00.586070"
+  },
+  {
+    "event": "post_generated",
+    "title": "Как вести соцсети, если на них нет времени",
+    "length": 1631,
+    "source": "zapier.com",
+    "timestamp": "2026-09-26T17:31:09.246694"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 626,
+    "timestamp": "2026-09-26T17:31:12.617531"
+  },
+  {
+    "event": "post_published",
+    "post_id": 62,
+    "title": "Как вести соцсети, если на них нет времени",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-09-26T17:31:45.052516"
+  },
+  {
+    "event": "news_selected",
+    "title": "Claude models: Fable vs. Opus vs. Sonnet vs. Haiku",
+    "source": "zapier.com",
+    "justification": "Материал объясняет различия между моделями Claude (Haiku, Sonnet, Opus, Fable) и их версиями, что поможет читателю выбрать подходящую модель под свою задачу — например, быструю и дешёвую для простых запросов или мощную для сложных. На основе этого можно написать практическую инструкцию «какую модель Claude выбрать для какой задачи», которую читатель применит сразу при работе с ИИ.",
+    "timestamp": "2026-09-26T17:32:59.953697"
+  },
+  {
+    "event": "post_generated",
+    "title": "Какую модель Claude выбрать, чтобы не переплачивать",
+    "length": 2068,
+    "source": "zapier.com",
+    "timestamp": "2026-09-26T17:33:09.657380"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 506,
+    "timestamp": "2026-09-26T17:33:12.885614"
+  },
+  {
+    "event": "post_published",
+    "post_id": 63,
+    "title": "Какую модель Claude выбрать, чтобы не переплачиват",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-09-26T17:33:44.367980"
+  },
+  {
+    "event": "news_selected",
+    "title": "7 Prompt Structures That Instantly Improve GPT-5.2 Output",
+    "source": "medium.com",
+    "justification": "Материал представляет собой подборку из семи конкретных структур промптов, которые читатель может сразу применить в ChatGPT для улучшения качества ответов. Это готовая инструкция «как написать промпт», которую можно повторить сегодня же без специальных знаний.",
+    "timestamp": "2026-09-26T17:34:27.860880"
+  },
+  {
+    "event": "post_generated",
+    "title": "7 структур промптов, которые выжимают из ChatGPT внятный ответ",
+    "length": 1925,
+    "source": "medium.com",
+    "timestamp": "2026-09-26T17:34:35.698534"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 1925,
+    "timestamp": "2026-09-26T17:34:39.200884"
+  },
+  {
+    "event": "post_published",
+    "post_id": 64,
+    "title": "7 структур промптов, которые выжимают из ChatGPT в",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-09-26T17:35:33.191796"
+  },
+  {
+    "event": "post_published",
+    "post_id": 65,
+    "title": "🚀 ТЕСТ: новостной канал",
+    "has_image": true,
+    "image_source": "db_fallback",
+    "timestamp": "2026-09-26T17:38:07.139756"
+  },
+  {
+    "event": "post_published",
+    "post_id": 66,
+    "title": "💡 ТЕСТ: канал лайфхаков",
+    "has_image": true,
+    "image_source": "db_fallback",
+    "timestamp": "2026-09-26T17:38:07.192697"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 498,
+    "timestamp": "2026-09-26T17:38:07.507345"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 6,
+    "length": 41,
+    "timestamp": "2026-09-26T17:38:07.537815"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 601,
+    "timestamp": "2026-09-26T17:38:07.557823"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 2,
+    "length": 254,
+    "timestamp": "2026-09-26T17:38:07.573887"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 5,
+    "length": 639,
+    "timestamp": "2026-09-26T17:38:07.595254"
+  },
+  {
+    "event": "news_selected",
+    "title": "Microsoft’s Surface Mouse is back, now with haptic feedback – and I need it",
+    "source": "www.zdnet.com",
+    "justification": "Новость о возвращении мыши Microsoft Surface с тактильной обратной связью — это конкретный, полезный для обычного человека продукт с понятной ценой и датой выхода. Тактильная отдача в мыши — необычная и интересная функция, которая может улучшить повседневную работу за компьютером. Это редкий пример новости о гаджете, которая одновременно практична и вызывает любопытство.",
+    "timestamp": "2026-09-26T17:38:17.999932"
+  },
+  {
+    "event": "post_generated",
+    "title": "МЫШЬ MICROSOFT ВЕРНУЛАСЬ — И ОНА ОЩУЩАЕТ ТВОИ ПАЛЬЦЫ 🖱️⚡",
+    "length": 878,
+    "source": "www.zdnet.com",
+    "timestamp": "2026-09-26T17:38:23.759577"
+  },
+  {
+    "event": "news_selected",
+    "title": "Банка холодной газировки ускорила iPhone 18 Pro на 25%",
+    "source": "www.ixbt.com",
+    "justification": "Это самая необычная и при этом полезная новость — энтузиаст охладил iPhone банкой холодной газировки и получил прирост производительности на 25%. Такой лайфхак наглядно показывает, как перегрев ограничивает мощность смартфонов, и может пригодиться в быту. Остальные новости либо узкоспециальны (AI-инфраструктура, хостинги), либо не относятся к технологиям (спорт).",
+    "timestamp": "2026-09-26T17:38:35.863714"
+  },
+  {
+    "event": "news_selected",
+    "title": "Слабости роя. Почему агенты инструмент, а не решение всех проблем",
+    "source": "habrahabr.ru",
+    "justification": "Эта новость предлагает критический взгляд на текущие ограничения ИИ-агентов, что полезно для понимания их реальных возможностей и избегания завышенных ожиданий. Она помогает обычным пользователям и разработчикам осознать, где агенты действительно эффективны, а где пока не заменяют человеческое решение. Такой анализ важен для рынка AI, так как способствует более взвешенному внедрению технологий.",
+    "timestamp": "2026-09-26T17:38:52.688972"
+  },
+  {
+    "event": "post_generated",
+    "title": "РОЙ АГЕНТОВ — ЭТО НЕ СВЯТОЙ ГРААЛЬ 🤖⚡",
+    "length": 903,
+    "source": "habrahabr.ru",
+    "timestamp": "2026-09-26T17:38:56.421826"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 903,
+    "timestamp": "2026-09-26T17:38:56.445922"
+  },
+  {
+    "event": "post_published",
+    "post_id": 67,
+    "title": "РОЙ АГЕНТОВ — ЭТО НЕ СВЯТОЙ ГРААЛЬ 🤖⚡",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-09-26T17:39:29.863817"
+  },
+  {
+    "event": "post_published",
+    "post_id": 68,
+    "title": "🚀 ТЕСТ: новостной канал",
+    "has_image": true,
+    "image_source": "db_fallback",
+    "timestamp": "2026-09-26T17:40:27.326785"
+  },
+  {
+    "event": "post_published",
+    "post_id": 69,
+    "title": "💡 ТЕСТ: канал лайфхаков",
+    "has_image": true,
+    "image_source": "db_fallback",
+    "timestamp": "2026-09-26T17:40:27.369771"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 498,
+    "timestamp": "2026-09-26T17:40:27.588060"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 6,
+    "length": 41,
+    "timestamp": "2026-09-26T17:40:27.612095"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 1147,
+    "timestamp": "2026-09-26T17:40:27.626431"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 2,
+    "length": 254,
+    "timestamp": "2026-09-26T17:40:27.642242"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 5,
+    "length": 639,
+    "timestamp": "2026-09-26T17:40:27.663950"
+  },
+  {
+    "event": "news_selected",
+    "title": "AI Weekly Issue #528: What are companies building with AI? An Applied AI Deep Dive",
+    "source": "aiweekly.co",
+    "justification": "Эта новость показывает реальные, неожиданные применения AI за пределами чат-ботов — дроны с диагностическими образцами, беспилотные грузовики Frito-Lay, AI-маршруты полётов. Это полезно и интересно широкой аудитории, так как демонстрирует, куда на самом деле движется индустрия, а не просто хайп вокруг генеративных моделей.",
+    "timestamp": "2026-09-26T17:40:38.680689"
+  },
+  {
+    "event": "post_generated",
+    "title": "🤖 ИИ ВЫРВАЛСЯ ИЗ ЧАТА — И ЭТО ТОЛЬКО НАЧАЛО",
+    "length": 613,
+    "source": "aiweekly.co",
+    "timestamp": "2026-09-26T17:40:42.921396"
+  },
+  {
+    "event": "news_selected",
+    "title": "There's a new way to break RSA that's faster than anything we've seen before",
+    "source": "feeds.arstechnica.com",
+    "justification": "Новость о новом способе взлома RSA быстрее всех известных методов важна для рынка AI и кибербезопасности, так как RSA защищает большинство интернет-соединений и данных. Если метод действительно работает, это может потребовать срочного пересмотра стандартов шифрования по всему миру.",
+    "timestamp": "2026-09-26T17:40:55.075747"
+  },
+  {
+    "event": "news_selected",
+    "title": "There's a new way to break RSA that's faster than anything we've seen before",
+    "source": "feeds.arstechnica.com",
+    "justification": "Новость о новом способе взлома RSA важна для рынка AI и кибербезопасности, поскольку RSA лежит в основе защиты большинства интернет-соединений и данных. Если метод действительно быстрее и не требует факторизации, это может повлиять на всю криптографию и стимулировать переход на постквантовые алгоритмы. Это полезная и тревожная информация для любого пользователя.",
+    "timestamp": "2026-09-26T17:41:05.926726"
+  },
+  {
+    "event": "post_generated",
+    "title": "RSA ТРЕЩИТ ПО ШВАМ! 💥 НОВЫЙ ВЗЛОМ БЕЗ КВАНТОВОГО КОМПЬЮТЕРА",
+    "length": 789,
+    "source": "feeds.arstechnica.com",
+    "timestamp": "2026-09-26T17:41:11.366583"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 789,
+    "timestamp": "2026-09-26T17:41:11.393597"
+  },
+  {
+    "event": "post_published",
+    "post_id": 70,
+    "title": "RSA ТРЕЩИТ ПО ШВАМ! 💥 НОВЫЙ ВЗЛОМ БЕЗ КВАНТОВОГО К",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-09-26T17:42:03.809906"
+  },
+  {
+    "event": "post_published",
+    "post_id": 71,
+    "title": "🚀 ТЕСТ: новостной канал",
+    "has_image": true,
+    "image_source": "db_fallback",
+    "timestamp": "2026-09-26T17:42:43.228685"
+  },
+  {
+    "event": "post_published",
+    "post_id": 72,
+    "title": "💡 ТЕСТ: канал лайфхаков",
+    "has_image": true,
+    "image_source": "db_fallback",
+    "timestamp": "2026-09-26T17:42:43.285498"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 498,
+    "timestamp": "2026-09-26T17:42:43.618933"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 6,
+    "length": 41,
+    "timestamp": "2026-09-26T17:42:43.661096"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 1147,
+    "timestamp": "2026-09-26T17:42:43.675989"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 2,
+    "length": 254,
+    "timestamp": "2026-09-26T17:42:43.703012"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 5,
+    "length": 639,
+    "timestamp": "2026-09-26T17:42:43.743810"
+  },
+  {
+    "event": "news_selected",
+    "title": "Банка холодной газировки ускорила iPhone 18 Pro на 25%",
+    "source": "www.ixbt.com",
+    "justification": "Это яркий лайфхак-эксперимент: энтузиаст охладил iPhone 18 Pro обычной банкой холодной газировки и получил прирост производительности на 25%. Новость необычна, полезна и наглядна — показывает, как перегрев ограничивает мощность смартфона, и что даже подручные средства могут временно решить проблему.",
+    "timestamp": "2026-09-26T17:42:54.145008"
+  },
+  {
+    "event": "post_generated",
+    "title": "БАНКА ГАЗИРОВКИ СЛОМАЛА ПРАВИЛА ИГРЫ! 🥤⚡",
+    "length": 586,
+    "source": "www.ixbt.com",
+    "timestamp": "2026-09-26T17:42:57.697905"
+  },
+  {
+    "event": "news_selected",
+    "title": "Постмортем моего выгорания: почти половина моей работы ушла в корзину, а я полтора года искала баг в себе",
+    "source": "habrahabr.ru",
+    "justification": "Это редкий и честный разбор выгорания от практикующего разработчика — не мотивационный пост, а реальная история с конкретными деталями (полтора года поиска несуществующего бага в себе, слёзы из-за линтера). Такие материалы помогают обычным людям вовремя распознать похожие сигналы у себя и понять, что проблема часто не в человеке, а в условиях работы.",
+    "timestamp": "2026-09-26T17:48:14.254090"
+  },
+  {
+    "event": "post_generated",
+    "title": "КОГДА ЛИНТЕР ЛОМАЕТ ТЕБЯ, А НЕ КОД 🔥💔",
+    "length": 615,
+    "source": "habrahabr.ru",
+    "timestamp": "2026-09-26T17:48:18.050227"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 615,
+    "timestamp": "2026-09-26T17:48:18.082494"
+  },
+  {
+    "event": "post_published",
+    "post_id": 73,
+    "title": "КОГДА ЛИНТЕР ЛОМАЕТ ТЕБЯ, А НЕ КОД 🔥💔",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-09-26T17:49:10.563801"
+  },
+  {
+    "event": "news_selected",
+    "title": "AI Weekly Issue #528: What are companies building with AI? An Applied AI Deep Dive",
+    "source": "aiweekly.co",
+    "justification": "Эта новость показывает реальные и неожиданные применения AI в бизнесе — дроны с диагностическими образцами, беспилотные грузовики Frito-Lay, AI-оптимизация маршрутов. Это полезно и интересно для обычного читателя, так как разрушает стереотип, что AI — это только чат-боты, и демонстрирует, как технология уже меняет логистику, медицину и другие отрасли.",
+    "timestamp": "2026-09-26T17:49:38.312441"
+  },
+  {
+    "event": "post_published",
+    "post_id": 74,
+    "title": "🚀 ТЕСТ: новостной канал",
+    "has_image": true,
+    "image_source": "db_fallback",
+    "timestamp": "2026-09-26T17:50:03.092254"
+  },
+  {
+    "event": "post_published",
+    "post_id": 75,
+    "title": "💡 ТЕСТ: канал лайфхаков",
+    "has_image": true,
+    "image_source": "db_fallback",
+    "timestamp": "2026-09-26T17:50:03.135290"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 498,
+    "timestamp": "2026-09-26T17:50:03.354138"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 6,
+    "length": 41,
+    "timestamp": "2026-09-26T17:50:03.379139"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 1147,
+    "timestamp": "2026-09-26T17:50:03.393287"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 2,
+    "length": 254,
+    "timestamp": "2026-09-26T17:50:03.407354"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 5,
+    "length": 639,
+    "timestamp": "2026-09-26T17:50:03.428670"
+  },
+  {
+    "event": "news_selected",
+    "title": "MIT Researchers Unveil “SEAL”: A New Step Towards Self-Improving AI",
+    "source": "syncedreview.com",
+    "justification": "Новость о разработке MIT под названием SEAL — это важный шаг к созданию самоулучшающегося AI, что может существенно повлиять на развитие технологий в ближайшие годы. В отличие от многих других новостей, она показывает реальный исследовательский прорыв, а не просто бюджетные запросы или рыночные прогнозы. Это интересно и полезно как для специалистов, так и для широкой аудитории, следящей за развитием искусственного интеллекта.",
+    "timestamp": "2026-09-26T17:50:13.654360"
+  },
+  {
+    "event": "post_generated",
+    "title": "🤖 ИИ НАЧАЛ ПЕРЕПИСЫВАТЬ САМ СЕБЯ — ЭТО УЖЕ НЕ ФАНТАСТИКА!",
+    "length": 605,
+    "source": "syncedreview.com",
+    "timestamp": "2026-09-26T17:50:17.260614"
+  },
+  {
+    "event": "news_selected",
+    "title": "AI Weekly Issue #528: What are companies building with AI? An Applied AI Deep Dive",
+    "source": "aiweekly.co",
+    "justification": "Эта новость показывает реальные, неожиданные применения AI в бизнесе — дроны для доставки диагностических образцов, беспилотные грузовики Frito-Lay, AI-навигация полётов. Это полезно и интересно для обычного читателя, так как выходит за рамки привычных «чат-ботов» и демонстрирует, куда на самом деле движется рынок AI.",
+    "timestamp": "2026-09-26T17:50:27.748523"
+  },
+  {
+    "event": "news_selected",
+    "title": "AI Weekly Issue #528: What are companies building with AI? An Applied AI Deep Dive",
+    "source": "aiweekly.co",
+    "justification": "Эта новость показывает реальные, неожиданные применения AI в бизнесе — от дронов с диагностическими образцами до беспилотных грузовиков Frito-Lay и AI-оптимизации авиамаршрутов. Это выходит за рамки привычных чат-ботов и даёт читателю конкретное представление о том, как AI уже меняет целые отрасли. Такой обзор полезен и для понимания рынка, и как источник идей.",
+    "timestamp": "2026-09-26T17:50:37.600354"
+  },
+  {
+    "event": "post_generated",
+    "title": "ИИ ВЫРВАЛСЯ ИЗ ЧАТА — И ЭТО ТОЛЬКО НАЧАЛО 🚀🤖",
+    "length": 674,
+    "source": "aiweekly.co",
+    "timestamp": "2026-09-26T17:50:41.707491"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 674,
+    "timestamp": "2026-09-26T17:50:41.733503"
+  },
+  {
+    "event": "post_published",
+    "post_id": 76,
+    "title": "ИИ ВЫРВАЛСЯ ИЗ ЧАТА — И ЭТО ТОЛЬКО НАЧАЛО 🚀🤖",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-09-26T17:51:32.915788"
   }
 ]

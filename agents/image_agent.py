@@ -12,6 +12,7 @@ import uuid
 import requests
 from .base_agent import BaseAgent
 from config import Config
+from net_utils import post_json, get_json, retry_sync
 
 
 class ImageAgent(BaseAgent):
@@ -87,14 +88,14 @@ class ImageAgent(BaseAgent):
         При неудаче возвращает None — тогда публикатор попробует старую логику.
         """
         try:
-            response = await asyncio.to_thread(requests.get, url, timeout=60)
-            if response.status_code != 200:
-                self.log(
-                    f"⚠️ Не удалось скачать картинку (статус {response.status_code})",
-                    is_error=True
-                )
-                return None
-            
+            # Повторяем при временных сбоях: картинка уже сгенерирована и
+            # оплачена, потерять её из-за одного обрыва связи нельзя.
+            def _fetch():
+                resp = requests.get(url, timeout=60)
+                resp.raise_for_status()
+                return resp
+
+            response = await asyncio.to_thread(retry_sync, _fetch, attempts=3)
             if not response.content:
                 self.log("⚠️ Картинка пустая", is_error=True)
                 return None
@@ -173,12 +174,10 @@ class ImageAgent(BaseAgent):
         try:
             # 1. Отправляем задачу
             self.log("  📤 Отправка задачи в очередь...")
-            # to_thread: requests блокирующий, иначе он замораживает event loop бота
-            response = await asyncio.to_thread(
-                requests.post, base_url, headers=headers, json=payload, timeout=30
+            # to_thread: requests блокирующий; post_json повторяет временные сбои
+            task_data = await asyncio.to_thread(
+                post_json, base_url, headers, payload, 30, 3
             )
-            response.raise_for_status()
-            task_data = response.json()
             
             request_id = task_data.get("request_id")
             if not request_id:
@@ -196,11 +195,11 @@ class ImageAgent(BaseAgent):
             
             while attempts < max_attempts:
                 try:
-                    status_response = await asyncio.to_thread(
-                        requests.get, status_url, headers=headers, timeout=10
+                    # Опрос статуса: временный сбой сети не должен считаться
+                    # провалом генерации — задача на стороне OdiRouter живёт.
+                    status_data = await asyncio.to_thread(
+                        get_json, status_url, headers, None, 10, 2
                     )
-                    status_response.raise_for_status()
-                    status_data = status_response.json()
                     
                     current_status = status_data.get("status")
                     last_status = current_status
@@ -237,11 +236,9 @@ class ImageAgent(BaseAgent):
             
             # 3. Получаем результат
             result_url = task_data.get("response_url") or f"{base_url}/requests/{request_id}/response"
-            result_response = await asyncio.to_thread(
-                requests.get, result_url, headers=headers, timeout=30
+            result_data = await asyncio.to_thread(
+                get_json, result_url, headers, None, 30, 3
             )
-            result_response.raise_for_status()
-            result_data = result_response.json()
             
             # Задача может завершиться со статусом COMPLETED и одновременно
             # нести error: провайдер упал на своей стороне (мы видели

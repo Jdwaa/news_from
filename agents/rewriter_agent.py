@@ -12,6 +12,7 @@ import requests
 from bs4 import BeautifulSoup
 from .base_agent import BaseAgent
 from config import Config
+from net_utils import post_json
 
 
 class RewriterAgent(BaseAgent):
@@ -60,44 +61,19 @@ class RewriterAgent(BaseAgent):
 ХЕШТЕГИ: [текст]
 ПРОМПТ_ДЛЯ_КАРТИНКИ: [текст]"""
 
-    def _get_tips_prompt_suffix(self) -> str:
+    def _get_tips_prompt_suffix(self, profile=None) -> str:
         """
         Требования к структуре для канала лайфхаков.
 
         Отличается от новостной: вместо «анализ + прогноз» — конкретные шаги
         и оговорка, вместо «мощной мысли» — что сделать прямо сейчас.
+        Лимит длины берётся из профиля канала: у лайфхаков он больше, иначе
+        инструкция сжимается до «пресного» минимума.
         """
-        max_length = Config.MAX_POST_LENGTH
-        min_length = Config.MIN_POST_LENGTH
-        return f"""
-ЖЁСТКИЕ ТРЕБОВАНИЯ:
-- Пост: {min_length}-{max_length} символов (НЕ БОЛЬШЕ {max_length}!)
-- ЯЗЫК: ТОЛЬКО РУССКИЙ. Источник может быть на английском или другом языке —
-  переведи и переработай на русский. Английские названия продуктов оставляй
-  как есть (ChatGPT, Midjourney), но всё описание — по-русски.
-- ЗАПРЕЩЕНО: "согласно", "как сообщает", "инновационный", "революционный",
-  ссылки на источники, прогнозы про рынок
-- ОБЯЗАТЕЛЬНО: конкретная польза, которую читатель применит сам
-- ЭМОДЗИ: 3-5, они структурируют текст, а не украшают
-
-СТРУКТУРА ПОСТА:
-1. ЗАГОЛОВОК: без КАПСА, живой и понятный (до 10 слов), например
-   «Как за 5 минут сделать расшифровку созвона»
-2. ВСТУПЛЕНИЕ: знакомая читателю проблема (1-2 предложения)
-3. РЕШЕНИЕ: что использовать и как — с шагами или промптом
-4. ПРИМЕР: конкретная задача и результат
-5. ОГОВОРКА: где НЕ сработает, что учесть
-6. ВЫВОД: что сделать прямо сегодня
-7. ХЕШТЕГИ: 2-3 шт
-8. ПРОМПТ_ДЛЯ_КАРТИНКИ: 30-50 слов, бытовая сцена по теме поста
-
-ФОРМАТ ОТВЕТА:
-ЗАГОЛОВОК: [текст]
-ВСТУПЛЕНИЕ: [текст]
-ОСНОВНОЙ ТЕКСТ: [текст]
-ВЫВОД: [текст]
-ХЕШТЕГИ: [текст]
-ПРОМПТ_ДЛЯ_КАРТИНКИ: [текст]"""
+        from channels import tips_format_block
+        min_length = getattr(profile, "min_length", Config.MIN_POST_LENGTH)
+        max_length = getattr(profile, "max_length", Config.MAX_POST_LENGTH)
+        return "\n" + tips_format_block(min_length, max_length)
 
     def _system_prompt_for(self, context: dict) -> str:
         """Системный промпт под канал из контекста (с учётом структуры)."""
@@ -105,8 +81,10 @@ class RewriterAgent(BaseAgent):
         profile = context.get("channel_profile") or get_profile(NEWS)
         prompt = self._get_system_prompt(profile)
         if profile.key == "tips":
-            # Для лайфхаков структура другая: заменяем блок требований целиком
-            prompt = prompt.split("ЖЁСТКИЕ ТРЕБОВАНИЯ:")[0] + self._get_tips_prompt_suffix()
+            # Для лайфхаков структура другая: заменяем блок требований целиком.
+            # Лимит длины берём из профиля — у лайфхаков он больше новостного.
+            prompt = (prompt.split("ЖЁСТКИЕ ТРЕБОВАНИЯ:")[0]
+                      + self._get_tips_prompt_suffix(profile))
         return prompt
 
     async def execute(self, context: dict) -> dict:
@@ -154,8 +132,13 @@ class RewriterAgent(BaseAgent):
         current_length = len(full_post.strip())
         self.log(f"📏 Длина поста: {current_length} символов")
         
+        # Лимиты берём из профиля канала: у лайфхаков он больше новостного,
+        # иначе инструкция сжимается до «пресного» минимума.
+        profile = context.get("channel_profile")
+        MAX_LENGTH = getattr(profile, "max_length", Config.MAX_POST_LENGTH)
+        MIN_LENGTH = getattr(profile, "min_length", Config.MIN_POST_LENGTH)
+        
         # 4. Если пост слишком длинный — отправляем на сокращение
-        MAX_LENGTH = Config.MAX_POST_LENGTH
         MAX_REWRITE_ATTEMPTS = 2
         attempt = 0
         
@@ -179,12 +162,19 @@ class RewriterAgent(BaseAgent):
             full_post = full_post[:MAX_LENGTH - 3] + "..."
             current_length = len(full_post.strip())
         
-        # 6. Проверяем минимальную длину
-        if current_length < Config.MIN_POST_LENGTH:
-            self.log(f"⚠️ Пост слишком короткий ({current_length} символов), пытаюсь расширить...")
-            expanded = await self._expand_post(full_post, context)
+        # 6. Проверяем минимальную длину.
+        # Расширяем настолько, чтобы попасть в цель с запасом: следующий агент
+        # (редактор) может сократить текст, и без запаса пост окажется ниже
+        # минимума уже после правки.
+        if current_length < MIN_LENGTH:
+            target = int(MIN_LENGTH * 1.4)
+            self.log(f"⚠️ Пост слишком короткий ({current_length} символов, "
+                     f"нужно {MIN_LENGTH}), расширяю до ~{target}...")
+            expanded = await self._expand_post(full_post, context, target)
             if expanded:
                 full_post = expanded
+                current_length = len(full_post.strip())
+                self.log(f"  ✅ Пост расширен до {current_length} символов")
         
         # 7. Сохраняем в контекст
         context["post_title"] = post_data.get("title", selected["title"])
@@ -250,11 +240,10 @@ class RewriterAgent(BaseAgent):
         
         try:
             # to_thread: requests блокирующий, иначе он замораживает event loop бота
-            response = await asyncio.to_thread(
-                requests.post, url, headers=headers, json=payload, timeout=60
+            # post_json добавляет повторы при временных сбоях DeepSeek
+            result = await asyncio.to_thread(
+                post_json, url, headers, payload, 60, 3
             )
-            response.raise_for_status()
-            result = response.json()
             content = result["choices"][0]["message"]["content"].strip()
             
             # Парсим сокращённый пост
@@ -289,9 +278,20 @@ class RewriterAgent(BaseAgent):
             self.log(f"  ⚠️ Ошибка сокращения: {e}", is_error=True)
             return None
     
-    async def _expand_post(self, post_text: str, context) -> str:
-        """Расширяет короткий пост"""
+    async def _expand_post(self, post_text: str, context, min_length: int = None) -> str:
+        """
+        Расширяет короткий пост.
+
+        Инструкция расширения зависит от канала: для новостей просим анализ и
+        прогнозы, для лайфхаков — конкретику (шаги, пример, промпт). Общий
+        промпт добавлял бы в лайфхак «прогнозы», которые там запрещены, и
+        ревизор такой пост отклонил бы.
+        """
         self.log("  📝 Отправляю запрос на расширение...")
+        
+        from channels import get_profile, NEWS
+        profile = context.get("channel_profile") or get_profile(NEWS)
+        target = min_length or getattr(profile, "min_length", Config.MIN_POST_LENGTH)
         
         url = "https://api.deepseek.com/v1/chat/completions"
         headers = {
@@ -299,23 +299,35 @@ class RewriterAgent(BaseAgent):
             "Content-Type": "application/json"
         }
         
+        if profile.key == "tips":
+            system = (
+                f"Ты — редактор канала практичных ИИ-лайфхаков. Расширь пост до "
+                f"минимум {target} символов, НЕ ВЫДУМЫВАЯ факты. Добавляй только то, "
+                f"что делает инструкцию полезнее: конкретные шаги, готовый промпт, "
+                f"бытовой пример, оговорку про ограничения. Пиши живо и по-русски. "
+                f"Запрещено: прогнозы про рынок, слова «инновационный» и «революционный»."
+            )
+        else:
+            system = (
+                f"Ты — главный редактор. Расширь пост до минимум {target} символов. "
+                f"Добавь анализ, прогнозы, эмодзи, личное мнение. Сохрани яркий стиль."
+            )
+        
         payload = {
             "model": "deepseek-chat",
             "messages": [
-                {"role": "system", "content": f"Ты — главный редактор. Расширь пост до минимум {Config.MIN_POST_LENGTH} символов. Добавь анализ, прогнозы, эмодзи, личное мнение. Сохрани яркий стиль."},
+                {"role": "system", "content": system},
                 {"role": "user", "content": f"Этот пост слишком короткий. Расширь его:\n\n{post_text}"}
             ],
             "temperature": 0.8,
-            "max_tokens": 1500
+            "max_tokens": 2500
         }
         
         try:
-            # to_thread: requests блокирующий, иначе он замораживает event loop бота
-            response = await asyncio.to_thread(
-                requests.post, url, headers=headers, json=payload, timeout=60
+            # to_thread: requests блокирующий; post_json добавляет повторы
+            result = await asyncio.to_thread(
+                post_json, url, headers, payload, 60, 3
             )
-            response.raise_for_status()
-            result = response.json()
             return result["choices"][0]["message"]["content"].strip()
         except Exception as e:
             self.log(f"  ⚠️ Ошибка расширения: {e}", is_error=True)
@@ -402,11 +414,10 @@ class RewriterAgent(BaseAgent):
         
         try:
             # to_thread: requests блокирующий, иначе он замораживает event loop бота
-            response = await asyncio.to_thread(
-                requests.post, url, headers=headers, json=payload, timeout=60
+            # post_json добавляет повторы при временных сбоях DeepSeek
+            result = await asyncio.to_thread(
+                post_json, url, headers, payload, 60, 3
             )
-            response.raise_for_status()
-            result = response.json()
             content = result["choices"][0]["message"]["content"]
             
             post_data = {

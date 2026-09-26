@@ -2,14 +2,22 @@
 
 """
 АГЕНТ-РЕДАКТОР
-Исправляет и сокращает пост до нужной длины,
-сохраняя все требования: мнение, эмодзи, капс, прогнозы.
+
+Приводит пост к лимитам канала: сокращает слишком длинный.
+
+Важно: лимиты берутся из профиля канала. Раньше здесь стоял общий
+Config.MAX_POST_LENGTH, и редактор обрезал уже написанный пост-лайфхак до
+новостного максимума — инструкция теряла шаги и пример, оставался «пресный»
+огрызок. Плюс его промпт требовал прогноз и капс, которые в лайфхаках
+запрещены: редактор сам ломал то, что просил рерайтер.
 """
 
 import asyncio
 import requests
 from .base_agent import BaseAgent
 from config import Config
+from channels import get_profile, NEWS
+from net_utils import post_json
 
 
 class EditorAgent(BaseAgent):
@@ -17,10 +25,37 @@ class EditorAgent(BaseAgent):
     
     def __init__(self):
         super().__init__("Редактор")
-        self.max_length = Config.MAX_POST_LENGTH
-        self.system_prompt = self._get_system_prompt()
     
-    def _get_system_prompt(self) -> str:
+    def _system_prompt(self, profile) -> str:
+        """
+        Промпт редактора под канал.
+
+        Для лайфхаков сохраняем практичность и запрет на прогнозы; для новостей
+        оставляем прежние требования (мнение, капс, прогноз).
+        """
+        if profile.key == "tips":
+            return """Ты — ПРОФЕССИОНАЛЬНЫЙ РЕДАКТОР канала практичных ИИ-лайфхаков.
+
+ТВОЯ ЗАДАЧА:
+Сократить пост, СОХРАНИВ всю практическую пользу. Лучше убрать вводные
+слова, чем потерять конкретный шаг или пример.
+
+ТВОИ ПРАВИЛА:
+1. СОХРАНИ конкретику: названия инструментов, шаги, промпт, цифры
+2. СОХРАНИ эмодзи (4-6 штук) — они задают структуру
+3. СОХРАНИ оговорку: где приём НЕ сработает
+4. СОКРАЩАЙ за счёт воды, а не за счёт пользы
+5. НЕ добавляй прогнозы, не используй слова «инновационный»,
+   «революционный» — в этом канале они запрещены
+
+ФОРМАТ ОТВЕТА (строго):
+ЗАГОЛОВОК: ...
+ВСТУПЛЕНИЕ: ...
+ОСНОВНОЙ ТЕКСТ: ...
+ВЫВОД: ...
+ХЕШТЕГИ: ...
+ПРОМПТ_ДЛЯ_КАРТИНКИ: ..."""
+
         return """Ты — ПРОФЕССИОНАЛЬНЫЙ РЕДАКТОР в крупном издательстве.
 
 ТВОЯ ЗАДАЧА:
@@ -45,10 +80,14 @@ class EditorAgent(BaseAgent):
     async def execute(self, context: dict) -> dict:
         """
         1. Берёт пост из контекста
-        2. Проверяет длину
+        2. Сравнивает с лимитами канала
         3. Если длиннее максимума — правит и сокращает через AI
         4. Возвращает исправленный пост
         """
+        profile = context.get("channel_profile") or get_profile(NEWS)
+        max_length = getattr(profile, "max_length", Config.MAX_POST_LENGTH)
+        min_length = getattr(profile, "min_length", Config.MIN_POST_LENGTH)
+
         post_text = context.get("post_text")
         post_title = context.get("post_title", "")
         image_prompt = context.get("image_prompt", "")
@@ -59,56 +98,75 @@ class EditorAgent(BaseAgent):
         
         current_length = len(post_text.strip())
         
-        if current_length <= self.max_length:
-            self.log(f"✅ Длина поста в норме: {current_length} символов")
+        if current_length <= max_length:
+            self.log(f"✅ Длина поста в норме: {current_length} символов "
+                     f"(лимит канала {min_length}-{max_length})")
             context["editor_ok"] = True
             return context
         
-        self.log(f"⚠️ Пост слишком длинный: {current_length} символов (макс {self.max_length})")
+        self.log(f"⚠️ Пост слишком длинный: {current_length} символов (макс {max_length})")
         self.log("✍️ Редактирую и сокращаю...")
         
         # Отправляем на редактирование
-        edited = await self._edit_post(post_text, post_title, image_prompt)
+        edited = await self._edit_post(post_text, post_title, image_prompt,
+                                        profile, max_length, min_length)
         
         if edited:
             new_length = len(edited.strip())
+            # Модель иногда режет сильнее, чем просили, и пост проваливается
+            # ниже минимума канала — тогда ревизор его отклоняет, и попытка
+            # рерайта тратится впустую. Если сокращённая версия вышла за нижнюю
+            # границу, оставляем исходную: она длиннее максимума, но ревизор
+            # примет её с одним замечанием, а не отклонит целиком.
+            if new_length < min_length <= current_length:
+                self.log(f"⚠️ Редактор сократил слишком сильно ({new_length} < {min_length}), "
+                         f"оставляю исходный текст")
+                context["editor_ok"] = True
+                return context
             context["post_text"] = edited
             context["editor_ok"] = True
             self.log(f"✅ Пост отредактирован: {new_length} символов")
-            
-            # Проверяем, сохранилось ли мнение
-            opinion_keywords = ["мне кажется", "я считаю", "я думаю"]
-            has_opinion = any(kw in edited.lower() for kw in opinion_keywords)
-            if not has_opinion:
-                self.log("⚠️ Мнение автора потеряно, добавляю...")
-                context["post_text"] = edited + "\n\n📌 А что думаете вы?"
         else:
             self.log("⚠️ Не удалось отредактировать, обрезаю...")
-            context["post_text"] = post_text[:self.max_length - 3] + "..."
+            context["post_text"] = post_text[:max_length - 3] + "..."
             context["editor_ok"] = True
         
         return context
     
-    async def _edit_post(self, post_text: str, post_title: str, image_prompt: str) -> str:
+    async def _edit_post(self, post_text: str, post_title: str, image_prompt: str,
+                         profile, max_length: int, min_length: int) -> str:
         """Редактирует и сокращает пост через AI"""
+        
+        if profile.key == "tips":
+            requirements = (
+                f"- Должен быть {min_length}-{max_length} символов\n"
+                f"- Обязательно сохранить конкретные шаги, названия инструментов и пример\n"
+                f"- Эмодзи 4-6 штук\n"
+                f"- Обязательно оговорка: где приём НЕ сработает\n"
+                f"- ЗАПРЕЩЕНО: прогнозы про будущее, слова «инновационный», «революционный»"
+            )
+        else:
+            requirements = (
+                f"- Должен быть {min_length}-{max_length} символов\n"
+                f"- Обязательно мнение автора (\"мне кажется\", \"я считаю\")\n"
+                f"- Минимум 3-5 эмодзи\n"
+                f"- Капс в ключевых моментах\n"
+                f"- Прогноз о будущем"
+            )
         
         user_prompt = f"""
 Отредактируй этот пост. Он слишком длинный ({len(post_text)} символов).
 
-Нужно сократить его до {self.max_length} символов.
+Нужно сократить его до {max_length} символов, но НЕ КОРОЧЕ {min_length}.
 
 Требования к посту:
-- Должен быть {Config.MIN_POST_LENGTH}-{self.max_length} символов
-- Обязательно мнение автора ("мне кажется", "я считаю")
-- Минимум 3-5 эмодзи
-- Капс в ключевых моментах
-- Прогноз о будущем
+{requirements}
 - Все факты сохранены
 
 Текущий пост:
 {post_text}
 
-Напиши отредактированную версию (максимум {self.max_length} символов).
+Напиши отредактированную версию (максимум {max_length} символов).
 Сохрани все важное. Формат ответа строго:
 ЗАГОЛОВОК: ...
 ВСТУПЛЕНИЕ: ...
@@ -126,20 +184,18 @@ class EditorAgent(BaseAgent):
         payload = {
             "model": "deepseek-chat",
             "messages": [
-                {"role": "system", "content": self.system_prompt},
+                {"role": "system", "content": self._system_prompt(profile)},
                 {"role": "user", "content": user_prompt}
             ],
             "temperature": 0.6,
-            "max_tokens": 1500
+            "max_tokens": 2500
         }
         
         try:
-            # to_thread: requests блокирующий, иначе он замораживает event loop бота
-            response = await asyncio.to_thread(
-                requests.post, url, headers=headers, json=payload, timeout=60
+            # post_json добавляет повторы при временных сбоях DeepSeek
+            result = await asyncio.to_thread(
+                post_json, url, headers, payload, 60, 3
             )
-            response.raise_for_status()
-            result = response.json()
             content = result["choices"][0]["message"]["content"].strip()
             
             # Парсим ответ

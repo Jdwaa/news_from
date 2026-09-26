@@ -11,6 +11,7 @@ import requests
 from .base_agent import BaseAgent
 from config import Config
 from channels import get_profile, NEWS
+from net_utils import post_json
 
 
 class SelectorAgent(BaseAgent):
@@ -143,12 +144,11 @@ class SelectorAgent(BaseAgent):
         }
         
         try:
-            # to_thread: requests блокирующий, иначе он замораживает event loop бота
-            response = await asyncio.to_thread(
-                requests.post, url, headers=headers, json=payload, timeout=30
+            # post_json повторяет временные сбои: иначе один сетевой сбой
+            # заставлял брать первую новость списка наугад
+            result = await asyncio.to_thread(
+                post_json, url, headers, payload, 30, 3
             )
-            response.raise_for_status()
-            result = response.json()
             content = result["choices"][0]["message"]["content"]
             
             # Парсим ответ

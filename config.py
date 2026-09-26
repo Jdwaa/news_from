@@ -138,6 +138,25 @@ class Config:
     # чаще смысла нет, реже — теряется динамика внутри дня.
     GROWTH_INTERVAL = _env_int("GROWTH_INTERVAL", 3600)
     
+    # Обслуживание: чистка картинок и бэкапы БД.
+    # Картинки нужны только на момент публикации, а каждая весит ~1.5 МБ.
+    IMAGE_KEEP_DAYS = _env_int("IMAGE_KEEP_DAYS", 14)
+    # Сколько последних копий базы хранить (при часовом бэкапе это ~неделя)
+    BACKUP_KEEP = _env_int("BACKUP_KEEP", 7)
+    BACKUP_INTERVAL = _env_int("BACKUP_INTERVAL", 86400)
+    # Папка бэкапов: на хостинге лучше вынести на отдельный диск (BACKUP_DIR)
+    BACKUP_DIR = os.getenv("BACKUP_DIR") or os.path.join("memory_bank", "backups")
+    # Час суточной сводки админу (локальное время). -1 — отключить сводку
+    DAILY_REPORT_HOUR = _env_int("DAILY_REPORT_HOUR", 21)
+    
+    # Тихие часы: ночью не публикуем (планировщик это уже соблюдает,
+    # здесь — единая точка настройки).
+    QUIET_HOUR_FROM = _env_int("QUIET_HOUR_FROM", 23)
+    QUIET_HOUR_TO = _env_int("QUIET_HOUR_TO", 7)
+    # Дневной лимит постов на канал: защита от «выгорания» канала при
+    # случайно сбитом интервале или частых ручных запусках. 0 — без лимита.
+    MAX_POSTS_PER_DAY = _env_int("MAX_POSTS_PER_DAY", 8)
+    
     # Переменные, без которых бот не может работать вообще.
     # ADMIN_ID сюда не входит: без него бот запустится, но команды будут открыты всем.
     REQUIRED_FIELDS = (
@@ -169,7 +188,8 @@ class Config:
         if not cls.ADMIN_ID:
             warnings.append(
                 "ADMIN_ID не задан — команды управления (/post, /analytics, /admin) "
-                "доступны любому пользователю бота"
+                "доступны любому пользователю бота, и уведомления о сбоях "
+                "отправлять некому"
             )
         
         if not cls.NEWSAPI_KEY:

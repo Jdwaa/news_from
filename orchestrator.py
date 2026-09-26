@@ -179,6 +179,20 @@ class Orchestrator:
             self._log(f"✅ Картинка сгенерирована")
         else:
             self._log("⚠️ Не удалось сгенерировать картинку, использую последнюю из БД", is_error=True)
+            # Все модели картинок упали — это признак проблемы на стороне
+            # OdiRouter, и админ должен узнать о ней, а не замечать по постам
+            # без иллюстраций.
+            if self.bot:
+                try:
+                    from alerts import notify_admin
+                    await notify_admin(
+                        self.bot,
+                        f"Не удалось сгенерировать картинку для «{self.profile.title}».\n"
+                        f"Возможно, провайдер изображений недоступен.",
+                        kind="image-failed",
+                    )
+                except Exception:
+                    pass
         
         # ==========================================
         # 5. ПУБЛИКАЦИЯ
@@ -220,14 +234,17 @@ class Orchestrator:
         return context
     
     async def run_scheduler(self):
-        """Запускает планировщик публикаций и мониторинг воронки."""
-        # Мониторинг метрик идёт отдельной задачей: он не должен ждать
-        # интервала публикации, иначе замеры будут раз в 3 часа, а не в час.
+        """Запускает планировщик публикаций, мониторинг воронки и обслуживание."""
+        # Мониторинг метрик и обслуживание идут отдельными задачами: они не
+        # должны ждать интервала публикации, иначе замеры будут раз в 3 часа,
+        # а бэкап и чистка — только после выхода поста.
         monitor = asyncio.create_task(self.scheduler.run_growth_monitor())
+        upkeep = asyncio.create_task(self.scheduler.run_maintenance())
         try:
             await self.scheduler.execute({})
         finally:
             monitor.cancel()
+            upkeep.cancel()
     
     async def run_growth(self, context: dict = None) -> dict:
         """Разовый сбор метрик подписчиков (для команды /growth)."""

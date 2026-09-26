@@ -266,27 +266,46 @@ class TelegramBot:
         )
     
     async def status(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        published = len(get_posts_by_status('published'))
-        pending = len(get_posts_by_status('pending'))
-        last_publish = self.memory.get("last_publish_at")
-        report = self.memory.get("analytics_report") or {}
-        
-        last_text = "ещё не публиковал"
-        if last_publish:
+        """Статистика по каналам раздельно: у каждого свой продукт и метрики."""
+        from database import get_all_posts_with_stats, get_subscriber_growth
+
+        lines = ["📊 *Статистика по каналам*", ""]
+        for p in active_profiles():
+            lines.append(f"{p.emoji} *{p.title}*")
+
+            published = len(get_posts_by_status('published', channel=p.key))
+            pending = len(get_posts_by_status('pending', channel=p.key))
+            lines.append(f"   📝 постов: {published} (в очереди: {pending})")
+
+            # Подписчики и прирост
+            growth = get_subscriber_growth(p.key, hours=24)
+            if growth.get("current") is not None:
+                delta = growth.get("delta")
+                delta_text = "—" if delta is None else (f"+{delta}" if delta > 0 else str(delta))
+                lines.append(f"   👥 подписчиков: {growth['current']} ({delta_text} за сутки)")
+
+            # Просмотры и средний отклик по каналу
+            posts = get_all_posts_with_stats(limit=30, channel=p.key)
+            viewed = [x for x in posts if (x.get("views") or 0) > 0]
+            if viewed:
+                avg_views = sum(x["views"] for x in viewed) / len(viewed)
+                avg_score = sum(x.get("score") or 0 for x in viewed) / len(viewed)
+                lines.append(f"   👁️ средние просмотры: {avg_views:.0f}")
+                lines.append(f"   ⭐ средняя оценка: {avg_score:.1f}/10")
+            else:
+                lines.append("   👁️ статистика ещё не собрана")
+            lines.append("")
+
+        last = self.memory.get(f"last_publish_at:{NEWS}")
+        if last:
             try:
-                last_text = datetime.fromisoformat(str(last_publish)).strftime("%d.%m.%Y %H:%M")
+                lines.append(f"🕐 Последняя публикация (новости): "
+                             f"{datetime.fromisoformat(str(last)).strftime('%d.%m %H:%M')}")
             except ValueError:
-                last_text = str(last_publish)
-        
-        await update.message.reply_text(
-            "📊 *Статистика бота*\n\n"
-            f"✅ Опубликовано: {published}\n"
-            f"⏳ Ожидают: {pending}\n"
-            f"🕐 Последняя публикация: {last_text}\n"
-            f"⏰ Планировщик: {'работает' if self._scheduler_alive() else 'не запущен'}\n"
-            f"📅 Лучшее время по аналитике: {report.get('hour', '—')}:00",
-            parse_mode="Markdown"
-        )
+                pass
+        lines.append(f"⏰ Планировщики: {'работают' if self._scheduler_alive() else 'не запущены'}")
+
+        await update.message.reply_text("\n".join(lines), parse_mode="Markdown")
     
     async def analytics_cmd(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         summary = await self._collect_analytics(context.bot)

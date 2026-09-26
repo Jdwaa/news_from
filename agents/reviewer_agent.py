@@ -69,11 +69,15 @@ class ReviewerAgent(BaseAgent):
         # ==========================================
         # 1. ПРОВЕРКА ДЛИНЫ
         # ==========================================
+        # Лимиты берём из профиля канала: у лайфхаков пост длиннее, потому что
+        # инструкции нужно место на шаги, пример и оговорку.
+        min_length = getattr(profile, "min_length", Config.MIN_POST_LENGTH)
+        max_length = getattr(profile, "max_length", Config.MAX_POST_LENGTH)
         length = len(post_text.strip())
-        if length < Config.MIN_POST_LENGTH:
-            issues.append(f"🔴 Пост слишком короткий: {length} символов (минимум {Config.MIN_POST_LENGTH})")
-        elif length > Config.MAX_POST_LENGTH:
-            issues.append(f"🔴 Пост слишком длинный: {length} символов (максимум {Config.MAX_POST_LENGTH})")
+        if length < min_length:
+            issues.append(f"🔴 Пост слишком короткий: {length} символов (минимум {min_length})")
+        elif length > max_length:
+            issues.append(f"🔴 Пост слишком длинный: {length} символов (максимум {max_length})")
         
         # ==========================================
         # 2. ПРОВЕРКА ЗАГОЛОВКА

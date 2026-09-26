@@ -18,6 +18,7 @@ from bs4 import BeautifulSoup
 from .base_agent import BaseAgent
 from config import Config
 from database import get_all_posts_with_stats, save_post_stats
+from channels import NEWS
 
 # ===== КОНТРАКТ ОТЧЁТА АНАЛИТИКИ =====
 # Канонические ключи отчёта: "hour", "day", "interval_hours", "reason".
@@ -219,7 +220,11 @@ class AnalyticsAgent(BaseAgent):
             self.log("⚠️ Бот не передан — не могу определить @username канала", is_error=True)
             return None
         
-        username = await self._get_channel_username()
+        # Канал берём из самого поста: у бота их два, и статистика лайфхаков
+        # собиралась бы по username новостного канала — то есть попадала бы
+        # в чужие данные или не собиралась вовсе.
+        channel_key = post.get("channel") or NEWS
+        username = await self._get_channel_username(channel_key)
         if not username:
             self.log(f"⚠️ Пост #{post_id}: у канала нет @username, web-preview недоступен", is_error=True)
             return None
@@ -253,23 +258,35 @@ class AnalyticsAgent(BaseAgent):
             'score': score
         }
     
-    async def _get_channel_username(self):
-        """Возвращает @username канала через Bot API (с кэшем в Memory Bank)."""
-        cached = self.memory.get("channel_username")
+    async def _get_channel_username(self, channel_key: str = None):
+        """
+        Возвращает @username канала через Bot API (с кэшем в Memory Bank).
+
+        Кэш отдельный на каждый канал: у бота их два, и общий ключ отдавал бы
+        username новостного канала при сборе статистики лайфхаков.
+        """
+        from channels import PROFILES, NEWS, get_profile
+
+        key = channel_key or NEWS
+        cache_key = f"channel_username:{key}"
+
+        cached = self.memory.get(cache_key)
         if cached:
             return cached
-        
+
         try:
-            chat = await self.bot.get_chat(Config.CHANNEL_ID)
+            profile = get_profile(key)
+            chat_id = profile.chat_id or Config.CHANNEL_ID
+            chat = await self.bot.get_chat(chat_id)
             username = getattr(chat, "username", None)
         except Exception as e:
-            self.log(f"⚠️ Не удалось получить информацию о канале: {e}", is_error=True)
+            self.log(f"⚠️ Не удалось получить информацию о канале {key}: {e}", is_error=True)
             return None
-        
+
         if username:
-            self.memory.set("channel_username", username)
-            self.log(f"📡 Канал определён: @{username}")
-        
+            self.memory.set(cache_key, username)
+            self.log(f"📡 Канал {key} определён: @{username}")
+
         return username
     
     def _fetch_preview(self, username: str, message_id: int) -> str:
