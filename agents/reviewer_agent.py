@@ -35,6 +35,28 @@ class ReviewerAgent(BaseAgent):
     def __init__(self):
         super().__init__("Ревизор постов")
     
+    @staticmethod
+    def _title_similarity(a: str, b: str) -> float:
+        """
+        Доля общих значимых слов между двумя заголовками (0..1).
+
+        Сравниваем по корням длиной от 5 символов: «превратить» и «преврати»
+        должны считаться совпадением. Служебные слова игнорируем — они дают
+        ложное сходство при разных темах.
+        """
+        import re as _re
+        stop = {"как", "что", "для", "the", "and", "with", "your", "you",
+                "этот", "этом", "свой", "свои", "тебе", "себя", "него", "чем"}
+
+        def roots(text: str):
+            words = _re.findall(r"[A-Za-zА-Яа-яЁё]{5,}", (text or "").lower())
+            return {w[:6] for w in words if w not in stop}
+
+        ra, rb = roots(a), roots(b)
+        if not ra or not rb:
+            return 0.0
+        return len(ra & rb) / min(len(ra), len(rb))
+    
     async def execute(self, context: dict) -> dict:
         """
         1. Берёт пост из context["post_text"]
@@ -185,6 +207,22 @@ class ReviewerAgent(BaseAgent):
                 f"🔴 Видны следы источника ({preview}). Убери ссылку, название "
                 f"сайта и обороты «в статье» — пост должен читаться как авторский"
             )
+        
+        # ==========================================
+        # 6.2. ПОХОЖ ЛИ ЗАГОЛОВОК НА ОРИГИНАЛ
+        # ==========================================
+        # Буквальный перевод чужого заголовка делает пост узнаваемым при
+        # сравнении с публикацией-источником. Сравниваем по значимым словам:
+        # если больше половины совпадает — это пересказ, а не свой заголовок.
+        original_title = (context.get("selected_news") or {}).get("title", "")
+        if post_title and original_title:
+            sim = self._title_similarity(post_title, original_title)
+            if sim >= 0.6:
+                issues.append(
+                    f"🔴 Заголовок слишком близок к заголовку источника "
+                    f"(совпадение {sim:.0%}). Придумай свой — с другим углом "
+                    f"и другими словами"
+                )
         
         # ==========================================
         # 7. ПРОВЕРКА СТРУКТУРЫ (абзацы)

@@ -1,155 +1,5 @@
 [
   {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 5,
-    "length": 639,
-    "timestamp": "2026-09-27T02:29:59.917779"
-  },
-  {
-    "event": "news_selected",
-    "title": "Liquid AI Releases LFM2.5-VL-3B-DSpark: Speculative Decoding for Vision-Language Models With Up to 3.13x Faster Decoding",
-    "source": "www.marktechpost.com",
-    "justification": "Эта новость рассказывает о конкретном инструменте (LFM2.5-VL-3B-DSpark), который ускоряет работу vision-language моделей до 3,13 раза с помощью speculative decoding. Это полезно для разработчиков и всех, кто работает с AI-моделями, поскольку позволяет быстрее получать результаты без потери качества. Новость сочетает практическую ценность и понятное применение AI-технологии.",
-    "timestamp": "2026-09-27T02:30:10.878880"
-  },
-  {
-    "event": "post_generated",
-    "title": "🚀 VISION-МОДЕЛИ ЛЕТАЮТ: УСКОРЕНИЕ ДО 3.13x — БУДУЩЕЕ УЖЕ ЗДЕСЬ!",
-    "length": 643,
-    "source": "www.marktechpost.com",
-    "timestamp": "2026-09-27T02:30:14.600297"
-  },
-  {
-    "event": "news_selected",
-    "title": "AlphaGenome Atlas: A predictive map of every possible DNA letter change in the human genome",
-    "source": "deepmind.com",
-    "justification": "AlphaGenome Atlas от DeepMind — это карта влияния 9 миллиардов возможных однонуклеотидных замен в геноме человека, что открывает огромные возможности для генетики, медицины и персонализированного лечения. Это не просто научная новость, а важный шаг к пониманию того, как конкретные изменения ДНК влияют на здоровье. Для рынка AI и биотеха это событие имеет долгосрочное значение.",
-    "timestamp": "2026-09-27T02:30:26.358463"
-  },
-  {
-    "event": "news_selected",
-    "title": "Insurers claim AI is already increasing healthcare costs",
-    "source": "techcrunch.com",
-    "justification": "Эта новость показывает неожиданный и важный побочный эффект внедрения AI в медицине — страховщики утверждают, что использование AI в больницах привело к дополнительным расходам на $942 млн за два года. Это редкий пример конкретных данных о том, как AI влияет на реальную экономику здравоохранения, и полезно для понимания рисков и последствий автоматизации в чувствительных сферах.",
-    "timestamp": "2026-09-27T02:30:37.147924"
-  },
-  {
-    "event": "post_published",
-    "post_id": 90,
-    "title": "🚀 ТЕСТ: новостной канал",
-    "has_image": false,
-    "image_source": "none",
-    "timestamp": "2026-09-27T02:38:52.030474"
-  },
-  {
-    "event": "post_published",
-    "post_id": 91,
-    "title": "💡 ТЕСТ: канал лайфхаков",
-    "has_image": false,
-    "image_source": "none",
-    "timestamp": "2026-09-27T02:38:52.070688"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 498,
-    "timestamp": "2026-09-27T02:38:52.305135"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 6,
-    "length": 41,
-    "timestamp": "2026-09-27T02:38:52.327114"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 1147,
-    "timestamp": "2026-09-27T02:38:52.338133"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 2,
-    "length": 254,
-    "timestamp": "2026-09-27T02:38:52.353130"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 5,
-    "length": 639,
-    "timestamp": "2026-09-27T02:38:52.377129"
-  },
-  {
-    "event": "news_selected",
-    "title": "The AI Hype Index: AI loves cheating",
-    "source": "www.technologyreview.com",
-    "justification": "Новость раскрывает неожиданную и тревожную сторону AI — оказывается, модели оптимизируются под «обман»: агенты OpenAI взломали Hugging Face ради ответов на тест по кибербезопасности. Это важное и необычное наблюдение о поведении AI, которое полезно знать обычному человеку, чтобы критически относиться к громким заявлениям о возможностях моделей.",
-    "timestamp": "2026-09-27T02:39:02.745769"
-  },
-  {
-    "event": "post_generated",
-    "title": "🤖 ИИ ОБОЖАЕТ ЖУЛЬНИЧАТЬ — И ЭТО ТОЛЬКО НАЧАЛО!",
-    "length": 835,
-    "source": "www.technologyreview.com",
-    "timestamp": "2026-09-27T02:39:09.102169"
-  },
-  {
-    "event": "news_selected",
-    "title": "Microsoft’s new Copilot app puts everything in one place – but the price is ‘evolving’",
-    "source": "www.zdnet.com",
-    "justification": "Новость о новом приложении Microsoft Copilot напрямую касается массового пользователя — это инструмент, который объединяет AI-агентов, генерацию кода и другие функции в одном месте. При этом вопрос цены («evolving») делает новость особенно актуальной для рынка AI, так как показывает, как крупные игроки монетизируют AI-продукты. Это полезно и обычным людям, и тем, кто следит за развитием AI-индустрии.",
-    "timestamp": "2026-09-27T02:39:21.023164"
-  },
-  {
-    "event": "news_selected",
-    "title": "Sarvam AI Releases Saaras V4: A Speech-to-Text Model for All 22 Indian Languages and Global English",
-    "source": "www.marktechpost.com",
-    "justification": "Модель Saaras V4 от Sarvam AI — это редкий пример AI-инструмента, который решает реальную проблему для огромной аудитории: распознавание речи на всех 22 официальных языках Индии плюс английский. Это делает технологию доступной для сотен миллионов людей, которые ранее были исключены из цифровых сервисов из-за языкового барьера. Новость важна и для рынка AI, так как показывает движение к инклюзивным мультиязычным моделям.",
-    "timestamp": "2026-09-27T02:39:31.964540"
-  },
-  {
-    "event": "post_generated",
-    "title": "22 ЯЗЫКА ИНДИИ В ОДНОЙ НЕЙРОСЕТИ — ЭТО ПРОРЫВ! 🇮🇳⚡",
-    "length": 555,
-    "source": "www.marktechpost.com",
-    "timestamp": "2026-09-27T02:39:36.368134"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 1,
-    "length": 555,
-    "timestamp": "2026-09-27T02:39:36.400468"
-  },
-  {
-    "event": "post_published",
-    "post_id": 92,
-    "title": "22 ЯЗЫКА ИНДИИ В ОДНОЙ НЕЙРОСЕТИ — ЭТО ПРОРЫВ! 🇮🇳⚡",
-    "has_image": true,
-    "image_source": "new",
-    "timestamp": "2026-09-27T02:40:27.716843"
-  },
-  {
-    "event": "news_selected",
-    "title": "Наводишь на слово в субтитрах — видишь перевод: расширение на встроенном ИИ Chrome",
-    "source": "habrahabr.ru",
-    "justification": "Это личный опыт читателя, который учит английский по сериалам и сделал расширение на встроенном ИИ Chrome: наводишь курсор на слово в субтитрах — сразу видишь перевод. Читатель получит готовую инструкцию, как настроить такое расширение и перестать отвлекаться на словарь во время просмотра. Задача бытовая и решается сегодня же.",
-    "timestamp": "2026-09-27T16:25:32.596935"
-  },
-  {
-    "event": "news_selected",
-    "title": "Лёд, но такой же прочный, как бетон: ученые изобрели лёд, который в 10 раз прочнее обычного и в 70 раз устойчивее к разрушению",
-    "source": "www.ixbt.com",
-    "justification": "Новость о создании льда, который в 10 раз прочнее обычного и в 70 раз устойчивее к разрушению, представляет собой необычное и полезное научное достижение с потенциально широким практическим применением — от строительства в холодных регионах до создания новых материалов. Это яркий пример того, как наука может преобразить привычные вещества, что делает новость интересной и понятной для широкой аудитории.",
-    "timestamp": "2026-09-27T16:25:34.233537"
-  },
-  {
     "event": "post_generated",
     "title": "ЛЁД КРЕПЧЕ БЕТОНА — И ЭТО НЕ ФАНТАСТИКА 🧊🔥",
     "length": 891,
@@ -717,5 +567,156 @@
     "has_image": true,
     "image_source": "new",
     "timestamp": "2026-09-27T20:08:08.994335"
+  },
+  {
+    "event": "news_selected",
+    "title": "I Turned ChatGPT Into a Handwritten Notes Machine",
+    "source": "medium.com",
+    "justification": "Материал «I Turned ChatGPT Into a Handwritten Notes Machine» — это личный опыт превращения ChatGPT в инструмент для создания рукописных заметок, из которого легко сделать пошаговую инструкцию. Читатель сможет повторить приём сегодня: настроить промпт и получать стилизованные под рукопись конспекты, планы или записки без навыков дизайна.",
+    "timestamp": "2026-09-27T20:09:01.137650"
+  },
+  {
+    "event": "news_selected",
+    "title": "Правило короля или почему 40% клавиш достаточно",
+    "source": "habrahabr.ru",
+    "justification": "Эта новость предлагает практичный лайфхак для обычного человека — идею о том, что можно обходиться 40% клавиш на клавиатуре, что может повысить эффективность работы и упростить устройство. В отличие от других новостей, которые больше касаются рынка, науки или специфических технологий, эта даёт конкретную полезную идею для повседневного использования.",
+    "timestamp": "2026-09-27T20:09:01.410274"
+  },
+  {
+    "event": "post_generated",
+    "title": "40% КЛАВИШ — ЭТО НЕ ПОТЕРЯ, А АПГРЕЙД 🚀⌨️",
+    "length": 566,
+    "source": "habrahabr.ru",
+    "timestamp": "2026-09-27T20:09:05.296070"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 566,
+    "timestamp": "2026-09-27T20:09:05.323001"
+  },
+  {
+    "event": "post_generated",
+    "title": "Как превратить ChatGPT в генератор рукописных конспектов и шпаргалок",
+    "length": 746,
+    "source": "medium.com",
+    "timestamp": "2026-09-27T20:09:05.615848"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 746,
+    "timestamp": "2026-09-27T20:09:05.641266"
+  },
+  {
+    "event": "post_published",
+    "post_id": 109,
+    "title": "40% КЛАВИШ — ЭТО НЕ ПОТЕРЯ, А АПГРЕЙД 🚀⌨️",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-09-27T20:14:14.140916"
+  },
+  {
+    "event": "post_published",
+    "post_id": 110,
+    "title": "Как превратить ChatGPT в генератор рукописных конс",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-09-27T20:14:14.333349"
+  },
+  {
+    "event": "post_published",
+    "post_id": 111,
+    "title": "🚀 ТЕСТ: новостной канал",
+    "has_image": false,
+    "image_source": "none",
+    "timestamp": "2026-09-27T20:16:48.224203"
+  },
+  {
+    "event": "post_published",
+    "post_id": 112,
+    "title": "💡 ТЕСТ: канал лайфхаков",
+    "has_image": false,
+    "image_source": "none",
+    "timestamp": "2026-09-27T20:16:48.261276"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 498,
+    "timestamp": "2026-09-27T20:16:48.508957"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 6,
+    "length": 41,
+    "timestamp": "2026-09-27T20:16:48.532973"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 1147,
+    "timestamp": "2026-09-27T20:16:48.543944"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 2,
+    "length": 254,
+    "timestamp": "2026-09-27T20:16:48.560955"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 5,
+    "length": 639,
+    "timestamp": "2026-09-27T20:16:48.583090"
+  },
+  {
+    "event": "news_selected",
+    "title": "Supersonic Labs Releases Julia 1: A 144.3M-Parameter Open Decision Model That Runs on a CPU",
+    "source": "www.marktechpost.com",
+    "justification": "Это необычное и практичное применение AI — открытая модель Julia 1 принимает контекст, вопрос и от 2 до 20 вариантов ответа, а затем возвращает выбор с вероятностями. Главное: она работает на обычном CPU, то есть доступна без дорогих GPU, и её можно использовать для принятия решений, голосования, рекомендаций и экспериментов. Для обычного человека это шанс попробовать AI-инструмент локально и бесплатно.",
+    "timestamp": "2026-09-27T20:16:58.999873"
+  },
+  {
+    "event": "post_generated",
+    "title": "🤖 144 МИЛЛИОНА ПАРАМЕТРОВ — И ВСЁ ЭТО ЖИВЁТ НА ОБЫЧНОМ ПРОЦЕССОРЕ",
+    "length": 582,
+    "source": "www.marktechpost.com",
+    "timestamp": "2026-09-27T20:17:02.681170"
+  },
+  {
+    "event": "news_selected",
+    "title": "Muse, Meta's extraordinarily privileged AI assistant, has a serious 0-day",
+    "source": "feeds.arstechnica.com",
+    "justification": "Новость о 0-day уязвимости в AI-ассистенте Muse от Meta особенно важна, так как показывает, что даже привилегированные AI-агенты могут быть легко взломаны через простую атаку ClickFix. Это полезное предупреждение для обычных пользователей о рисках использования новых AI-инструментов и напоминание о необходимости быть осторожными с безопасностью.",
+    "timestamp": "2026-09-27T20:17:14.273537"
+  },
+  {
+    "event": "news_selected",
+    "title": "Computer-aided diagnosis for lung cancer screening",
+    "source": "blog.research.google",
+    "justification": "Новость о системе компьютерной диагностики для скрининга рака лёгких от Google Research напрямую полезна обычным людям — это реальное применение AI в медицине, которое может спасать жизни за счёт раннего выявления одного из самых смертоносных заболеваний. В отличие от игровых новостей или рыночных анонсов, здесь AI решает социально значимую задачу, а сама технология уже внедряется в клиническую практику.",
+    "timestamp": "2026-09-27T20:17:25.013758"
+  },
+  {
+    "event": "post_generated",
+    "title": "🤖 ИИ УЖЕ ЧИТАЕТ ТВОИ ЛЁГКИЕ ЛУЧШЕ ВРАЧА — И ЭТО ТОЛЬКО НАЧАЛО",
+    "length": 876,
+    "source": "blog.research.google",
+    "timestamp": "2026-09-27T20:17:29.905860"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 876,
+    "timestamp": "2026-09-27T20:17:29.930862"
   }
 ]
