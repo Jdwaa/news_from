@@ -279,17 +279,19 @@ class PublisherAgent(BaseAgent):
         
         image_path = os.path.join("memory_bank", "temp_publish.jpg")
         try:
-            # to_thread: скачивание картинки блокирующее; retry_sync повторяет
-            # временные сбои — ссылка на CDN живёт ограниченное время
-            def _fetch():
-                resp = requests.get(image_url, timeout=30)
-                resp.raise_for_status()
-                return resp
+            # Качаем блоками с повтором оборвавшегося куска: CDN OdiRouter
+            # отдаёт файл неровно, а обычный requests.get теряет весь прогресс
+            # при обрыве на середине — пост тогда уходил без картинки.
+            from agents.image_agent import ImageAgent
+            content = await asyncio.to_thread(
+                ImageAgent()._fetch_image_bytes, image_url
+            )
+            if not content:
+                self.log("⚠️ Не удалось скачать картинку для отправки", is_error=True)
+                return None
 
-            response = await asyncio.to_thread(retry_sync, _fetch, attempts=3)
-            
             with open(image_path, "wb") as f:
-                f.write(response.content)
+                f.write(content)
             
             with open(image_path, "rb") as f:
                 result = await self.bot.send_photo(

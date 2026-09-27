@@ -1,107 +1,5 @@
 [
   {
-    "event": "post_generated",
-    "title": "ЛЁД КРЕПЧЕ БЕТОНА — И ЭТО НЕ ФАНТАСТИКА 🧊🔥",
-    "length": 891,
-    "source": "www.ixbt.com",
-    "timestamp": "2026-09-27T16:25:38.507221"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 891,
-    "timestamp": "2026-09-27T16:25:38.533817"
-  },
-  {
-    "event": "post_generated",
-    "title": "Смотришь сериал с субтитрами? Chrome теперь переводит слова сам",
-    "length": 2808,
-    "source": "habrahabr.ru",
-    "timestamp": "2026-09-27T16:25:43.168540"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 1,
-    "length": 2808,
-    "timestamp": "2026-09-27T16:25:47.456926"
-  },
-  {
-    "event": "post_published",
-    "post_id": 93,
-    "title": "ЛЁД КРЕПЧЕ БЕТОНА — И ЭТО НЕ ФАНТАСТИКА 🧊🔥",
-    "has_image": true,
-    "image_source": "new",
-    "timestamp": "2026-09-27T16:27:34.148683"
-  },
-  {
-    "event": "post_published",
-    "post_id": 94,
-    "title": "Смотришь сериал с субтитрами? Chrome теперь перево",
-    "has_image": true,
-    "image_source": "new",
-    "timestamp": "2026-09-27T16:28:29.975098"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 3,
-    "length": 861,
-    "timestamp": "2026-09-27T16:37:57.790245"
-  },
-  {
-    "event": "post_published",
-    "post_id": 95,
-    "title": "🚀 ТЕСТ: новостной канал",
-    "has_image": false,
-    "image_source": "none",
-    "timestamp": "2026-09-27T16:38:46.453090"
-  },
-  {
-    "event": "post_published",
-    "post_id": 96,
-    "title": "💡 ТЕСТ: канал лайфхаков",
-    "has_image": false,
-    "image_source": "none",
-    "timestamp": "2026-09-27T16:38:46.502313"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 498,
-    "timestamp": "2026-09-27T16:38:46.738883"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 6,
-    "length": 41,
-    "timestamp": "2026-09-27T16:38:46.764882"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 1147,
-    "timestamp": "2026-09-27T16:38:46.777865"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 2,
-    "length": 254,
-    "timestamp": "2026-09-27T16:38:46.794884"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 5,
-    "length": 639,
-    "timestamp": "2026-09-27T16:38:46.818865"
-  },
-  {
     "event": "news_selected",
     "title": "I created an interactive digital avatar of myself — and you can talk to it",
     "source": "techcrunch.com",
@@ -718,5 +616,106 @@
     "issues_count": 0,
     "length": 876,
     "timestamp": "2026-09-27T20:17:29.930862"
+  },
+  {
+    "event": "post_published",
+    "post_id": 113,
+    "title": "🚀 ТЕСТ: новостной канал",
+    "has_image": false,
+    "image_source": "none",
+    "timestamp": "2026-09-27T20:31:13.528301"
+  },
+  {
+    "event": "post_published",
+    "post_id": 114,
+    "title": "💡 ТЕСТ: канал лайфхаков",
+    "has_image": false,
+    "image_source": "none",
+    "timestamp": "2026-09-27T20:31:13.584056"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 498,
+    "timestamp": "2026-09-27T20:31:13.936668"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 6,
+    "length": 41,
+    "timestamp": "2026-09-27T20:31:13.974681"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 1147,
+    "timestamp": "2026-09-27T20:31:13.989681"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 2,
+    "length": 254,
+    "timestamp": "2026-09-27T20:31:14.007682"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 5,
+    "length": 639,
+    "timestamp": "2026-09-27T20:31:14.029689"
+  },
+  {
+    "event": "news_selected",
+    "title": "Supersonic Labs Releases Julia 1: A 144.3M-Parameter Open Decision Model That Runs on a CPU",
+    "source": "www.marktechpost.com",
+    "justification": "Модель Julia 1 от Supersonic Labs — это открытая decision-модель на 144,3 млн параметров, которая работает на обычном CPU, без GPU и облака. Это делает её доступной для разработчиков и небольших команд, а сам формат «контекст + вопрос + варианты → выбор с вероятностями» необычен и полезен для практических задач.",
+    "timestamp": "2026-09-27T20:31:24.063110"
+  },
+  {
+    "event": "post_generated",
+    "title": "🤖 ИИ, КОТОРЫЙ ВЫБИРАЕТ ЗА ТЕБЯ — И РАБОТАЕТ БЕЗ ВИДЕОКАРТЫ!",
+    "length": 626,
+    "source": "www.marktechpost.com",
+    "timestamp": "2026-09-27T20:31:27.999016"
+  },
+  {
+    "event": "news_selected",
+    "title": "I created an interactive digital avatar of myself — and you can talk to it",
+    "source": "techcrunch.com",
+    "justification": "Эта новость описывает личный опыт создания интерактивного цифрового аватара, с которым можно разговаривать — это необычное и наглядное применение AI, интересное обычному человеку. Она затрагивает этические и практические вопросы клонирования себя с помощью ИИ, что делает материал полезным для размышлений и обсуждений.",
+    "timestamp": "2026-09-27T20:31:39.552178"
+  },
+  {
+    "event": "news_selected",
+    "title": "Cookies, которых не видно: partitioned cookies, cookies.txt и одно расширение под три браузера",
+    "source": "habrahabr.ru",
+    "justification": "Это практический лайфхак для обычного пользователя: автор разбирает, почему cookies возвращаются после удаления (partitioned cookies) и предлагает конкретное расширение, работающее сразу в трёх браузерах. Такая информация напрямую помогает защитить приватность и решить бытовую проблему, с которой сталкиваются многие. Остальные новости либо узкоспециальны, либо представляют собой анонсы и рассуждения без прикладной пользы.",
+    "timestamp": "2026-09-27T20:31:55.046067"
+  },
+  {
+    "event": "post_generated",
+    "title": "ТВОЙ БРАУЗЕР ВРЁТ ТЕБЕ: КУКИ, КОТОРЫХ ТЫ НЕ ВИДИШЬ 👻🍪",
+    "length": 733,
+    "source": "habrahabr.ru",
+    "timestamp": "2026-09-27T20:31:59.816198"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 733,
+    "timestamp": "2026-09-27T20:31:59.848203"
+  },
+  {
+    "event": "post_published",
+    "post_id": 115,
+    "title": "ТВОЙ БРАУЗЕР ВРЁТ ТЕБЕ: КУКИ, КОТОРЫХ ТЫ НЕ ВИДИШЬ",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-09-27T20:34:03.759501"
   }
 ]

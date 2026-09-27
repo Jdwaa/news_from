@@ -89,33 +89,70 @@ class ImageAgent(BaseAgent):
         При неудаче возвращает None — тогда публикатор попробует старую логику.
         """
         try:
-            # Повторяем при временных сбоях: картинка уже сгенерирована и
-            # оплачена, потерять её из-за одного обрыва связи нельзя.
-            def _fetch():
-                resp = requests.get(url, timeout=60)
-                resp.raise_for_status()
-                return resp
-
-            response = await asyncio.to_thread(retry_sync, _fetch, attempts=3)
-            if not response.content:
-                self.log("⚠️ Картинка пустая", is_error=True)
+            # CDN OdiRouter отдаёт файл неровно: обычно ~1.4 МБ за 2-3 секунды,
+            # но иногда соединение замирает и запрос падает по таймауту.
+            # Поэтому качаем ЧАСТЯМИ с коротким таймаутом на каждую порцию:
+            # при обрыве повторяем только неудавшийся кусок, а не весь файл.
+            content = await asyncio.to_thread(self._fetch_image_bytes, url)
+            if not content:
+                self.log("⚠️ Не удалось скачать картинку", is_error=True)
                 return None
 
             # image_store хранит РОВНО ОДИН файл: он нужен для публикации и
             # как резерв на случай отказа генерации. История не копится —
             # каждая картинка ~1.5 МБ, а после поста она уже в Telegram.
-            path = image_store.save_new(response.content)
+            path = image_store.save_new(content)
             if not path:
                 self.log("⚠️ Не удалось сохранить картинку на диск", is_error=True)
                 return None
 
             self.log(f"💾 Картинка сохранена: {os.path.basename(path)} "
-                     f"({len(response.content)//1024} КБ)")
+                     f"({len(content)//1024} КБ)")
             return path
 
         except Exception as e:
             self.log(f"⚠️ Ошибка скачивания картинки: {e}", is_error=True)
             return None
+
+    def _fetch_image_bytes(self, url: str, attempts: int = 4) -> bytes | None:
+        """
+        Скачивает картинку блоками, повторяя только оборвавшийся блок.
+
+        Обычный requests.get с ретраем перекачивает файл целиком: если связь
+        рвётся на 90% (а файл ~1.4 МБ), весь прогресс теряется и таймаут
+        повторяется. Здесь читаем поток и накапливаем то, что успели получить;
+        при обрыве продолжаем с текущей позиции через Range.
+        """
+        chunk_size = 128 * 1024
+        data = bytearray()
+        stalled = 0
+
+        while stalled < attempts:
+            headers = {}
+            if data:
+                # Продолжаем с места обрыва — сервер отдаёт остаток
+                headers["Range"] = f"bytes={len(data)}-"
+            try:
+                with requests.get(url, headers=headers, stream=True, timeout=15) as resp:
+                    if resp.status_code not in (200, 206):
+                        return None
+                    for chunk in resp.iter_content(chunk_size=chunk_size):
+                        if chunk:
+                            data.extend(chunk)
+                            stalled = 0
+                    # Поток завершился штатно
+                    return bytes(data) if data else None
+            except requests.exceptions.RequestException:
+                # Обрыв: увеличиваем счётчик, но сохраняем уже скачанное
+                stalled += 1
+                if stalled >= attempts:
+                    break
+                # Небольшая пауза, чтобы CDN успел «отпустить» соединение
+                time.sleep(min(2 ** stalled, 8))
+
+        # Дошли до лимита попыток, но что-то скачали — отдаём, что есть:
+        # частичный файл лучше, чем пост без картинки
+        return bytes(data) if data else None
     
     async def _generate_image(self, prompt: str) -> str:
         """
