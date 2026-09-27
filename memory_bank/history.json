@@ -1,27 +1,5 @@
 [
   {
-    "event": "post_generated",
-    "title": "MARKDOWN ПОБЕЖДАЕТ: ЯЗЫК БУДУЩЕГО УЖЕ ЗДЕСЬ 🚀",
-    "length": 805,
-    "source": "thenextweb.com",
-    "timestamp": "2026-09-27T16:45:33.424934"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 805,
-    "timestamp": "2026-09-27T16:45:33.444810"
-  },
-  {
-    "event": "post_published",
-    "post_id": 100,
-    "title": "MARKDOWN ПОБЕЖДАЕТ: ЯЗЫК БУДУЩЕГО УЖЕ ЗДЕСЬ 🚀",
-    "has_image": true,
-    "image_source": "new",
-    "timestamp": "2026-09-27T16:46:20.570182"
-  },
-  {
     "event": "post_published",
     "post_id": 101,
     "title": "🚀 ТЕСТ: новостной канал",
@@ -718,5 +696,26 @@
     "has_image": true,
     "image_source": "new",
     "timestamp": "2026-09-27T20:54:32.791058"
+  },
+  {
+    "event": "news_selected",
+    "title": "The 11 Best Social Media Management Tools in 2026 — Tried + Tested",
+    "source": "buffer.com",
+    "justification": "Это протестированная подборка инструментов для ведения соцсетей с указанием цен и того, кому какой сервис подходит, — из неё легко собрать инструкцию «чем вести соцсети: бесплатные варианты для соло-автора и платные для команды». Читатель получит готовый список, из которого можно сегодня же выбрать инструмент под свою задачу (планирование постов, аналитика, автопостинг).",
+    "timestamp": "2026-09-27T21:25:08.083166"
+  },
+  {
+    "event": "post_generated",
+    "title": "5 сервисов, которые избавят вас от рутины в соцсетях",
+    "length": 725,
+    "source": "buffer.com",
+    "timestamp": "2026-09-27T21:25:14.507153"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 725,
+    "timestamp": "2026-09-27T21:25:14.540167"
   }
 ]
