@@ -1,19 +1,21 @@
 {
   "last_parsed_count": 15,
-  "last_parsed_at": "2026-09-27T02:39:30.383694",
+  "last_parsed_at": "2026-09-27T16:25:32.388824",
   "best_practices": [],
   "worst_practices": [],
-  "last_analysis_at": "2026-09-27T02:40:28.657833",
+  "last_analysis_at": "2026-09-27T16:28:30.463328",
   "analytics_report": {
     "hour": 22,
     "day": 5,
     "interval_hours": 6.0,
-    "reason": "На основе 25 постов"
+    "reason": "На основе 23 постов"
   },
   "last_manual_run_at": "2026-09-18T20:06:58.941955+04:00",
   "last_publish_at": "2026-09-18T20:07:48.158373+04:00",
   "pinned_message_id:tips": 11,
   "pinned_message_id:news": 163,
   "channel_username:tips": "aipolza_ii",
-  "channel_username:news": "Aioneway"
+  "channel_username:news": "Aioneway",
+  "last_publish_at:news": "2026-09-27T16:27:34.203603+04:00",
+  "last_publish_at:tips": "2026-09-27T16:28:30.034203+04:00"
 }

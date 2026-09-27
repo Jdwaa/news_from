@@ -330,14 +330,22 @@ class SchedulerAgent(BaseAgent):
         
         # 4. Если сегодня не лучший день, но прошёл интервал — публикуем
         # (в рабочее время, чтобы не было простоев)
+        # Метки нет вовсе (первый запуск канала) — публикуем сразу: иначе бот
+        # ждал бы «лучшего дня», которого может не быть неделю, и в канале
+        # не появилось бы ни одного поста.
+        if not last_publish:
+            if self.min_hour <= current_hour <= self.max_hour:
+                self.log("📊 Публикаций ещё не было — публикую первую")
+                return True
+            return False
+
         hours_since_last = 0
-        if last_publish:
-            try:
-                last_time = self._parse_last_publish(last_publish)
-                hours_since_last = max(0.0, (datetime.now().astimezone() - last_time).total_seconds() / 3600)
-            except Exception as e:
-                self.log(f"⚠️ Ошибка чтения метки публикации ({e}) — интервал не выдержан", is_error=True)
-                hours_since_last = 0
+        try:
+            last_time = self._parse_last_publish(last_publish)
+            hours_since_last = max(0.0, (datetime.now().astimezone() - last_time).total_seconds() / 3600)
+        except Exception as e:
+            self.log(f"⚠️ Ошибка чтения метки публикации ({e}) — интервал не выдержан", is_error=True)
+            hours_since_last = 0
         
         if hours_since_last >= self.profile.interval / 3600:
             # Проверяем, что сейчас рабочее время
