@@ -1,134 +1,5 @@
 [
   {
-    "event": "news_selected",
-    "title": "I created an interactive digital avatar of myself — and you can talk to it",
-    "source": "techcrunch.com",
-    "justification": "Эта новость рассказывает о необычном применении AI — создании интерактивного цифрового аватара самого себя, с которым можно общаться. Это интересный пример того, как технологии становятся доступными обычным людям, и поднимает важные вопросы об этике клонирования личности с помощью ИИ.",
-    "timestamp": "2026-09-27T16:39:28.962788"
-  },
-  {
-    "event": "post_generated",
-    "title": "МОЙ ЦИФРОВОЙ ДВОЙНИК УЖЕ ОТВЕЧАЕТ ЗА МЕНЯ 🤖🔥",
-    "length": 673,
-    "source": "techcrunch.com",
-    "timestamp": "2026-09-27T16:39:33.497161"
-  },
-  {
-    "event": "news_selected",
-    "title": "Microsoft’s Surface Mouse is back, now with haptic feedback – and I need it",
-    "source": "www.zdnet.com",
-    "justification": "Это самая полезная и понятная для обычного человека новость — возвращение культовой мыши Surface с тактильной отдачей (haptic feedback) за $80. Она напрямую касается повседневного опыта пользователей ПК, а не абстрактных исследований или корпоративных бюджетов. Остальные новости либо узкоспециальны (BNN, дозаторы, markdown), либо тревожны (0-day, трагедия, слежка).",
-    "timestamp": "2026-09-27T16:39:46.892586"
-  },
-  {
-    "event": "news_selected",
-    "title": "Поколение отклонённых: как ИИ-скрининг резюме выталкивает молодёжь в киберпреступность",
-    "source": "habrahabr.ru",
-    "justification": "Эта новость поднимает важную и неочевидную социальную проблему — как автоматизированный ИИ-скрининг резюме, отсеивающий кандидатов без объяснения причин, толкает молодёжь к киберпреступности. Это редкий пример анализа негативных побочных эффектов AI на рынке труда, полезный и для соискателей, и для HR-специалистов, и для разработчиков таких систем.",
-    "timestamp": "2026-09-27T16:40:26.599912"
-  },
-  {
-    "event": "post_generated",
-    "title": "ИИ-ФИЛЬТР РЕЗЮМЕ ВЫДАВЛИВАЕТ МОЛОДЁЖЬ В ХАКЕРЫ 🤖💀",
-    "length": 628,
-    "source": "habrahabr.ru",
-    "timestamp": "2026-09-27T16:40:32.000214"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 628,
-    "timestamp": "2026-09-27T16:40:32.018855"
-  },
-  {
-    "event": "post_published",
-    "post_id": 97,
-    "title": "ИИ-ФИЛЬТР РЕЗЮМЕ ВЫДАВЛИВАЕТ МОЛОДЁЖЬ В ХАКЕРЫ 🤖💀",
-    "has_image": true,
-    "image_source": "new",
-    "timestamp": "2026-09-27T16:41:40.076799"
-  },
-  {
-    "event": "post_published",
-    "post_id": 98,
-    "title": "🚀 ТЕСТ: новостной канал",
-    "has_image": false,
-    "image_source": "none",
-    "timestamp": "2026-09-27T16:43:21.996928"
-  },
-  {
-    "event": "post_published",
-    "post_id": 99,
-    "title": "💡 ТЕСТ: канал лайфхаков",
-    "has_image": false,
-    "image_source": "none",
-    "timestamp": "2026-09-27T16:43:22.036888"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 498,
-    "timestamp": "2026-09-27T16:43:22.288230"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 6,
-    "length": 41,
-    "timestamp": "2026-09-27T16:43:22.314697"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 1147,
-    "timestamp": "2026-09-27T16:43:22.326334"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 2,
-    "length": 254,
-    "timestamp": "2026-09-27T16:43:22.345342"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 5,
-    "length": 639,
-    "timestamp": "2026-09-27T16:43:22.368505"
-  },
-  {
-    "event": "news_selected",
-    "title": "Google tests buying from Walmart-owned Flipkart through Gemini and AI Mode in India",
-    "source": "techcrunch.com",
-    "justification": "Новость о тесте Google покупок через Gemini и AI Mode напрямую показывает, как AI встраивается в повседневные задачи — покупки. Это практичный пример применения AI, который в перспективе упростит жизнь обычным пользователям и сигнализирует о важном сдвиге на рынке e-commerce.",
-    "timestamp": "2026-09-27T16:43:48.390408"
-  },
-  {
-    "event": "post_generated",
-    "title": "GOOGLE СТИРАЕТ ГРАНИЦУ МЕЖДУ ПОИСКОМ И ПОКУПКОЙ 🛒🤖",
-    "length": 765,
-    "source": "techcrunch.com",
-    "timestamp": "2026-09-27T16:43:52.652085"
-  },
-  {
-    "event": "news_selected",
-    "title": "Google tests buying from Walmart-owned Flipkart through Gemini and AI Mode in India",
-    "source": "techcrunch.com",
-    "justification": "Эта новость показывает реальное практическое применение AI в повседневной жизни — покупки через Gemini и AI Mode прямо в Индии. Это важный шаг к тому, чтобы AI-ассистенты стали полноценными инструментами для обычных пользователей, а не просто чат-ботами. Тест с Walmart-owned Flipkart сигнализирует о начале интеграции AI в e-commerce, что может изменить привычный опыт онлайн-шопинга.",
-    "timestamp": "2026-09-27T16:44:48.713413"
-  },
-  {
-    "event": "news_selected",
-    "title": "Why markdown is becoming the default language between search data and AI models",
-    "source": "thenextweb.com",
-    "justification": "Новость объясняет, почему Markdown становится стандартным языком обмена данными между поисковыми системами и AI-моделями — это важный тренд, который касается разработчиков, контент-менеджеров и всех, кто работает с AI-инструментами. Понимание этого сдвига помогает лучше готовить контент для AI-эпохи и осознанно выбирать форматы данных. В отличие от узких технических новостей, эта даёт практическое понимание инфраструктурных изменений в индустрии.",
-    "timestamp": "2026-09-27T16:45:29.657442"
-  },
-  {
     "event": "post_generated",
     "title": "MARKDOWN ПОБЕЖДАЕТ: ЯЗЫК БУДУЩЕГО УЖЕ ЗДЕСЬ 🚀",
     "length": 805,
@@ -717,5 +588,135 @@
     "has_image": true,
     "image_source": "new",
     "timestamp": "2026-09-27T20:34:03.759501"
+  },
+  {
+    "event": "news_selected",
+    "title": "Supersonic Labs Releases Julia 1: A 144.3M-Parameter Open Decision Model That Runs on a CPU",
+    "source": "www.marktechpost.com",
+    "justification": "Это самая полезная для практического применения новость из списка — открытая модель принятия решений на 144 млн параметров, работающая на обычном CPU без GPU. Она позволяет разработчикам и обычным пользователям запускать AI-инструмент выбора из вариантов локально, что снижает порог входа и зависимость от облачных сервисов.",
+    "timestamp": "2026-09-27T20:41:37.544745"
+  },
+  {
+    "event": "post_generated",
+    "title": "🤖 ИИ, КОТОРЫЙ ВЫБИРАЕТ ЗА ТЕБЯ — И РАБОТАЕТ БЕЗ ВИДЕОКАРТЫ!",
+    "length": 591,
+    "source": "www.marktechpost.com",
+    "timestamp": "2026-09-27T20:41:42.435683"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 591,
+    "timestamp": "2026-09-27T20:41:42.460772"
+  },
+  {
+    "event": "post_published",
+    "post_id": 116,
+    "title": "🤖 ИИ, КОТОРЫЙ ВЫБИРАЕТ ЗА ТЕБЯ — И РАБОТАЕТ БЕЗ ВИ",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-09-27T20:42:13.626697"
+  },
+  {
+    "event": "post_published",
+    "post_id": 117,
+    "title": "🚀 ТЕСТ: новостной канал",
+    "has_image": false,
+    "image_source": "none",
+    "timestamp": "2026-09-27T20:53:02.347824"
+  },
+  {
+    "event": "post_published",
+    "post_id": 118,
+    "title": "💡 ТЕСТ: канал лайфхаков",
+    "has_image": false,
+    "image_source": "none",
+    "timestamp": "2026-09-27T20:53:02.386824"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 498,
+    "timestamp": "2026-09-27T20:53:02.643121"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 6,
+    "length": 41,
+    "timestamp": "2026-09-27T20:53:02.673116"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 1147,
+    "timestamp": "2026-09-27T20:53:02.684124"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 2,
+    "length": 254,
+    "timestamp": "2026-09-27T20:53:02.700366"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 5,
+    "length": 639,
+    "timestamp": "2026-09-27T20:53:02.720983"
+  },
+  {
+    "event": "news_selected",
+    "title": "Microsoft’s new Copilot app puts everything in one place – but the price is ‘evolving’",
+    "source": "www.zdnet.com",
+    "justification": "Новость о новом приложении Microsoft Copilot важна для широкой аудитории, так как показывает, как AI-инструменты становятся единой платформой для работы, кода и агентов. Вопрос цены («evolving») затрагивает ключевой для рынка AI момент монетизации, что делает новость полезной и практически значимой для обычных пользователей и специалистов.",
+    "timestamp": "2026-09-27T20:53:15.660643"
+  },
+  {
+    "event": "post_generated",
+    "title": "MICROSOFT СКЛЕИЛ ВСЁ В ОДНО — НО СЧЁТ ПРИДЁТ ПОЗЖЕ 🚀💸",
+    "length": 618,
+    "source": "www.zdnet.com",
+    "timestamp": "2026-09-27T20:53:20.272034"
+  },
+  {
+    "event": "news_selected",
+    "title": "AlphaGenome Atlas: A predictive map of every possible DNA letter change in the human genome",
+    "source": "deepmind.com",
+    "justification": "AlphaGenome Atlas от DeepMind — это действительно прорывная новость: карта влияния 9 миллиардов однонуклеотидных изменений ДНК открывает огромные возможности для генетики, медицины и понимания наследственных заболеваний. Это не просто инструмент для узких специалистов, а фундаментальный ресурс, который со временем может повлиять на диагностику и лечение болезней у обычных людей.",
+    "timestamp": "2026-09-27T20:53:34.646185"
+  },
+  {
+    "event": "news_selected",
+    "title": "MIT Researchers Unveil “SEAL”: A New Step Towards Self-Improving AI",
+    "source": "syncedreview.com",
+    "justification": "Новость о фреймворке SEAL от MIT — это важный шаг к самоулучшающемуся AI, что может существенно повлиять на развитие рынка и подходы к обучению моделей. В отличие от большинства новостей в списке, она представляет не просто очередной продукт или локальное событие, а фундаментальное исследование с потенциалом изменить всю индустрию.",
+    "timestamp": "2026-09-27T20:53:50.638664"
+  },
+  {
+    "event": "post_generated",
+    "title": "🤖 ИИ НАУЧИЛСЯ ПЕРЕПИСЫВАТЬ САМ СЕБЯ — ЭТО НАЧАЛО КОНЦА ЭПОХИ «СТАТИЧНЫХ» МОДЕЛЕЙ",
+    "length": 783,
+    "source": "syncedreview.com",
+    "timestamp": "2026-09-27T20:53:56.148383"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 783,
+    "timestamp": "2026-09-27T20:53:56.170931"
+  },
+  {
+    "event": "post_published",
+    "post_id": 119,
+    "title": "🤖 ИИ НАУЧИЛСЯ ПЕРЕПИСЫВАТЬ САМ СЕБЯ — ЭТО НАЧАЛО К",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-09-27T20:54:32.791058"
   }
 ]

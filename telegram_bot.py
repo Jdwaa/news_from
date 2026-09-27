@@ -75,7 +75,12 @@ class TelegramBot:
         self.app.add_handler(CommandHandler("pin", self.pin_cmd, admin_only))
         self.app.add_handler(CommandHandler("admin", self.admin_menu, filters=private & admin_only))
         
-        self.app.add_handler(CallbackQueryHandler(self.button_handler, admin_only))
+        # ВНИМАНИЕ: у CallbackQueryHandler второй позиционный аргумент — это
+        # pattern (регулярное выражение), а не фильтр: фильтра у него нет.
+        # Раньше сюда попадал admin_only и библиотека падала на
+        # re.match(<filters.User>, data) с TypeError — не работала НИ ОДНА
+        # кнопка меню. Доступ проверяем внутри обработчика.
+        self.app.add_handler(CallbackQueryHandler(self.button_handler))
         
         # Кнопки внизу экрана. Это единственный сетевой вызов на старте:
         # если Telegram недоступен (нет сети, блокировка), бот всё равно должен
@@ -114,9 +119,22 @@ class TelegramBot:
         return text
     
     async def _on_error(self, update, context):
-        """Логирует ошибку обработчика и сообщает пользователю, что запрос упал."""
+        """
+        Логирует ошибку обработчика и сообщает пользователю, что запрос упал.
+
+        Печатаем ПОЛНЫЙ трейс, а не только тип ошибки: без него непонятно,
+        в какой строке и на каких данных всё сломалось, и приходится
+        воспроизводить вручную.
+        """
         error = context.error
         print(f"❌ Ошибка обработки запроса: {type(error).__name__}: {error}")
+        try:
+            import traceback
+            print("".join(traceback.format_exception(
+                type(error), error, error.__traceback__
+            ))[-2000:])
+        except Exception:
+            pass
         
         chat_id = None
         if update is not None:
@@ -324,8 +342,20 @@ class TelegramBot:
     # ==========================================
     
     async def button_handler(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """
+        Обработчик инлайн-кнопок.
+
+        Права проверяем здесь, а не фильтром: у CallbackQueryHandler фильтра
+        нет (второй аргумент — это pattern для регулярки), а кнопки умеют
+        запускать платный цикл публикации.
+        """
         query = update.callback_query
         await query.answer()
+        
+        # Доступ только для администратора: кнопка публикации тратит API-квоту
+        if not self._is_admin(update):
+            await query.message.reply_text("⛔ Эта кнопка доступна только администратору.")
+            return
         
         data = query.data or ""
         
@@ -435,6 +465,24 @@ class TelegramBot:
         if len(admin_ids) == 1:
             return filters.User(user_id=admin_ids[0])
         return filters.User(user_id=admin_ids)
+    
+    @staticmethod
+    def _is_admin(update) -> bool:
+        """
+        Проверяет, что нажатие пришло от администратора.
+
+        Нужен для кнопок: у CallbackQueryHandler нет фильтра, а кнопки
+        запускают платный цикл публикации и меняют настройки канала.
+        Если ADMIN_ID не задан, доступ открыт — об этом предупреждает main.py.
+        """
+        admin_ids = [i for i in [Config.ADMIN_ID, Config.OWNER_CHAT_ID, *Config.EXTRA_ADMIN_IDS] if i]
+        if not admin_ids:
+            return True
+        from_user = getattr(update, "effective_user", None)
+        user_id = getattr(from_user, "id", None)
+        if user_id is None:
+            return False
+        return user_id in admin_ids
     
     async def _run_manual_cycle(self, reply, profile=None):
         """
