@@ -39,8 +39,13 @@ class DummyOrchestrator:
 
     def __init__(self):
         self.calls = 0
+        # Планировщик обращается к bot для уведомлений о сбоях; None означает
+        # «уведомлять некому», и это допустимый случай
+        self.bot = None
 
-    async def run(self) -> dict:
+    async def run(self, context: dict = None) -> dict:
+        # Планировщик передаёт контекст с профилем канала, поэтому сигнатура
+        # должна его принимать: иначе вызов падает с TypeError.
         self.calls += 1
         return {"published_post_id": None}
 

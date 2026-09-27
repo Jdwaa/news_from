@@ -252,11 +252,22 @@ async def main():
     check("aware-метка сохраняет смещение",
           scheduler._parse_last_publish(aware.isoformat()).utcoffset(), aware.utcoffset())
 
-    scheduler.memory.set("last_publish_at", datetime.now().astimezone().isoformat())
-    check("свежая публикация не даёт публиковать снова", await scheduler._should_publish(10, 0), False)
+    # Метка публикации хранится ПОД КЛЮЧОМ КАНАЛА (last_publish_at:<канал>):
+    # у бота два канала, и общая метка сдвигала бы интервал соседнего.
+    _publish_key = scheduler._last_publish_key
+    scheduler.memory.set(_publish_key, datetime.now().astimezone().isoformat())
+    check("свежая публикация не даёт публиковать снова",
+          await scheduler._should_publish(10, 0), False)
 
-    scheduler.memory.set("last_publish_at", "не дата")
-    check("битая метка не роняет планировщик", await scheduler._should_publish(10, 0), False)
+    scheduler.memory.set(_publish_key, "не дата")
+    check("битая метка не роняет планировщик",
+          await scheduler._should_publish(10, 0), False)
+
+    # Пустая метка = канал ещё не публиковал -> публикуем сразу, иначе бот
+    # ждал бы «лучшего дня» и не выпустил ни одного поста
+    scheduler.memory.set(_publish_key, None)
+    check("без метки канал публикует первую запись",
+          await scheduler._should_publish(10, 0), True)
 
     # ==========================================
     # 5. UI: МЕНЮ И БЕЗОПАСНАЯ РАЗМЕТКА

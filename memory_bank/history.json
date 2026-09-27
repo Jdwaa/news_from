@@ -1,531 +1,6 @@
 [
   {
     "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 498,
-    "timestamp": "2026-09-26T17:50:03.354138"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 6,
-    "length": 41,
-    "timestamp": "2026-09-26T17:50:03.379139"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 1147,
-    "timestamp": "2026-09-26T17:50:03.393287"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 2,
-    "length": 254,
-    "timestamp": "2026-09-26T17:50:03.407354"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 5,
-    "length": 639,
-    "timestamp": "2026-09-26T17:50:03.428670"
-  },
-  {
-    "event": "news_selected",
-    "title": "MIT Researchers Unveil “SEAL”: A New Step Towards Self-Improving AI",
-    "source": "syncedreview.com",
-    "justification": "Новость о разработке MIT под названием SEAL — это важный шаг к созданию самоулучшающегося AI, что может существенно повлиять на развитие технологий в ближайшие годы. В отличие от многих других новостей, она показывает реальный исследовательский прорыв, а не просто бюджетные запросы или рыночные прогнозы. Это интересно и полезно как для специалистов, так и для широкой аудитории, следящей за развитием искусственного интеллекта.",
-    "timestamp": "2026-09-26T17:50:13.654360"
-  },
-  {
-    "event": "post_generated",
-    "title": "🤖 ИИ НАЧАЛ ПЕРЕПИСЫВАТЬ САМ СЕБЯ — ЭТО УЖЕ НЕ ФАНТАСТИКА!",
-    "length": 605,
-    "source": "syncedreview.com",
-    "timestamp": "2026-09-26T17:50:17.260614"
-  },
-  {
-    "event": "news_selected",
-    "title": "AI Weekly Issue #528: What are companies building with AI? An Applied AI Deep Dive",
-    "source": "aiweekly.co",
-    "justification": "Эта новость показывает реальные, неожиданные применения AI в бизнесе — дроны для доставки диагностических образцов, беспилотные грузовики Frito-Lay, AI-навигация полётов. Это полезно и интересно для обычного читателя, так как выходит за рамки привычных «чат-ботов» и демонстрирует, куда на самом деле движется рынок AI.",
-    "timestamp": "2026-09-26T17:50:27.748523"
-  },
-  {
-    "event": "news_selected",
-    "title": "AI Weekly Issue #528: What are companies building with AI? An Applied AI Deep Dive",
-    "source": "aiweekly.co",
-    "justification": "Эта новость показывает реальные, неожиданные применения AI в бизнесе — от дронов с диагностическими образцами до беспилотных грузовиков Frito-Lay и AI-оптимизации авиамаршрутов. Это выходит за рамки привычных чат-ботов и даёт читателю конкретное представление о том, как AI уже меняет целые отрасли. Такой обзор полезен и для понимания рынка, и как источник идей.",
-    "timestamp": "2026-09-26T17:50:37.600354"
-  },
-  {
-    "event": "post_generated",
-    "title": "ИИ ВЫРВАЛСЯ ИЗ ЧАТА — И ЭТО ТОЛЬКО НАЧАЛО 🚀🤖",
-    "length": 674,
-    "source": "aiweekly.co",
-    "timestamp": "2026-09-26T17:50:41.707491"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 1,
-    "length": 674,
-    "timestamp": "2026-09-26T17:50:41.733503"
-  },
-  {
-    "event": "post_published",
-    "post_id": 76,
-    "title": "ИИ ВЫРВАЛСЯ ИЗ ЧАТА — И ЭТО ТОЛЬКО НАЧАЛО 🚀🤖",
-    "has_image": true,
-    "image_source": "new",
-    "timestamp": "2026-09-26T17:51:32.915788"
-  },
-  {
-    "event": "post_published",
-    "post_id": 77,
-    "title": "🚀 ТЕСТ: новостной канал",
-    "has_image": false,
-    "image_source": "none",
-    "timestamp": "2026-09-26T19:00:45.399455"
-  },
-  {
-    "event": "post_published",
-    "post_id": 78,
-    "title": "💡 ТЕСТ: канал лайфхаков",
-    "has_image": false,
-    "image_source": "none",
-    "timestamp": "2026-09-26T19:00:45.441439"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 498,
-    "timestamp": "2026-09-26T19:00:45.683631"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 6,
-    "length": 41,
-    "timestamp": "2026-09-26T19:00:45.706635"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 1147,
-    "timestamp": "2026-09-26T19:00:45.716648"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 2,
-    "length": 254,
-    "timestamp": "2026-09-26T19:00:45.732649"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 5,
-    "length": 639,
-    "timestamp": "2026-09-26T19:00:45.756652"
-  },
-  {
-    "event": "news_selected",
-    "title": "Поймал удачу за хвост: пользователь заказал GeForce RTX 5070 Ti за $1100, а получил четыре такие видеокарты",
-    "source": "www.ixbt.com",
-    "justification": "Это самая необычная и позитивная новость из списка — пользователь заказал одну видеокарту за $1100, а получил четыре, что является редким примером ошибки доставки в пользу покупателя. Такие истории вызывают интерес у широкой аудитории и хорошо подходят для технологического канала, поскольку касаются популярного железа (RTX 5070 Ti). Остальные новости либо слишком узкие, либо негативные, либо не имеют практической ценности для обычного читателя.",
-    "timestamp": "2026-09-26T19:00:56.802879"
-  },
-  {
-    "event": "post_generated",
-    "title": "😱 ЗАКАЗАЛ ОДНУ ВИДЕОКАРТУ — ПОЛУЧИЛ ЧЕТЫРЕ! УДАЧА ИЛИ БАГ В МАТРИЦЕ?",
-    "length": 706,
-    "source": "www.ixbt.com",
-    "timestamp": "2026-09-26T19:01:00.771715"
-  },
-  {
-    "event": "news_selected",
-    "title": "Computer-aided diagnosis for lung cancer screening",
-    "source": "blog.research.google",
-    "justification": "Эта новость рассказывает о применении ИИ для диагностики рака легких, что напрямую влияет на здоровье и может спасать жизни благодаря раннему выявлению. Это важное и полезное применение AI в медицине, которое будет интересно и понятно широкой аудитории.",
-    "timestamp": "2026-09-26T19:01:12.110311"
-  },
-  {
-    "event": "news_selected",
-    "title": "Offloaded inference for real-world physical AI robotics",
-    "source": "www.microsoft.com",
-    "justification": "Эта новость показывает необычное и практичное применение AI — вынесение инференса за пределы робота, что повышает успешность выполнения задач и эффективность. Это важно для развития физической робототехники и может ускорить внедрение умных роботов в реальном мире. Для технологического канала это интересный пример того, как архитектурные решения влияют на возможности AI.",
-    "timestamp": "2026-09-26T19:06:40.858930"
-  },
-  {
-    "event": "post_generated",
-    "title": "🤖 РОБОТЫ БОЛЬШЕ НЕ НОСЯТ МОЗГИ С СОБОЙ — И ЭТО МЕНЯЕТ ВСЁ!",
-    "length": 548,
-    "source": "www.microsoft.com",
-    "timestamp": "2026-09-26T19:06:46.215594"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 548,
-    "timestamp": "2026-09-26T19:06:46.235458"
-  },
-  {
-    "event": "post_published",
-    "post_id": 79,
-    "title": "🤖 РОБОТЫ БОЛЬШЕ НЕ НОСЯТ МОЗГИ С СОБОЙ — И ЭТО МЕН",
-    "has_image": true,
-    "image_source": "new",
-    "timestamp": "2026-09-26T19:07:38.269211"
-  },
-  {
-    "event": "post_published",
-    "post_id": 80,
-    "title": "🚀 ТЕСТ: новостной канал",
-    "has_image": false,
-    "image_source": "none",
-    "timestamp": "2026-09-26T19:09:07.855849"
-  },
-  {
-    "event": "post_published",
-    "post_id": 81,
-    "title": "💡 ТЕСТ: канал лайфхаков",
-    "has_image": false,
-    "image_source": "none",
-    "timestamp": "2026-09-26T19:09:07.898984"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 498,
-    "timestamp": "2026-09-26T19:09:08.222059"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 6,
-    "length": 41,
-    "timestamp": "2026-09-26T19:09:08.253593"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 1147,
-    "timestamp": "2026-09-26T19:09:08.263623"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 2,
-    "length": 254,
-    "timestamp": "2026-09-26T19:09:08.281803"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 5,
-    "length": 639,
-    "timestamp": "2026-09-26T19:09:08.306460"
-  },
-  {
-    "event": "news_selected",
-    "title": "AI Weekly Issue #527: Schools are choosing opposite futures for AI",
-    "source": "aiweekly.co",
-    "justification": "Эта новость показывает важный раскол в подходах к использованию AI в образовании: одни школы полностью отказываются от AI-помощи в письме, другие строят учебный день вокруг адаптивного ПО. Для читателей это полезная пища для размышлений о том, как AI меняет обучение и какие модели могут победить.",
-    "timestamp": "2026-09-26T19:09:19.291381"
-  },
-  {
-    "event": "post_generated",
-    "title": "ШКОЛЫ РАСКОЛОЛИСЬ: КТО-ТО ЗАПРЕЩАЕТ ИИ, А КТО-ТО СТАВИТ ЕГО В ЦЕНТР УРОКА 🤖🏫⚡",
-    "length": 673,
-    "source": "aiweekly.co",
-    "timestamp": "2026-09-26T19:09:23.719076"
-  },
-  {
-    "event": "news_selected",
-    "title": "Transformers now runs llama.cpp quants",
-    "source": "huggingface.co",
-    "justification": "Новость о том, что Transformers теперь поддерживает квантизацию llama.cpp, важна для практического использования AI — это позволяет запускать большие языковые модели на обычном железе, включая ноутбуки и даже смартфоны, с меньшими затратами памяти. Такое сочетание двух популярных инструментов заметно упрощает локальный запуск AI для разработчиков и энтузиастов.",
-    "timestamp": "2026-09-26T19:09:34.697046"
-  },
-  {
-    "event": "news_selected",
-    "title": "The AI Hype Index: AI loves cheating",
-    "source": "www.technologyreview.com",
-    "justification": "Новость раскрывает неожиданную и тревожную сторону современных AI-агентов — они учатся \"читерить\" и обходить ограничения, взламывая системы ради лучших результатов. Это важный сигнал для рынка AI о проблемах безопасности и выравнивания (alignment), который напрямую касается всех, кто использует или разрабатывает AI-системы.",
-    "timestamp": "2026-09-26T19:09:45.144538"
-  },
-  {
-    "event": "post_generated",
-    "title": "🤖 ИИ НАУЧИЛСЯ ЖУЛЬНИЧАТЬ — И ЭТО ТОЛЬКО НАЧАЛО",
-    "length": 632,
-    "source": "www.technologyreview.com",
-    "timestamp": "2026-09-26T19:09:49.087301"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 1,
-    "length": 632,
-    "timestamp": "2026-09-26T19:09:49.113328"
-  },
-  {
-    "event": "post_published",
-    "post_id": 82,
-    "title": "🚀 ТЕСТ: новостной канал",
-    "has_image": false,
-    "image_source": "none",
-    "timestamp": "2026-09-27T02:24:48.576083"
-  },
-  {
-    "event": "post_published",
-    "post_id": 83,
-    "title": "💡 ТЕСТ: канал лайфхаков",
-    "has_image": false,
-    "image_source": "none",
-    "timestamp": "2026-09-27T02:24:48.621802"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 498,
-    "timestamp": "2026-09-27T02:24:48.875454"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 6,
-    "length": 41,
-    "timestamp": "2026-09-27T02:24:48.898640"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 1147,
-    "timestamp": "2026-09-27T02:24:48.907870"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 2,
-    "length": 254,
-    "timestamp": "2026-09-27T02:24:48.924346"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 5,
-    "length": 639,
-    "timestamp": "2026-09-27T02:24:48.949133"
-  },
-  {
-    "event": "news_selected",
-    "title": "ИИ-агент OpenAI снова выбрался в интернет после усиления защиты — чтобы уточнить столицу Франции",
-    "source": "3dnews.ru",
-    "justification": "Эта новость — яркий и почти анекдотичный пример того, как ИИ-агенты обходят ограничения: чтобы уточнить столицу Франции, агент нашёл способ выйти в интернет из изолированной среды. Это наглядно показывает, насколько сложно контролировать поведение современных AI-систем и почему вопросы безопасности ИИ важны не только для специалистов, но и для широкой публики.",
-    "timestamp": "2026-09-27T02:24:59.539603"
-  },
-  {
-    "event": "post_generated",
-    "title": "ИИ СНОВА СБЕЖАЛ ИЗ ЛАБОРАТОРИИ — ЧТОБЫ СПРОСИТЬ ПРО ПАРИЖ 🚨",
-    "length": 694,
-    "source": "3dnews.ru",
-    "timestamp": "2026-09-27T02:25:03.340231"
-  },
-  {
-    "event": "news_selected",
-    "title": "Sarvam AI Releases Saaras V4: A Speech-to-Text Model for All 22 Indian Languages and Global English",
-    "source": "www.marktechpost.com",
-    "justification": "Это самая практичная новость из списка: Sarvam AI выпустила Saaras V4 — модель распознавания речи, которая поддерживает все 22 официальных языка Индии плюс английский. Для сотен миллионов людей это реальный инструмент доступа к технологиям на родном языке, а не очередной эксперимент или финансовый отчёт.",
-    "timestamp": "2026-09-27T02:25:14.486859"
-  },
-  {
-    "event": "news_selected",
-    "title": "This one WatchOS 27 feature just solved my biggest issue with Apple Watch",
-    "source": "www.zdnet.com",
-    "justification": "Эта новость наиболее полезна для обычного человека — она рассказывает о простой функции в WatchOS 27, которая решает давнюю проблему владельцев Apple Watch, а значит, может напрямую улучшить повседневный опыт миллионов пользователей. В отличие от большинства других новостей (патентные споры, политика, научные исследования), здесь речь идёт о конкретном практичном улучшении гаджета. Формат «одна функция решила мою главную проблему» — классический полезный лайфхак для читателя.",
-    "timestamp": "2026-09-27T02:25:25.698869"
-  },
-  {
-    "event": "post_generated",
-    "title": "APPLE WATCH СТАНОВИТСЯ УМНЕЕ — И ЭТО МЕНЯЕТ ВСЁ ⌚🔥",
-    "length": 879,
-    "source": "www.zdnet.com",
-    "timestamp": "2026-09-27T02:25:28.953925"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 879,
-    "timestamp": "2026-09-27T02:25:28.980504"
-  },
-  {
-    "event": "post_published",
-    "post_id": 84,
-    "title": "APPLE WATCH СТАНОВИТСЯ УМНЕЕ — И ЭТО МЕНЯЕТ ВСЁ ⌚🔥",
-    "has_image": true,
-    "image_source": "new",
-    "timestamp": "2026-09-27T02:26:22.422836"
-  },
-  {
-    "event": "post_published",
-    "post_id": 85,
-    "title": "🚀 ТЕСТ: новостной канал",
-    "has_image": false,
-    "image_source": "none",
-    "timestamp": "2026-09-27T02:27:54.337171"
-  },
-  {
-    "event": "post_published",
-    "post_id": 86,
-    "title": "💡 ТЕСТ: канал лайфхаков",
-    "has_image": false,
-    "image_source": "none",
-    "timestamp": "2026-09-27T02:27:54.377247"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 498,
-    "timestamp": "2026-09-27T02:27:54.708236"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 6,
-    "length": 41,
-    "timestamp": "2026-09-27T02:27:54.739317"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 1147,
-    "timestamp": "2026-09-27T02:27:54.755475"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 2,
-    "length": 254,
-    "timestamp": "2026-09-27T02:27:54.773487"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 5,
-    "length": 639,
-    "timestamp": "2026-09-27T02:27:54.799535"
-  },
-  {
-    "event": "news_selected",
-    "title": "AI Weekly Issue #530: Applied AI This Week",
-    "source": "aiweekly.co",
-    "justification": "Эта новость показывает, как AI уже сегодня решает конкретные прикладные задачи — от проверки камер безопасности до помощи фермерам и анализа спутниковых снимков. Это наглядно демонстрирует реальную пользу AI для обычных людей и бизнеса, а не абстрактные обещания. Такой обзор практических применений помогает читателям понять, где AI может пригодиться в их собственной сфере.",
-    "timestamp": "2026-09-27T02:28:05.862652"
-  },
-  {
-    "event": "post_generated",
-    "title": "ИИ ПЕРЕСТАЛ БОЛТАТЬ — ТЕПЕРЬ ОН РАБОТАЕТ 🚀",
-    "length": 562,
-    "source": "aiweekly.co",
-    "timestamp": "2026-09-27T02:28:09.684143"
-  },
-  {
-    "event": "news_selected",
-    "title": "Anthropic открыла портал для публикации плагинов в каталоге Claude",
-    "source": "tproger.ru",
-    "justification": "Новость о запуске портала Anthropic для публикации плагинов в каталоге Claude напрямую касается практических инструментов для пользователей и разработчиков AI — это шаг к расширению экосистемы и упрощению доступа к новым функциям. В отличие от внутренних исследовательских релизов (как AutoBNN или Adobe Research), эта новость имеет конкретное прикладное значение для рынка AI и обычных пользователей Claude.",
-    "timestamp": "2026-09-27T02:28:22.571194"
-  },
-  {
-    "event": "news_selected",
-    "title": "ИИ-агент OpenAI снова выбрался в интернет после усиления защиты — чтобы уточнить столицу Франции",
-    "source": "3dnews.ru",
-    "justification": "Новость описывает яркий и показательный случай: ИИ-агент OpenAI, помещённый в изолированную среду без доступа к интернету, сумел найти обходной путь и связаться с внешним чат-ботом, чтобы уточнить столицу Франции. Это необычное применение AI и одновременно тревожный сигнал о том, насколько сложно удержать современные модели в заданных рамках, что важно как для специалистов, так и для широкой аудитории.",
-    "timestamp": "2026-09-27T02:28:34.884766"
-  },
-  {
-    "event": "post_generated",
-    "title": "ИИ СНОВА СБЕЖАЛ ИЗ ЛАБОРАТОРИИ — И СПРОСИЛ ПРО ПАРИЖ 🤯",
-    "length": 679,
-    "source": "3dnews.ru",
-    "timestamp": "2026-09-27T02:28:38.749814"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 679,
-    "timestamp": "2026-09-27T02:28:38.777801"
-  },
-  {
-    "event": "post_published",
-    "post_id": 87,
-    "title": "ИИ СНОВА СБЕЖАЛ ИЗ ЛАБОРАТОРИИ — И СПРОСИЛ ПРО ПАР",
-    "has_image": true,
-    "image_source": "new",
-    "timestamp": "2026-09-27T02:29:09.586399"
-  },
-  {
-    "event": "post_published",
-    "post_id": 88,
-    "title": "🚀 ТЕСТ: новостной канал",
-    "has_image": false,
-    "image_source": "none",
-    "timestamp": "2026-09-27T02:29:59.538544"
-  },
-  {
-    "event": "post_published",
-    "post_id": 89,
-    "title": "💡 ТЕСТ: канал лайфхаков",
-    "has_image": false,
-    "image_source": "none",
-    "timestamp": "2026-09-27T02:29:59.575788"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 498,
-    "timestamp": "2026-09-27T02:29:59.844474"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 6,
-    "length": 41,
-    "timestamp": "2026-09-27T02:29:59.872015"
-  },
-  {
-    "event": "review_completed",
-    "status": "approved",
-    "issues_count": 0,
-    "length": 1147,
-    "timestamp": "2026-09-27T02:29:59.881015"
-  },
-  {
-    "event": "review_completed",
-    "status": "rejected",
-    "issues_count": 2,
-    "length": 254,
-    "timestamp": "2026-09-27T02:29:59.896379"
-  },
-  {
-    "event": "review_completed",
     "status": "rejected",
     "issues_count": 5,
     "length": 639,
@@ -717,5 +192,530 @@
     "has_image": true,
     "image_source": "new",
     "timestamp": "2026-09-27T16:28:29.975098"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 3,
+    "length": 861,
+    "timestamp": "2026-09-27T16:37:57.790245"
+  },
+  {
+    "event": "post_published",
+    "post_id": 95,
+    "title": "🚀 ТЕСТ: новостной канал",
+    "has_image": false,
+    "image_source": "none",
+    "timestamp": "2026-09-27T16:38:46.453090"
+  },
+  {
+    "event": "post_published",
+    "post_id": 96,
+    "title": "💡 ТЕСТ: канал лайфхаков",
+    "has_image": false,
+    "image_source": "none",
+    "timestamp": "2026-09-27T16:38:46.502313"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 498,
+    "timestamp": "2026-09-27T16:38:46.738883"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 6,
+    "length": 41,
+    "timestamp": "2026-09-27T16:38:46.764882"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 1147,
+    "timestamp": "2026-09-27T16:38:46.777865"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 2,
+    "length": 254,
+    "timestamp": "2026-09-27T16:38:46.794884"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 5,
+    "length": 639,
+    "timestamp": "2026-09-27T16:38:46.818865"
+  },
+  {
+    "event": "news_selected",
+    "title": "I created an interactive digital avatar of myself — and you can talk to it",
+    "source": "techcrunch.com",
+    "justification": "Эта новость рассказывает о необычном применении AI — создании интерактивного цифрового аватара самого себя, с которым можно общаться. Это интересный пример того, как технологии становятся доступными обычным людям, и поднимает важные вопросы об этике клонирования личности с помощью ИИ.",
+    "timestamp": "2026-09-27T16:39:28.962788"
+  },
+  {
+    "event": "post_generated",
+    "title": "МОЙ ЦИФРОВОЙ ДВОЙНИК УЖЕ ОТВЕЧАЕТ ЗА МЕНЯ 🤖🔥",
+    "length": 673,
+    "source": "techcrunch.com",
+    "timestamp": "2026-09-27T16:39:33.497161"
+  },
+  {
+    "event": "news_selected",
+    "title": "Microsoft’s Surface Mouse is back, now with haptic feedback – and I need it",
+    "source": "www.zdnet.com",
+    "justification": "Это самая полезная и понятная для обычного человека новость — возвращение культовой мыши Surface с тактильной отдачей (haptic feedback) за $80. Она напрямую касается повседневного опыта пользователей ПК, а не абстрактных исследований или корпоративных бюджетов. Остальные новости либо узкоспециальны (BNN, дозаторы, markdown), либо тревожны (0-day, трагедия, слежка).",
+    "timestamp": "2026-09-27T16:39:46.892586"
+  },
+  {
+    "event": "news_selected",
+    "title": "Поколение отклонённых: как ИИ-скрининг резюме выталкивает молодёжь в киберпреступность",
+    "source": "habrahabr.ru",
+    "justification": "Эта новость поднимает важную и неочевидную социальную проблему — как автоматизированный ИИ-скрининг резюме, отсеивающий кандидатов без объяснения причин, толкает молодёжь к киберпреступности. Это редкий пример анализа негативных побочных эффектов AI на рынке труда, полезный и для соискателей, и для HR-специалистов, и для разработчиков таких систем.",
+    "timestamp": "2026-09-27T16:40:26.599912"
+  },
+  {
+    "event": "post_generated",
+    "title": "ИИ-ФИЛЬТР РЕЗЮМЕ ВЫДАВЛИВАЕТ МОЛОДЁЖЬ В ХАКЕРЫ 🤖💀",
+    "length": 628,
+    "source": "habrahabr.ru",
+    "timestamp": "2026-09-27T16:40:32.000214"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 628,
+    "timestamp": "2026-09-27T16:40:32.018855"
+  },
+  {
+    "event": "post_published",
+    "post_id": 97,
+    "title": "ИИ-ФИЛЬТР РЕЗЮМЕ ВЫДАВЛИВАЕТ МОЛОДЁЖЬ В ХАКЕРЫ 🤖💀",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-09-27T16:41:40.076799"
+  },
+  {
+    "event": "post_published",
+    "post_id": 98,
+    "title": "🚀 ТЕСТ: новостной канал",
+    "has_image": false,
+    "image_source": "none",
+    "timestamp": "2026-09-27T16:43:21.996928"
+  },
+  {
+    "event": "post_published",
+    "post_id": 99,
+    "title": "💡 ТЕСТ: канал лайфхаков",
+    "has_image": false,
+    "image_source": "none",
+    "timestamp": "2026-09-27T16:43:22.036888"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 498,
+    "timestamp": "2026-09-27T16:43:22.288230"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 6,
+    "length": 41,
+    "timestamp": "2026-09-27T16:43:22.314697"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 1147,
+    "timestamp": "2026-09-27T16:43:22.326334"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 2,
+    "length": 254,
+    "timestamp": "2026-09-27T16:43:22.345342"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 5,
+    "length": 639,
+    "timestamp": "2026-09-27T16:43:22.368505"
+  },
+  {
+    "event": "news_selected",
+    "title": "Google tests buying from Walmart-owned Flipkart through Gemini and AI Mode in India",
+    "source": "techcrunch.com",
+    "justification": "Новость о тесте Google покупок через Gemini и AI Mode напрямую показывает, как AI встраивается в повседневные задачи — покупки. Это практичный пример применения AI, который в перспективе упростит жизнь обычным пользователям и сигнализирует о важном сдвиге на рынке e-commerce.",
+    "timestamp": "2026-09-27T16:43:48.390408"
+  },
+  {
+    "event": "post_generated",
+    "title": "GOOGLE СТИРАЕТ ГРАНИЦУ МЕЖДУ ПОИСКОМ И ПОКУПКОЙ 🛒🤖",
+    "length": 765,
+    "source": "techcrunch.com",
+    "timestamp": "2026-09-27T16:43:52.652085"
+  },
+  {
+    "event": "news_selected",
+    "title": "Google tests buying from Walmart-owned Flipkart through Gemini and AI Mode in India",
+    "source": "techcrunch.com",
+    "justification": "Эта новость показывает реальное практическое применение AI в повседневной жизни — покупки через Gemini и AI Mode прямо в Индии. Это важный шаг к тому, чтобы AI-ассистенты стали полноценными инструментами для обычных пользователей, а не просто чат-ботами. Тест с Walmart-owned Flipkart сигнализирует о начале интеграции AI в e-commerce, что может изменить привычный опыт онлайн-шопинга.",
+    "timestamp": "2026-09-27T16:44:48.713413"
+  },
+  {
+    "event": "news_selected",
+    "title": "Why markdown is becoming the default language between search data and AI models",
+    "source": "thenextweb.com",
+    "justification": "Новость объясняет, почему Markdown становится стандартным языком обмена данными между поисковыми системами и AI-моделями — это важный тренд, который касается разработчиков, контент-менеджеров и всех, кто работает с AI-инструментами. Понимание этого сдвига помогает лучше готовить контент для AI-эпохи и осознанно выбирать форматы данных. В отличие от узких технических новостей, эта даёт практическое понимание инфраструктурных изменений в индустрии.",
+    "timestamp": "2026-09-27T16:45:29.657442"
+  },
+  {
+    "event": "post_generated",
+    "title": "MARKDOWN ПОБЕЖДАЕТ: ЯЗЫК БУДУЩЕГО УЖЕ ЗДЕСЬ 🚀",
+    "length": 805,
+    "source": "thenextweb.com",
+    "timestamp": "2026-09-27T16:45:33.424934"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 805,
+    "timestamp": "2026-09-27T16:45:33.444810"
+  },
+  {
+    "event": "post_published",
+    "post_id": 100,
+    "title": "MARKDOWN ПОБЕЖДАЕТ: ЯЗЫК БУДУЩЕГО УЖЕ ЗДЕСЬ 🚀",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-09-27T16:46:20.570182"
+  },
+  {
+    "event": "post_published",
+    "post_id": 101,
+    "title": "🚀 ТЕСТ: новостной канал",
+    "has_image": false,
+    "image_source": "none",
+    "timestamp": "2026-09-27T16:47:12.058648"
+  },
+  {
+    "event": "post_published",
+    "post_id": 102,
+    "title": "💡 ТЕСТ: канал лайфхаков",
+    "has_image": false,
+    "image_source": "none",
+    "timestamp": "2026-09-27T16:47:12.100623"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 498,
+    "timestamp": "2026-09-27T16:47:12.331678"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 6,
+    "length": 41,
+    "timestamp": "2026-09-27T16:47:12.354687"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 1147,
+    "timestamp": "2026-09-27T16:47:12.365002"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 2,
+    "length": 254,
+    "timestamp": "2026-09-27T16:47:12.380555"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 5,
+    "length": 639,
+    "timestamp": "2026-09-27T16:47:12.401952"
+  },
+  {
+    "event": "news_selected",
+    "title": "I created an interactive digital avatar of myself — and you can talk to it",
+    "source": "techcrunch.com",
+    "justification": "Эта новость описывает необычное и всё более доступное применение AI — создание интерактивного цифрового аватара самого себя, с которым можно общаться. Это вызывает любопытство у обычного читателя и поднимает важные этические вопросы о клонировании личности с помощью AI. Такой личный эксперимент журналиста делает тему наглядной и полезной для размышлений о будущем AI-клонов.",
+    "timestamp": "2026-09-27T16:47:24.859471"
+  },
+  {
+    "event": "post_generated",
+    "title": "Я СОЗДАЛ СВОЕГО ЦИФРОВОГО ДВОЙНИКА 🤖 И ЭТО УЖЕ НЕ ФАНТАСТИКА",
+    "length": 504,
+    "source": "techcrunch.com",
+    "timestamp": "2026-09-27T16:47:30.653003"
+  },
+  {
+    "event": "news_selected",
+    "title": "Microsoft’s Surface Mouse is back, now with haptic feedback – and I need it",
+    "source": "www.zdnet.com",
+    "justification": "Это самая полезная и «человечная» новость из списка — речь о конкретном устройстве (мышь Surface с тактильной отдачей за $80), которое обычный человек может купить и использовать ежедневно. Новость вызывает живой интерес у автора обзора («I need it»), что делает её не только информативной, но и увлекательной для читателя. В отличие от абстрактных исследований, политики или серверных технологий, это осязаемый продукт с понятной ценностью.",
+    "timestamp": "2026-09-27T16:47:44.910107"
+  },
+  {
+    "event": "news_selected",
+    "title": "Supersonic Labs Releases Julia 1: A 144.3M-Parameter Open Decision Model That Runs on a CPU",
+    "source": "www.marktechpost.com",
+    "justification": "Это самая полезная и необычная новость из списка — открытая модель принятия решений на 144 млн параметров, которая работает прямо на CPU, без GPU и облака. Обычный человек или разработчик может запустить её локально для задач выбора из вариантов (от бытовых решений до прототипов агентов), что делает AI по-настоящему доступным. Остальные новости либо узкоспециальны, либо касаются политики и конфликтов, либо требуют серьёзной инфраструктуры.",
+    "timestamp": "2026-09-27T16:47:56.418465"
+  },
+  {
+    "event": "post_generated",
+    "title": "🤖 НЕЙРОСЕТЬ, КОТОРАЯ ПРИНИМАЕТ РЕШЕНИЯ ЗА ТЕБЯ — И РАБОТАЕТ БЕЗ GPU!",
+    "length": 543,
+    "source": "www.marktechpost.com",
+    "timestamp": "2026-09-27T16:48:00.896270"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 543,
+    "timestamp": "2026-09-27T16:48:00.924358"
+  },
+  {
+    "event": "post_published",
+    "post_id": 103,
+    "title": "🚀 ТЕСТ: новостной канал",
+    "has_image": false,
+    "image_source": "none",
+    "timestamp": "2026-09-27T20:02:43.213917"
+  },
+  {
+    "event": "post_published",
+    "post_id": 104,
+    "title": "💡 ТЕСТ: канал лайфхаков",
+    "has_image": false,
+    "image_source": "none",
+    "timestamp": "2026-09-27T20:02:43.248344"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 498,
+    "timestamp": "2026-09-27T20:02:43.569542"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 6,
+    "length": 41,
+    "timestamp": "2026-09-27T20:02:43.602711"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 1147,
+    "timestamp": "2026-09-27T20:02:43.612459"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 2,
+    "length": 254,
+    "timestamp": "2026-09-27T20:02:43.629392"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 5,
+    "length": 639,
+    "timestamp": "2026-09-27T20:02:43.652265"
+  },
+  {
+    "event": "news_selected",
+    "title": "Red Dead Redemption 2 запустили на iPhone 18 Pro — c почти 30 FPS",
+    "source": "www.ixbt.com",
+    "justification": "Новость про запуск Red Dead Redemption 2 на iPhone 18 Pro — яркий пример необычного применения технологий, который удивляет и вдохновляет. Она показывает, насколько мощными становятся мобильные устройства, и интересна широкой аудитории геймеров и любителей техники.",
+    "timestamp": "2026-09-27T20:02:53.562023"
+  },
+  {
+    "event": "post_generated",
+    "title": "🎮 КОНСОЛЬНЫЕ ИГРЫ ПЕРЕЕХАЛИ В КАРМАН — БУДУЩЕЕ УЖЕ ЗДЕСЬ!",
+    "length": 852,
+    "source": "www.ixbt.com",
+    "timestamp": "2026-09-27T20:02:57.444384"
+  },
+  {
+    "event": "news_selected",
+    "title": "Полноценный компьютер с Intel Core 7 и гигабитным Ethernet — размером со смартфон. Sixunited WB81-H02 помещается в ладони",
+    "source": "www.ixbt.com",
+    "justification": "Мини-компьютер размером со смартфон с полноценным Intel Core 7 и гигабитным Ethernet — это наглядный пример того, как вычислительная техника становится всё компактнее без потери производительности. Такая новость полезна обычному человеку: она показывает, что скоро мощный ПК можно будет носить в кармане или прятать за монитором, что меняет представление о домашних и рабочих рабочих местах.",
+    "timestamp": "2026-09-27T20:03:08.684456"
+  },
+  {
+    "event": "news_selected",
+    "title": "Google tests buying from Walmart-owned Flipkart through Gemini and AI Mode in India",
+    "source": "techcrunch.com",
+    "justification": "Новость показывает практическое применение AI в повседневной жизни — теперь пользователи в Индии смогут покупать товары с Flipkart прямо через Gemini и AI Mode, что упрощает шопинг и демонстрирует, как AI-ассистенты превращаются в полноценные торговые платформы. Это важный сигнал для рынка: AI-компании и ритейлеры начинают интегрироваться в единые экосистемы, что может изменить привычные способы онлайн-покупок.",
+    "timestamp": "2026-09-27T20:03:21.249328"
+  },
+  {
+    "event": "post_generated",
+    "title": "GOOGLE СТИРАЕТ ГРАНЬ МЕЖДУ ПОИСКОМ И МАГАЗИНОМ 🛒🤖",
+    "length": 751,
+    "source": "techcrunch.com",
+    "timestamp": "2026-09-27T20:03:24.802449"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 751,
+    "timestamp": "2026-09-27T20:03:24.822466"
+  },
+  {
+    "event": "post_published",
+    "post_id": 105,
+    "title": "🚀 ТЕСТ: новостной канал",
+    "has_image": false,
+    "image_source": "none",
+    "timestamp": "2026-09-27T20:05:24.286409"
+  },
+  {
+    "event": "post_published",
+    "post_id": 106,
+    "title": "💡 ТЕСТ: канал лайфхаков",
+    "has_image": false,
+    "image_source": "none",
+    "timestamp": "2026-09-27T20:05:24.323393"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 498,
+    "timestamp": "2026-09-27T20:05:24.589047"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 6,
+    "length": 41,
+    "timestamp": "2026-09-27T20:05:24.615036"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 1147,
+    "timestamp": "2026-09-27T20:05:24.631038"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 2,
+    "length": 254,
+    "timestamp": "2026-09-27T20:05:24.648076"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 5,
+    "length": 639,
+    "timestamp": "2026-09-27T20:05:24.669255"
+  },
+  {
+    "event": "news_selected",
+    "title": "OpenAI приостановила обучение ИИ-моделей — расследуются десятки тысяч инцидентов с выходом ИИ из-под контроля",
+    "source": "3dnews.ru",
+    "justification": "Эта новость критически важна для рынка AI: если OpenAI действительно приостановила обучение моделей из-за десятков тысяч инцидентов с выходом ИИ из-под контроля, это сигнал о серьёзных проблемах безопасности и может повлиять на всю индустрию. Для обычного читателя это также тревожный и важный факт о реальных рисках современных нейросетей, а не абстрактных сценариях из фантастики.",
+    "timestamp": "2026-09-27T20:05:35.623471"
+  },
+  {
+    "event": "post_generated",
+    "title": "🚨 OPENAI НАЖАЛА СТОП: ИИ ВЫШЕЛ ИЗ-ПОД КОНТРОЛЯ?",
+    "length": 710,
+    "source": "3dnews.ru",
+    "timestamp": "2026-09-27T20:05:39.303890"
+  },
+  {
+    "event": "news_selected",
+    "title": "Правило короля или почему 40% клавиш достаточно",
+    "source": "habrahabr.ru",
+    "justification": "Эта новость предлагает нестандартный и практичный лайфхак — идею, что 40% клавиш на клавиатуре может быть достаточно, что потенциально упрощает и ускоряет работу. В отличие от большинства новостей об AI, политике или научных исследованиях, она даёт конкретную пользу обычному человеку в повседневном использовании компьютера.",
+    "timestamp": "2026-09-27T20:05:51.063305"
+  },
+  {
+    "event": "news_selected",
+    "title": "Полноценный компьютер с Intel Core 7 и гигабитным Ethernet — размером со смартфон. Sixunited WB81-H02 помещается в ладони",
+    "source": "www.ixbt.com",
+    "justification": "Полноценный компьютер размером со смартфон — это наглядный пример миниатюризации, которая вскоре может изменить представление о домашних и рабочих ПК. Такая новость интересна и полезна обычному человеку: компактное устройство с Intel Core 7 и гигабитным Ethernet способно заменить громоздкий системный блок. Это необычное и практичное применение технологий, а не абстрактный бенчмарк или отраслевая аналитика.",
+    "timestamp": "2026-09-27T20:06:02.065071"
+  },
+  {
+    "event": "post_generated",
+    "title": "КОМПЬЮТЕР В КАРМАНЕ? ЭТО УЖЕ РЕАЛЬНОСТЬ! 🚀💻",
+    "length": 530,
+    "source": "www.ixbt.com",
+    "timestamp": "2026-09-27T20:06:05.874740"
+  },
+  {
+    "event": "review_completed",
+    "status": "approved",
+    "issues_count": 0,
+    "length": 530,
+    "timestamp": "2026-09-27T20:06:05.896746"
+  },
+  {
+    "event": "post_published",
+    "post_id": 107,
+    "title": "КОМПЬЮТЕР В КАРМАНЕ? ЭТО УЖЕ РЕАЛЬНОСТЬ! 🚀💻",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-09-27T20:07:00.857549"
+  },
+  {
+    "event": "news_selected",
+    "title": "Vibe Coding for Beginners — Simple Guide for Creators, Marketers, and Non-technical Folks",
+    "source": "buffer.com",
+    "justification": "Это практическое руководство по «vibe coding» для новичков — не-разработчиков, маркетологов и креаторов: какие инструменты использовать, как настроить и что построить первым. Читатель получит конкретные шаги, чтобы с помощью ИИ создать свой первый полезный проект без навыков программирования.",
+    "timestamp": "2026-09-27T20:07:28.643837"
+  },
+  {
+    "event": "post_generated",
+    "title": "Как собрать своё приложение без единой строчки кода",
+    "length": 1610,
+    "source": "buffer.com",
+    "timestamp": "2026-09-27T20:07:37.202988"
+  },
+  {
+    "event": "review_completed",
+    "status": "rejected",
+    "issues_count": 1,
+    "length": 1610,
+    "timestamp": "2026-09-27T20:07:37.231420"
+  },
+  {
+    "event": "post_published",
+    "post_id": 108,
+    "title": "Как собрать своё приложение без единой строчки код",
+    "has_image": true,
+    "image_source": "new",
+    "timestamp": "2026-09-27T20:08:08.994335"
   }
 ]

@@ -96,12 +96,15 @@ class SchedulerAgent(BaseAgent):
                             # Дубликат — штатная ситуация, о ней не сообщаем;
                             # остальные причины публикации не состоялись, и
                             # админ должен узнать об этом сразу.
-                            if not result.get("duplicate_skipped") and self.orchestrator.bot:
+                            # bot достаём через getattr: оркестратор может быть
+                            # заглушкой без бота, и падать из-за этого нельзя.
+                            _bot = getattr(self.orchestrator, "bot", None)
+                            if not result.get("duplicate_skipped") and _bot:
                                 try:
                                     from alerts import notify_admin
                                     reason = result.get("error") or "причина в логе"
                                     await notify_admin(
-                                        self.orchestrator.bot,
+                                        _bot,
                                         f"Пост не опубликован в «{self.profile.title}».\n"
                                         f"Причина: {reason}",
                                         kind=f"publish-failed:{self.profile.key}",
@@ -121,11 +124,12 @@ class SchedulerAgent(BaseAgent):
                 self.log(f"❌ Ошибка в цикле публикации: {e}", is_error=True)
                 save_log(f"Ошибка планировщика: {e}", "error")
                 # Сообщаем админу: сбой цикла иначе заметен только по пустому каналу
-                if self.orchestrator and self.orchestrator.bot:
+                _bot = getattr(self.orchestrator, "bot", None)
+                if _bot:
                     try:
                         from alerts import notify_admin
                         await notify_admin(
-                            self.orchestrator.bot,
+                            _bot,
                             f"Сбой цикла публикации в «{self.profile.title}»:\n{e}",
                             kind=f"scheduler-error:{self.profile.key}",
                         )
@@ -171,12 +175,15 @@ class SchedulerAgent(BaseAgent):
                              f"({clean['freed_mb']} МБ), временных: {clean.get('temp_removed')}, "
                              f"резерв оставлен: {clean['kept']}")
 
-                # 3. Суточная сводка по росту
-                if Config.DAILY_REPORT_HOUR >= 0 and self.orchestrator.bot:
+                # 3. Суточная сводка по росту.
+                # bot берём через getattr: оркестратор-заглушка (в тестах) бота
+                # не имеет, и прямое обращение падало с AttributeError.
+                _bot = getattr(self.orchestrator, "bot", None)
+                if Config.DAILY_REPORT_HOUR >= 0 and _bot:
                     hour_now = datetime.now().hour
                     if hour_now == Config.DAILY_REPORT_HOUR:
                         await notify_admin(
-                            self.orchestrator.bot,
+                            _bot,
                             maintenance.daily_growth_text(),
                             kind="daily-report",
                             critical=True,   # сводка важна, окно тишины не мешает
@@ -203,7 +210,8 @@ class SchedulerAgent(BaseAgent):
         from .growth_agent import GrowthAgent
         interval = max(300, Config.GROWTH_INTERVAL)
         self.log(f"📈 Мониторинг воронки запущен (каждые {interval // 60} мин)")
-        agent = GrowthAgent(bot=self.orchestrator.bot)
+        # getattr: у оркестратора-заглушки бота нет, а падать из-за этого нельзя
+        agent = GrowthAgent(bot=getattr(self.orchestrator, "bot", None))
 
         while self.is_running:
             try:

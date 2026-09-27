@@ -1,14 +1,14 @@
 {
   "last_parsed_count": 15,
-  "last_parsed_at": "2026-09-27T16:25:32.388824",
+  "last_parsed_at": "2026-09-27T20:07:27.085750",
   "best_practices": [],
   "worst_practices": [],
-  "last_analysis_at": "2026-09-27T16:28:30.463328",
+  "last_analysis_at": "2026-09-27T20:07:01.768064",
   "analytics_report": {
     "hour": 22,
     "day": 5,
     "interval_hours": 6.0,
-    "reason": "На основе 23 постов"
+    "reason": "На основе 20 постов"
   },
   "last_manual_run_at": "2026-09-18T20:06:58.941955+04:00",
   "last_publish_at": "2026-09-18T20:07:48.158373+04:00",

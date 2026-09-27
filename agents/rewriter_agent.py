@@ -30,11 +30,13 @@ class RewriterAgent(BaseAgent):
         яркий новостной пост, второму — инструкция «что мне с этого».
         Общий промпт делал бы оба канала одинаковыми.
         """
-        from channels import get_profile, NEWS
+        from channels import get_profile, NEWS, UNIQUENESS_RULES
         profile = profile or get_profile(NEWS)
-        max_length = Config.MAX_POST_LENGTH
-        min_length = Config.MIN_POST_LENGTH
+        max_length = getattr(profile, "max_length", Config.MAX_POST_LENGTH)
+        min_length = getattr(profile, "min_length", Config.MIN_POST_LENGTH)
         return f"""{profile.style}
+
+{UNIQUENESS_RULES}
 
 ЖЁСТКИЕ ТРЕБОВАНИЯ:
 - Пост: {min_length}-{max_length} символов (НЕ БОЛЬШЕ {max_length}!)
@@ -396,7 +398,9 @@ class RewriterAgent(BaseAgent):
         if feedback and "✅" not in feedback:
             feedback_text = f"\n\n⚠️ ЗАМЕЧАНИЯ РЕВИЗОРА (исправь их):\n{feedback}\n\nПерепиши пост, учитывая все замечания выше!"
         
-        user_prompt = f"""Новость из {selected.get('source', 'неизвестного источника')}:
+        # Источник НЕ передаём модели: иначе она вставляет «по данным ixbt.com»
+        # или пересказывает ближе к оригиналу, выдавая, что текст спарсен.
+        user_prompt = f"""Материал для пересказа:
 Заголовок: {selected.get('title', '')}
 Текст: {content}
 {feedback_text}
