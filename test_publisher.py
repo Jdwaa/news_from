@@ -82,6 +82,77 @@ async def main():
     res_dup = await publish(PROFILES[TIPS], "💡 ТЕСТ: повтор в лайфхаках")
     check("повтор в том же канале отсечён", res_dup.get("duplicate_skipped"), True)
 
+    # ==========================================
+    # 4. ЛИМИТ ПОДПИСИ TELEGRAM (1024) — ДЛИННЫЙ ПОСТ УХОДИТ ДВУМЯ СООБЩЕНИЯМИ
+    # ==========================================
+    # Telegram режет caption на 1024 символах. Tips-посты до 2100, поэтому
+    # раньше send_photo падал и пост уходил без картинки. Теперь: фото без
+    # подписи + текст отдельным сообщением.
+    from agents.publisher_agent import TELEGRAM_CAPTION_LIMIT
+    check("лимит подписи Telegram = 1024", TELEGRAM_CAPTION_LIMIT, 1024)
+
+    # Файл-заглушка вместо картинки: _send_with_image уходит в ветку
+    # «локальный файл», не трогая сеть
+    _tmp_img = os.path.join(_tmp_dir, "stub.jpg")
+    with open(_tmp_img, "wb") as _f:
+        _f.write(b"\xff\xd8\xff\xd9")
+
+    sent = []
+
+    class _FakeResult:
+        message_id = 555
+
+    class _FakeBot:
+        async def send_photo(self, chat_id, photo, caption=None, reply_markup=None):
+            sent.append(("photo", len(caption) if caption else 0))
+            return _FakeResult()
+
+        async def send_message(self, chat_id, text, reply_markup=None,
+                              disable_web_page_preview=None):
+            sent.append(("text", len(text)))
+            return _FakeResult()
+
+    _pub = PublisherAgent()
+    _pub.bot = _FakeBot()
+
+    # Короткий пост (меньше лимита) — одно сообщение с подписью
+    sent.clear()
+    short = "Короткий пост " * 10  # ~140 символов
+    await _pub._send_with_image(short, _tmp_img, "-1000000000001", None)
+    check("короткий пост: одно сообщение", [s[0] for s in sent], ["photo"])
+    check("короткий пост: подпись не пустая", sent[0][1] > 0, True)
+
+    # Длинный пост (больше лимита) — фото без подписи + отдельный текст
+    sent.clear()
+    long_text = "Длинный пост про лайфхак. " * 60  # ~1560 символов
+    check("длинный пост длиннее лимита", len(long_text) > TELEGRAM_CAPTION_LIMIT, True)
+    mid = await _pub._send_with_image(long_text, _tmp_img, "-1000000000001", None)
+    check("длинный пост: два сообщения", [s[0] for s in sent], ["photo", "text"])
+    check("длинный пост: фото без подписи", sent[0][1], 0)
+    check("длинный пост: текст целиком", sent[1][1], len(long_text))
+    check("длинный пост: message_id от текста", mid, 555)
+
+    # ==========================================
+    # 5. ФИЛЬТР ПРЕАМБУЛ В РЕРАЙТЕРЕ
+    # ==========================================
+    # Модель иногда отвечает «Вот исправленный пост без воды: …» — эта фраза
+    # попадала в начало поста. Проверяем, что она срезается.
+    from agents.rewriter_agent import RewriterAgent
+    _rw = RewriterAgent.__new__(RewriterAgent)
+    _rw.log = lambda *a, **k: None
+
+    check("преамбула «вот исправленный» срезана",
+          _rw._strip_preamble("Вот исправленный пост без воды: Настоящий текст."),
+          "Настоящий текст.")
+    check("преамбула «без воды» срезана",
+          _rw._strip_preamble("Без воды: практический совет."),
+          "практический совет.")
+    check("обычный текст не тронут",
+          _rw._strip_preamble("Сегодня разберём ускорение работы."),
+          "Сегодня разберём ускорение работы.")
+    check("чистая отписка даёт пустую строку",
+          _rw._strip_preamble("Вот исправленный пост."), "")
+
     # Возвращаем реальную папку картинок
     _Config.IMAGE_DIR = _old_dir
 

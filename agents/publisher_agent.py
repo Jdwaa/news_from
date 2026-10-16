@@ -26,6 +26,14 @@ from net_utils import retry_sync
 import image_store
 
 
+# Telegram жёстко ограничивает подпись к фото: 1024 символа. Посты лайфхаков
+# длиннее (до MAX_POST_LENGTH_TIPS), поэтому раньше send_photo падал с
+# «caption is too long», и пост уходил текстом — без картинки.
+# Чтобы картинка была всегда, длинный пост отправляем в два сообщения:
+# сначала фото без подписи, затем текст с кнопками.
+TELEGRAM_CAPTION_LIMIT = 1024
+
+
 class PublisherAgent(BaseAgent):
     """Агент для публикации постов в Telegram"""
     
@@ -260,8 +268,17 @@ class PublisherAgent(BaseAgent):
         """
         Отправляет пост с картинкой в указанный чат.
         `image_url` может быть локальным путём к уже скачанному файлу.
-        Возвращает message_id опубликованного сообщения или None.
+
+        Если пост длиннее лимита подписи Telegram (1024), отправляем в два
+        сообщения: фото без подписи, затем текст с кнопками. Иначе — как раньше,
+        одним сообщением с подписью.
+
+        Возвращает message_id поста (текстового при двух сообщениях), чтобы
+        Аналитик собирал статистику по тексту, а не по картинке.
         """
+        # Пост длиннее подписи → фото и текст отдельно
+        two_messages = len(post_text) > TELEGRAM_CAPTION_LIMIT
+
         # Локальный файл: ничего скачивать не нужно, отправляем как есть
         if os.path.exists(image_url):
             try:
@@ -269,10 +286,14 @@ class PublisherAgent(BaseAgent):
                     result = await self.bot.send_photo(
                         chat_id=chat_id,
                         photo=f,
-                        caption=post_text,
-                        reply_markup=keyboard,
+                        caption=None if two_messages else post_text,
+                        reply_markup=None if two_messages else keyboard,
                     )
-                return result.message_id if result else None
+                if not result:
+                    return None
+                if two_messages:
+                    return await self._send_text_after_photo(post_text, chat_id, keyboard)
+                return result.message_id
             except Exception as e:
                 self.log(f"⚠️ Ошибка отправки локальной картинки: {e}", is_error=True)
                 return None
@@ -297,11 +318,15 @@ class PublisherAgent(BaseAgent):
                 result = await self.bot.send_photo(
                     chat_id=chat_id,
                     photo=f,
-                    caption=post_text,
-                    reply_markup=keyboard,
+                    caption=None if two_messages else post_text,
+                    reply_markup=None if two_messages else keyboard,
                 )
             
-            return result.message_id if result else None
+            if not result:
+                return None
+            if two_messages:
+                return await self._send_text_after_photo(post_text, chat_id, keyboard)
+            return result.message_id
             
         except Exception as e:
             self.log(f"⚠️ Ошибка отправки картинки: {e}", is_error=True)
@@ -310,3 +335,24 @@ class PublisherAgent(BaseAgent):
             # Временный файл удаляем всегда: он не резерв, а промежуточная копия
             if os.path.exists(image_path):
                 os.remove(image_path)
+
+    async def _send_text_after_photo(self, post_text: str, chat_id: str, keyboard=None):
+        """
+        Второе сообщение для длинного поста: текст с кнопками.
+        Возвращает message_id текста — именно он идёт в БД для сбора статистики.
+        """
+        try:
+            result = await self.bot.send_message(
+                chat_id=chat_id,
+                text=post_text,
+                reply_markup=keyboard,
+                disable_web_page_preview=True,
+            )
+            self.log(
+                f"📤 Длинный пост разбит на два сообщения "
+                f"(фото + текст {len(post_text)} симв., лимит подписи {TELEGRAM_CAPTION_LIMIT})"
+            )
+            return result.message_id if result else None
+        except Exception as e:
+            self.log(f"⚠️ Ошибка отправки текста после фото: {e}", is_error=True)
+            return None
