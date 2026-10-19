@@ -188,6 +188,29 @@ async def main():
           await first_para_issue("Часовой созвон, а через час надо вспомнить, о чём договорились.\n\n"
                                  + TIPS_GOOD.strip()), False)
 
+    # ==========================================
+    # СЛУЖЕБНЫЕ ФРАЗЫ О ПРАВКЕ (в любом месте поста)
+    # ==========================================
+    # Фильтр рерайтера срезает только НАЧАЛО поля. Если модель оставит
+    # «вот исправленный пост» внутри текста, пост не должен уйти в канал.
+    print("\n" + "=" * 60)
+    print("🧾 СЛУЖЕБНЫЕ ФРАЗЫ О ПРАВКЕ")
+    print("=" * 60)
+
+    async def meta_flagged(text):
+        probe = {"post_text": text, "post_title": "Как за 5 минут сделать расшифровку созвона",
+                 "channel_profile": PROFILES[TIPS]}
+        r = await agent.execute(probe)
+        return "служебные фразы" in (r.get("reviewer_feedback") or "")
+
+    for phrase in ("вот изменённый пост", "вот исправленный пост без воды",
+                   "учёл замечания", "исправленная версия"):
+        check(f"служебная фраза «{phrase}» замечена",
+              await meta_flagged(TIPS_GOOD.strip() + f"\n\n{phrase} выше."), True)
+
+    check("чистый пост без служебных фраз не задет",
+          await meta_flagged(TIPS_GOOD), False)
+
     print("\n" + "=" * 60)
     if all(_checks):
         print(f"✅ ВСЕ ПРОВЕРКИ ПРОЙДЕНЫ ({len(_checks)}/{len(_checks)})")
